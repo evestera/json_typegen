@@ -8,26 +8,10 @@ extern crate serde_json;
 extern crate serde_derive;
 
 use proc_macro::TokenStream;
-use serde_json::value::{Value, Map};
 
-#[derive(Deserialize)]
-struct Spec {
-    swagger: String,
-    info: Info,
-    host: Option<String>,
-    #[serde(rename = "basePath")]
-    base_path: Option<String>,
-    paths: Map<String, Value>,
-    definitions: Option<Map<String, Value>>,
-    parameters: Option<Map<String, Value>>,
-}
+mod spec;
 
-#[derive(Deserialize)]
-struct Info {
-    title: String,
-    version: String,
-    description: Option<String>,
-}
+use spec::*;
 
 #[derive(Debug)]
 enum SpecError {
@@ -48,7 +32,7 @@ impl From<serde_json::Error> for SpecError {
 }
 
 #[proc_macro_derive(Swagger, attributes(url))]
-pub fn my_macro(input: TokenStream) -> TokenStream {
+pub fn derive_swagger(input: TokenStream) -> TokenStream {
     let source = input.to_string();
     let ast = syn::parse_macro_input(&source).unwrap();
 
@@ -107,8 +91,3 @@ fn get_spec_url(attrs: &Vec<syn::Attribute>) -> Option<&str> {
     None
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {}
-}
