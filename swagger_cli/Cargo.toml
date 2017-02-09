@@ -1,0 +1,7 @@
+[package]
+name = "swagger_cli"
+version = "0.1.0"
+authors = ["Erik Vesteraas <erik@vestera.as>"]
+
+[dependencies]
+swagger_shared = { path = "../swagger_shared" }

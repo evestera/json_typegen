@@ -1,15 +1,6 @@
-[package]
-name = "derive-swagger-2"
-version = "0.1.0"
-authors = ["Erik Vesteraas <erik@vestera.as>"]
-
-[dependencies]
-syn = "0.10"
-quote = "0.3"
-serde = "0.9"
-serde_derive = "0.9"
-serde_json = "0.9"
-reqwest = "0.4"
-
-[lib]
-proc-macro = true
+[workspace]
+members = [
+    "swagger_shared",
+    "swagger_derive",
+    "swagger_cli"
+]

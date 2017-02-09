@@ -1,0 +1,12 @@
+[package]
+name = "swagger_derive"
+version = "0.1.0"
+authors = ["Erik Vesteraas <erik@vestera.as>"]
+
+[dependencies]
+syn = "0.10"
+quote = "0.3"
+swagger_shared = { path = "../swagger_shared" }
+
+[lib]
+proc-macro = true

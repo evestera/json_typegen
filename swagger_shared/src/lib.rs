@@ -1,5 +1,3 @@
-extern crate proc_macro;
-extern crate syn;
 #[macro_use]
 extern crate quote;
 extern crate reqwest;
@@ -7,8 +5,6 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
-use proc_macro::TokenStream;
-use syn::{MetaItem, NestedMetaItem, Attribute, Lit};
 use std::fs::File;
 use std::io::Read;
 
@@ -16,8 +12,13 @@ mod spec;
 
 use spec::*;
 
+pub enum SpecSource<'a> {
+    Url(&'a str),
+    File(&'a str),
+}
+
 #[derive(Debug)]
-enum SpecError {
+pub enum SpecError {
     ReqwestError(reqwest::Error),
     JsonError(serde_json::Error),
     IoError(std::io::Error),
@@ -42,19 +43,8 @@ impl From<std::io::Error> for SpecError {
     }
 }
 
-#[proc_macro_derive(Swagger, attributes(swagger))]
-pub fn derive_swagger(input: TokenStream) -> TokenStream {
-    let source = input.to_string();
-    let ast = syn::parse_macro_input(&source).unwrap();
-
-    let expanded = expand_swagger(&ast).unwrap();
-    expanded.parse().unwrap()
-}
-
-fn expand_swagger(ast: &syn::MacroInput) -> Result<quote::Tokens, SpecError> {
-    let name = &ast.ident;
-    let spec_source = get_spec_source(&ast.attrs)?;
-    let spec = get_spec(spec_source)?;
+pub fn codegen_from_spec(name: &str, source: SpecSource) -> Result<quote::Tokens, SpecError> {
+    let spec = get_spec(source)?;
 
     let paths = spec.paths;
     if let Some(definitions) = spec.definitions {
@@ -96,36 +86,4 @@ fn read_spec<T: Read>(reader: T) -> Result<Spec, SpecError> {
     Ok(spec)
 }
 
-enum SpecSource<'a> {
-    Url(&'a str),
-    File(&'a str),
-}
 
-fn get_spec_source(attrs: &Vec<Attribute>) -> Result<SpecSource, SpecError> {
-    for items in attrs.iter().filter_map(get_swagger_meta_items) {
-        for item in items {
-            if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref name, ref value)) = item {
-                if name == "url" {
-                    if let &Lit::Str(ref str, ref _style) = value {
-                        return Ok(SpecSource::Url(str));
-                    }
-                }
-                if name == "file" {
-                    if let &Lit::Str(ref str, ref _style) = value {
-                        return Ok(SpecSource::File(str));
-                    }
-                }
-            }
-        }
-    }
-    Err(SpecError::MissingSource)
-}
-
-fn get_swagger_meta_items(attr: &Attribute) -> Option<&Vec<NestedMetaItem>> {
-    match attr.value {
-        MetaItem::List(ref name, ref items) if name == "swagger" => {
-            Some(items)
-        }
-        _ => None
-    }
-}
