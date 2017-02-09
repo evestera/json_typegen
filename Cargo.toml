@@ -6,9 +6,10 @@ authors = ["Erik Vesteraas <erik@vestera.as>"]
 [dependencies]
 syn = "0.10"
 quote = "0.3"
-serde = "0.8"
-serde_json = "0.8"
-hyper = { version = "0.9", default-features = false, features = ["security-framework"] }
+serde = "0.9"
+serde_derive = "0.9"
+serde_json = "0.9"
+reqwest = "0.4"
 
 [lib]
 proc-macro = true

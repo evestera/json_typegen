@@ -1,16 +1,51 @@
-#![feature(proc_macro, proc_macro_lib)]
-
 extern crate proc_macro;
-use proc_macro::TokenStream;
-
 extern crate syn;
-extern crate hyper;
-extern crate serde_json;
-
-use serde_json::value::{Value, Map};
-
 #[macro_use]
 extern crate quote;
+extern crate reqwest;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
+
+use proc_macro::TokenStream;
+use serde_json::value::{Value, Map};
+
+#[derive(Deserialize)]
+struct Spec {
+    swagger: String,
+    info: Info,
+    host: Option<String>,
+    #[serde(rename = "basePath")]
+    base_path: Option<String>,
+    paths: Map<String, Value>,
+    definitions: Option<Map<String, Value>>,
+    parameters: Option<Map<String, Value>>,
+}
+
+#[derive(Deserialize)]
+struct Info {
+    title: String,
+    version: String,
+    description: Option<String>,
+}
+
+#[derive(Debug)]
+enum SpecError {
+    ReqwestError(reqwest::Error),
+    JsonError(serde_json::Error),
+}
+
+impl From<reqwest::Error> for SpecError {
+    fn from(err: reqwest::Error) -> Self {
+        SpecError::ReqwestError(err)
+    }
+}
+
+impl From<serde_json::Error> for SpecError {
+    fn from(err: serde_json::Error) -> Self {
+        SpecError::JsonError(err)
+    }
+}
 
 #[proc_macro_derive(Swagger, attributes(url))]
 pub fn my_macro(input: TokenStream) -> TokenStream {
@@ -24,39 +59,46 @@ pub fn my_macro(input: TokenStream) -> TokenStream {
 fn expand_swagger(ast: &syn::MacroInput) -> quote::Tokens {
     let name = &ast.ident;
     let url = get_spec_url(&ast.attrs).unwrap();
-    let spec = get_spec(url);
+    let spec = get_spec(url).unwrap();
 
-    let paths = match spec.get("paths").unwrap() {
-        &Value::Object(ref map) => map,
-        _ => panic!("Invalid paths object")
-    };
+    let paths = spec.paths;
+    if let Some(definitions) = spec.definitions {
+        println!("We have some definitions");
+    }
 
-    println!("{:?}", paths);
+    let fns = generate_fns(vec!["foo", "bar", "baz"]);
 
     quote! {
         impl #name {
-            fn foo() {
-                println!("Hello expanded");
-            }
+            #(#fns)*
         }
     }
 }
 
-fn get_spec(url: &str) -> Map<String, Value> {
-    let client = hyper::client::Client::new();
-    let res = client.get(url).send().unwrap();
-    let json: Value = serde_json::de::from_reader(res).unwrap();
-    match json {
-        Value::Object(map) => map,
-        _ => panic!("Invalid spec")
-    }
+fn generate_fns(names: Vec<&str>) -> Vec<quote::Tokens> {
+    names.iter()
+        .map(|name| {
+            let ident = quote::Ident::new(*name);
+            quote! {
+                fn #ident() {
+                    println!("hello {}", #name);
+                }
+            }
+        })
+        .collect()
+}
+
+fn get_spec(url: &str) -> Result<Spec, SpecError> {
+    let res = reqwest::get(url)?;
+    let spec: Spec = serde_json::de::from_reader(res)?;
+    Ok(spec)
 }
 
 fn get_spec_url(attrs: &Vec<syn::Attribute>) -> Option<&str> {
     for attr in attrs {
         if let syn::MetaItem::NameValue(ref name, ref value) = attr.value {
             if name == "url" {
-                if let &syn::Lit::Str(ref string, ref style) = value {
+                if let &syn::Lit::Str(ref string, ref _style) = value {
                     return Some(string);
                 }
             }
@@ -68,6 +110,5 @@ fn get_spec_url(attrs: &Vec<syn::Attribute>) -> Option<&str> {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn it_works() {
-    }
+    fn it_works() {}
 }
