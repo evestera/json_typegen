@@ -8,6 +8,9 @@ extern crate serde_json;
 extern crate serde_derive;
 
 use proc_macro::TokenStream;
+use syn::{MetaItem, NestedMetaItem, Attribute, Lit};
+use std::fs::File;
+use std::io::Read;
 
 mod spec;
 
@@ -17,6 +20,8 @@ use spec::*;
 enum SpecError {
     ReqwestError(reqwest::Error),
     JsonError(serde_json::Error),
+    IoError(std::io::Error),
+    MissingSource
 }
 
 impl From<reqwest::Error> for SpecError {
@@ -31,19 +36,25 @@ impl From<serde_json::Error> for SpecError {
     }
 }
 
-#[proc_macro_derive(Swagger, attributes(url))]
+impl From<std::io::Error> for SpecError {
+    fn from(err: std::io::Error) -> Self {
+        SpecError::IoError(err)
+    }
+}
+
+#[proc_macro_derive(Swagger, attributes(swagger))]
 pub fn derive_swagger(input: TokenStream) -> TokenStream {
     let source = input.to_string();
     let ast = syn::parse_macro_input(&source).unwrap();
 
-    let expanded = expand_swagger(&ast);
+    let expanded = expand_swagger(&ast).unwrap();
     expanded.parse().unwrap()
 }
 
-fn expand_swagger(ast: &syn::MacroInput) -> quote::Tokens {
+fn expand_swagger(ast: &syn::MacroInput) -> Result<quote::Tokens, SpecError> {
     let name = &ast.ident;
-    let url = get_spec_url(&ast.attrs).unwrap();
-    let spec = get_spec(url).unwrap();
+    let spec_source = get_spec_source(&ast.attrs)?;
+    let spec = get_spec(spec_source)?;
 
     let paths = spec.paths;
     if let Some(definitions) = spec.definitions {
@@ -52,11 +63,12 @@ fn expand_swagger(ast: &syn::MacroInput) -> quote::Tokens {
 
     let fns = generate_fns(vec!["foo", "bar", "baz"]);
 
-    quote! {
+    let tokens = quote! {
         impl #name {
             #(#fns)*
         }
-    }
+    };
+    Ok(tokens)
 }
 
 fn generate_fns(names: Vec<&str>) -> Vec<quote::Tokens> {
@@ -72,22 +84,48 @@ fn generate_fns(names: Vec<&str>) -> Vec<quote::Tokens> {
         .collect()
 }
 
-fn get_spec(url: &str) -> Result<Spec, SpecError> {
-    let res = reqwest::get(url)?;
-    let spec: Spec = serde_json::de::from_reader(res)?;
+fn get_spec(source: SpecSource) -> Result<Spec, SpecError> {
+    match source {
+        SpecSource::Url(url) => read_spec(reqwest::get(url)?),
+        SpecSource::File(path) => read_spec(File::open(path)?)
+    }
+}
+
+fn read_spec<T: Read>(reader: T) -> Result<Spec, SpecError> {
+    let spec: Spec = serde_json::de::from_reader(reader)?;
     Ok(spec)
 }
 
-fn get_spec_url(attrs: &Vec<syn::Attribute>) -> Option<&str> {
-    for attr in attrs {
-        if let syn::MetaItem::NameValue(ref name, ref value) = attr.value {
-            if name == "url" {
-                if let &syn::Lit::Str(ref string, ref _style) = value {
-                    return Some(string);
+enum SpecSource<'a> {
+    Url(&'a str),
+    File(&'a str),
+}
+
+fn get_spec_source(attrs: &Vec<Attribute>) -> Result<SpecSource, SpecError> {
+    for items in attrs.iter().filter_map(get_swagger_meta_items) {
+        for item in items {
+            if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref name, ref value)) = item {
+                if name == "url" {
+                    if let &Lit::Str(ref str, ref _style) = value {
+                        return Ok(SpecSource::Url(str));
+                    }
+                }
+                if name == "file" {
+                    if let &Lit::Str(ref str, ref _style) = value {
+                        return Ok(SpecSource::File(str));
+                    }
                 }
             }
         }
     }
-    None
+    Err(SpecError::MissingSource)
 }
 
+fn get_swagger_meta_items(attr: &Attribute) -> Option<&Vec<NestedMetaItem>> {
+    match attr.value {
+        MetaItem::List(ref name, ref items) if name == "swagger" => {
+            Some(items)
+        }
+        _ => None
+    }
+}
