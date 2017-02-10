@@ -45,6 +45,7 @@ impl From<std::io::Error> for SpecError {
 
 pub fn codegen_from_spec(name: &str, source: SpecSource) -> Result<quote::Tokens, SpecError> {
     let spec = get_spec(source)?;
+    let name_id = quote::Ident::new(name);
 
     let paths = spec.paths;
     if let Some(definitions) = spec.definitions {
@@ -54,7 +55,7 @@ pub fn codegen_from_spec(name: &str, source: SpecSource) -> Result<quote::Tokens
     let fns = generate_fns(vec!["foo", "bar", "baz"]);
 
     let tokens = quote! {
-        impl #name {
+        impl #name_id {
             #(#fns)*
         }
     };

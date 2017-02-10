@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate derive_swagger_2;
+extern crate swagger_derive;
 
 #[derive(Debug, Swagger)]
-#[swagger(file = "swagger.json")]
+#[swagger(file = "../petstore.json")]
 struct Petstore;
 
 fn main() {
