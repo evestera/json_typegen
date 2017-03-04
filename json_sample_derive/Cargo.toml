@@ -2,7 +2,7 @@
 name = "json_sample_derive"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-license = "Unlicense"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 syn = "0.10"

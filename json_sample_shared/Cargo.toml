@@ -2,7 +2,7 @@
 name = "json_sample_shared"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-license = "Unlicense"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 quote = "0.3"
