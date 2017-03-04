@@ -7,6 +7,7 @@ extern crate serde_derive;
 
 use std::fs::File;
 use serde_json::{ Value, Map };
+use std::collections::HashSet;
 
 mod util;
 
@@ -67,10 +68,32 @@ fn generate_type_from_value(path: &str, value: &Value) -> (quote::Tokens, Option
             }
         },
         Value::String(_) => (quote!{ String }, None),
-        Value::Array(_) => (quote!{ Vec<::serde_json::Value> }, None),
+        Value::Array(ref values) => {
+            generate_type_for_array(path, values)
+        },
         Value::Object(ref map) => {
             generate_struct_from_object(path, map)
         }
+    }
+}
+
+fn generate_type_for_array(path: &str, values: &Vec<Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+    let mut defs = Vec::new();
+    let mut types = HashSet::new();
+
+    for value in values.iter() {
+        let (elemtype, elemtype_def) = generate_type_from_value(path, value);
+        types.insert(elemtype.into_string());
+        if let Some(def) = elemtype_def {
+            defs.push(def);
+        }
+    }
+
+    if types.len() == 1 {
+        let ident = quote::Ident::new(types.into_iter().next().unwrap());
+        (quote! { Vec<#ident> }, defs.into_iter().next())
+    } else {
+        (quote! { Vec<::serde_json::Value> }, None)
     }
 }
 
