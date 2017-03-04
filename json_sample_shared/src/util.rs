@@ -43,6 +43,20 @@ pub fn snake_case(name: &str) -> String {
     s
 }
 
+pub fn type_case(name: &str) -> String {
+    let s = camel_case(name);
+    uppercase_first_letter(&s)
+}
+
+// from http://stackoverflow.com/questions/38406793/.../38406885
+fn uppercase_first_letter(s: &str) -> String {
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

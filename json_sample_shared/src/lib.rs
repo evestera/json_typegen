@@ -6,175 +6,109 @@ extern crate serde_json;
 extern crate serde_derive;
 
 use std::fs::File;
-use std::collections::{ HashMap, HashSet };
+use serde_json::{ Value, Map };
 
-pub mod spec;
 mod util;
 
-use spec::*;
 use util::*;
 
-pub enum SpecSource<'a> {
+pub enum SampleSource<'a> {
     Url(&'a str),
     File(&'a str),
     Text(&'a str),
 }
 
 #[derive(Debug)]
-pub enum SpecError {
+pub enum CodeGenError {
     ReqwestError(reqwest::Error),
     JsonError(serde_json::Error),
     IoError(std::io::Error),
     MissingSource,
+    ExistingType(String)
 }
 
-impl From<reqwest::Error> for SpecError {
+impl From<reqwest::Error> for CodeGenError {
     fn from(err: reqwest::Error) -> Self {
-        SpecError::ReqwestError(err)
+        CodeGenError::ReqwestError(err)
     }
 }
 
-impl From<serde_json::Error> for SpecError {
+impl From<serde_json::Error> for CodeGenError {
     fn from(err: serde_json::Error) -> Self {
-        SpecError::JsonError(err)
+        CodeGenError::JsonError(err)
     }
 }
 
-impl From<std::io::Error> for SpecError {
+impl From<std::io::Error> for CodeGenError {
     fn from(err: std::io::Error) -> Self {
-        SpecError::IoError(err)
+        CodeGenError::IoError(err)
     }
 }
 
-pub fn codegen_from_spec(name: &str, source: SpecSource) -> Result<quote::Tokens, SpecError> {
-    let spec = get_spec(source)?;
-    let name_id = quote::Ident::new(name);
+pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens, CodeGenError> {
+    let value = get_sample(source)?;
+    let (type_name, type_def) = generate_type_from_value(name, &value);
 
-    let paths = spec.paths;
-    let mut ctxt = Ctxt::new();
-    if let Some(definitions) = spec.definitions {
-        process_refmap(&definitions, "#/definitions", &mut ctxt);
-    }
-
-    let fns = generate_fns(vec!["foo", "bar", "baz"]);
-
-    let tokens = quote! {
-        impl #name_id {
-            #(#fns)*
-        }
-    };
-    Ok(tokens)
-}
-
-enum TypeDef {
-    Struct { name: String, fields: Vec<Field> },
-    Enum { name: String, variants: Vec<String> },
-    Alias { name: String, typ: String },
-}
-
-struct Field {
-    name: String,
-    original_name: Option<String>,
-    typ: String
-}
-
-struct Ctxt {
-    /// Map from spec path to type definitions
-    types: HashMap<String, TypeDef>,
-    /// Set of type names that are taken (same names as `types[x].name`)
-    names: HashSet<String>,
-    /// Should generated types with fields not marked as required be wrapped with Option?
-    wrap_optional: bool
-}
-
-impl Ctxt {
-    fn new() -> Self {
-        Ctxt {
-            types: HashMap::new(),
-            names: HashSet::new(),
-            wrap_optional: true
-        }
+    match type_def {
+        Some(tokens) => Ok(tokens),
+        None => Err(CodeGenError::ExistingType(String::from(type_name.as_str())))
     }
 }
 
-fn process_refmap(map: &HashMap<String, RefOr<SchemaObject>>,
-                  current_path: &str,
-                  ctxt: &mut Ctxt) -> Vec<Field> {
-    let mut temp_path: String = String::from(current_path) + "/";
-    let mut fields = Vec::new();
-
-    for (name, ref_or_schema) in map.iter() {
-        temp_path += name;
-        let field_type = process_ref_or_schema(ref_or_schema, &temp_path, ctxt);
-        let field_name = snake_case(name);
-        let original_name = if &field_name != name { Some(name.clone()) } else { None };
-        fields.push(Field {
-            name: field_name,
-            original_name: original_name,
-            typ: field_type
-        });
-        temp_path.truncate(current_path.len() + 1);
-    }
-
-    fields
-}
-
-fn process_ref_or_schema(ref_or_schema: &RefOr<SchemaObject>,
-                         current_path: &str,
-                         ctxt: &mut Ctxt) -> String {
-    match *ref_or_schema {
-        RefOr::Ref { ref path } => {
-            if !path.starts_with("#/definitions/") {
-                panic!("Unsupported $ref target: {} {}", current_path, path);
+fn generate_type_from_value(path: &str, value: &Value) -> (quote::Tokens, Option<quote::Tokens>) {
+    match *value {
+        Value::Null => (quote!{ Option<::serde_json::Value> }, None),
+        Value::Bool(_) => (quote!{ bool }, None),
+        Value::Number(ref n) => {
+            if n.is_i64() {
+                (quote!{ i64 }, None)
+            } else {
+                (quote!{ f64 }, None)
             }
-            // let def = TypeDef::Alias { name: type_name, typ: target_name };
-            // ctxt.names.insert(def.name.clone());
-            // ctxt.types.insert(current_path, def);
-            typename_from_path(&path)
         },
-        RefOr::Other(ref schema) => {
-            process_schema(&schema, &current_path, ctxt)
+        Value::String(_) => (quote!{ String }, None),
+        Value::Array(_) => (quote!{ Vec<::serde_json::Value> }, None),
+        Value::Object(ref map) => {
+            generate_struct_from_object(path, map)
         }
     }
 }
 
-fn process_schema(schema: &SchemaObject,
-                  current_path: &str,
-                  ctxt: &mut Ctxt) -> String {
-    if let Some(ref typ) = schema.typ {
-        if typ == "string" {
-            return String::from("String");
-        }
-    }
-    String::from("Value")
-}
+fn generate_struct_from_object(path: &str, map: &Map<String, Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+    let type_name = type_case(path);
+    let ident = quote::Ident::new(&type_name as &str);
+    let mut defs = Vec::new();
 
-fn typename_from_path(path: &str) -> String {
-    if path.starts_with("#/definitions/") {
-        camel_case(&path[14..])
-    } else {
-        camel_case(&path)
-    }
-}
-
-fn generate_fns(names: Vec<&str>) -> Vec<quote::Tokens> {
-    names.iter()
-        .map(|name| {
-            let ident = quote::Ident::new(*name);
+    let fields: Vec<quote::Tokens> = map.iter()
+        .map(|(name, value)| {
+            let field_name = snake_case(name);
+            let field_ident = quote::Ident::new(&field_name as &str);
+            let (fieldtype, fieldtype_def) = generate_type_from_value(name, value);
+            if let Some(def) = fieldtype_def {
+                defs.push(def);
+            }
             quote! {
-                fn #ident() {
-                    println!("hello {}", #name);
-                }
+                #field_ident: #fieldtype
             }
         })
-        .collect()
+        .collect();
+
+    let code = quote! {
+        struct #ident {
+            #(#fields),*
+        }
+
+        #(#defs)*
+    };
+
+    (quote! { #ident }, Some(code))
 }
 
-fn get_spec(source: SpecSource) -> Result<Spec, SpecError> {
+fn get_sample(source: SampleSource) -> Result<Value, CodeGenError> {
     let parse_result = match source {
-        SpecSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
-        SpecSource::File(path) => serde_json::de::from_reader(File::open(path)?),
-        SpecSource::Text(text) => serde_json::from_str(text),
+        SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
+        SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
+        SampleSource::Text(text) => serde_json::from_str(text),
     };
-    parse_result.map_err(SpecError::JsonError)
+    parse_result.map_err(CodeGenError::JsonError)
 }
