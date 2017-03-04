@@ -141,6 +141,11 @@ fn process_ref_or_schema(ref_or_schema: &RefOr<SchemaObject>,
 fn process_schema(schema: &SchemaObject,
                   current_path: &str,
                   ctxt: &mut Ctxt) -> String {
+    if let Some(ref typ) = schema.typ {
+        if typ == "string" {
+            return String::from("String");
+        }
+    }
     String::from("Value")
 }
 

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
 pub struct Spec {
-    pub swagger: String,
+    pub json_sample: String,
     pub info: Info,
     pub host: Option<String>,
     #[serde(rename = "basePath")]

@@ -1,7 +1,8 @@
 [package]
-name = "swagger_shared"
+name = "json_sample_shared"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
+license = "Unlicense"
 
 [dependencies]
 quote = "0.3"
@@ -9,4 +10,3 @@ serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
 reqwest = "0.4"
-

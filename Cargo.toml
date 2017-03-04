@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "swagger_shared",
-    "swagger_derive",
-    "swagger_cli"
+    "json_sample_shared",
+    "json_sample_derive",
+    "json_sample_cli"
 ]

@@ -1,12 +1,13 @@
 [package]
-name = "swagger_derive"
+name = "json_sample_derive"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
+license = "Unlicense"
 
 [dependencies]
 syn = "0.10"
 quote = "0.3"
-swagger_shared = { path = "../swagger_shared" }
+json_sample_shared = { path = "../json_sample_shared" }
 
 [lib]
 proc-macro = true

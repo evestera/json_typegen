@@ -1,8 +1,8 @@
 [package]
-name = "swagger_cli"
+name = "json_sample_cli"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 
 [dependencies]
 rustfmt = "0.7"
-swagger_shared = { path = "../swagger_shared" }
+json_sample_shared = { path = "../json_sample_shared" }

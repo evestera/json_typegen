@@ -1,3 +1,7 @@
 target
 Cargo.lock
 *.rs.bk
+
+# Temp
+*.json
+examples/
