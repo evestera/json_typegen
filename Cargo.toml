@@ -2,5 +2,6 @@
 members = [
     "json_sample_shared",
     "json_sample_derive",
-    "json_sample_cli"
+    "json_sample_cli",
+    "json_sample_web"
 ]
