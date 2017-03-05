@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Hello</title>
+    <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,fetch" charset="utf-8"></script>
+    <script type="text/javascript">
+      function generate() {
+        fetch('/api', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: document.querySelector('#name').value || 'Sample',
+            input: document.querySelector('#input').value || '{}'
+          })
+        }).then(function(res) {
+          console.log(res);
+          return res.text();
+        }).then(function(res) {
+          console.log(res);
+          document.querySelector('#output').textContent = res;
+        }).catch(function(error) {
+          console.log('Error: ' + error.message);
+        });
+      }
+    </script>
+    <style media="screen">
+      body {
+        max-width: 600px;
+        margin: auto;
+      }
+      #name {
+        width: 100%;
+      }
+      #input {
+        width: 100%;
+        height: 300px;
+        font-family: monospace;
+      }
+      #output {
+        font-family: monospace;
+        white-space: pre;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Input</h2>
+    <input id="name" placeholder="Root struct name">
+    <textarea id="input"
+              placeholder="Paste JSON here..."></textarea>
+    <button onclick="generate();">Generate Rust types</button>
+
+    <h2>Output</h2>
+    <div id="output"></div>
+  </body>
+</html>
