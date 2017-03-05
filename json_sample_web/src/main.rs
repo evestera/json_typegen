@@ -38,7 +38,35 @@ fn hello_world(req: &mut Request) -> IronResult<Response> {
     config.write_mode = WriteMode::Plain;
     rustfmt::format_input(input, &config, Some(&mut output)).unwrap();
 
-    Ok(Response::with((status::Ok, output)))
+    let s = String::from_utf8(output).unwrap();
+    let formatted = fix_rustfmt_issues(&s);
+
+    Ok(Response::with((status::Ok, formatted)))
+}
+
+fn fix_rustfmt_issues(input: &str) -> String {
+    let mut output = String::new();
+
+    for line in input.lines() {
+        if line.starts_with('#') {
+            for c in line.chars() {
+                match c {
+                    ' ' => {},
+                    ',' => { output.push_str(", "); }
+                    _ => { output.push(c); }
+                }
+            }
+            output.push('\n');
+        } else {
+            output.push_str(line);
+            output.push('\n');
+            if line == "}" {
+                output.push('\n');
+            }
+        }
+    }
+
+    output
 }
 
 fn main() {
