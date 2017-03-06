@@ -12,6 +12,7 @@ extern crate lazy_static;
 use std::fs::File;
 use serde_json::{ Value, Map };
 use std::collections::HashSet;
+use quote::{ Tokens, Ident };
 
 mod util;
 
@@ -94,7 +95,7 @@ macro_rules! some_if {
     })
 }
 
-pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens> {
+pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
         options: Options::default()
@@ -125,8 +126,8 @@ pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::To
     })
 }
 
-fn usage_example(type_id: &quote::Tokens) -> quote::Tokens {
-    let var_id = quote::Ident::from(snake_case(type_id.as_str()));
+fn usage_example(type_id: &Tokens) -> Tokens {
+    let var_id = Ident::from(snake_case(type_id.as_str()));
 
     quote! {
         fn main() {
@@ -143,7 +144,7 @@ fn usage_example(type_id: &quote::Tokens) -> quote::Tokens {
     }
 }
 
-fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (Tokens, Option<Tokens>) {
     match *value {
         Value::Null => (quote! { Option<::serde_json::Value> }, None),
         Value::Bool(_) => (quote! { bool }, None),
@@ -164,7 +165,7 @@ fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (quot
     }
 }
 
-fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &Vec<Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &Vec<Value>) -> (Tokens, Option<Tokens>) {
     let mut defs = Vec::new();
     let mut types = HashSet::new();
 
@@ -177,19 +178,19 @@ fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &Vec<Value>) -> 
     }
 
     if types.len() == 1 {
-        let ident = quote::Ident::new(types.into_iter().next().unwrap());
+        let ident = Ident::new(types.into_iter().next().unwrap());
         (quote! { Vec<#ident> }, defs.into_iter().next())
     } else {
         (quote! { Vec<::serde_json::Value> }, None)
     }
 }
 
-fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Value>) -> (Tokens, Option<Tokens>) {
     let type_name = type_case(path);
-    let ident = quote::Ident::new(&type_name as &str);
+    let ident = Ident::from(type_name);
     let mut defs = Vec::new();
 
-    let fields: Vec<quote::Tokens> = map.iter()
+    let fields: Vec<Tokens> = map.iter()
         .map(|(name, value)| {
             let mut field_name = snake_case(name);
             if RUST_KEYWORDS.contains::<str>(&field_name) {
@@ -198,7 +199,7 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
 
-            let field_ident = quote::Ident::new(&field_name as &str);
+            let field_ident = Ident::from(field_name);
             let (fieldtype, fieldtype_def) = generate_type_from_value(ctxt, name, value);
             if let Some(def) = fieldtype_def {
                 defs.push(def);
