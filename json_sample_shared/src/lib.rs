@@ -6,6 +6,8 @@ extern crate serde_json;
 extern crate serde_derive;
 #[macro_use]
 extern crate error_chain;
+#[macro_use]
+extern crate lazy_static;
 
 use std::fs::File;
 use serde_json::{ Value, Map };
@@ -42,6 +44,19 @@ mod errors {
 }
 
 pub use errors::*;
+
+const RUST_KEYWORDS_ARR: &'static [&'static str] = &["abstract", "alignof", "as", "become", "box",
+    "break", "const", "continue", "crate", "do", "else", "enum", "extern", "false", "final", "fn",
+    "for", "if", "impl", "in", "let", "loop", "macro", "match", "mod", "move", "mut", "offsetof",
+    "override", "priv", "proc", "pub", "pure", "ref", "return", "Self", "self", "sizeof", "static",
+    "struct", "super", "trait", "true", "type", "typeof", "unsafe", "unsized", "use", "virtual",
+    "where", "while", "yield"];
+
+lazy_static! {
+    static ref RUST_KEYWORDS: HashSet<&'static str> = {
+        RUST_KEYWORDS_ARR.iter().cloned().collect()
+    };
+}
 
 pub enum SampleSource<'a> {
     Url(&'a str),
@@ -126,13 +141,22 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
 
     let fields: Vec<quote::Tokens> = map.iter()
         .map(|(name, value)| {
-            let field_name = snake_case(name);
+            let mut field_name = snake_case(name);
+            if RUST_KEYWORDS.contains::<str>(&field_name) {
+                field_name.push_str("_field")
+            }
+            let rename = if &field_name == name {
+                None
+            } else {
+                Some(quote! { #[serde(rename = #name)] })
+            };
             let field_ident = quote::Ident::new(&field_name as &str);
             let (fieldtype, fieldtype_def) = generate_type_from_value(ctxt, name, value);
             if let Some(def) = fieldtype_def {
                 defs.push(def);
             }
             quote! {
+                #rename
                 #field_ident: #fieldtype
             }
         })
