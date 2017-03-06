@@ -4,6 +4,8 @@ extern crate reqwest;
 extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use]
+extern crate error_chain;
 
 use std::fs::File;
 use serde_json::{ Value, Map };
@@ -13,37 +15,38 @@ mod util;
 
 use util::*;
 
+mod errors {
+    error_chain! {
+        types {
+            Error, ErrorKind, ResultExt, Result;
+        }
+
+        links {
+        }
+
+        foreign_links {
+            ReqwestError(::reqwest::Error);
+            JsonError(::serde_json::Error);
+            IoError(::std::io::Error);
+        }
+
+        errors {
+            MissingSource {
+                description("No source for sample specified")
+            }
+            ExistingType(t: String) {
+                display("No code generated, JSON matches existing type {}", t)
+            }
+        }
+    }
+}
+
+pub use errors::*;
+
 pub enum SampleSource<'a> {
     Url(&'a str),
     File(&'a str),
     Text(&'a str),
-}
-
-#[derive(Debug)]
-pub enum CodeGenError {
-    ReqwestError(reqwest::Error),
-    JsonError(serde_json::Error),
-    IoError(std::io::Error),
-    MissingSource,
-    ExistingType(String)
-}
-
-impl From<reqwest::Error> for CodeGenError {
-    fn from(err: reqwest::Error) -> Self {
-        CodeGenError::ReqwestError(err)
-    }
-}
-
-impl From<serde_json::Error> for CodeGenError {
-    fn from(err: serde_json::Error) -> Self {
-        CodeGenError::JsonError(err)
-    }
-}
-
-impl From<std::io::Error> for CodeGenError {
-    fn from(err: std::io::Error) -> Self {
-        CodeGenError::IoError(err)
-    }
 }
 
 pub struct Options {
@@ -62,7 +65,7 @@ struct Ctxt {
     options: Options
 }
 
-pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens, CodeGenError> {
+pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
         options: Options::default()
@@ -71,7 +74,7 @@ pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::To
 
     match type_def {
         Some(tokens) => Ok(tokens),
-        None => Err(CodeGenError::ExistingType(String::from(type_name.as_str())))
+        None => Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into())
     }
 }
 
@@ -153,11 +156,11 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
     (quote! { #ident }, Some(code))
 }
 
-fn get_and_parse_sample(source: SampleSource) -> Result<Value, CodeGenError> {
+fn get_and_parse_sample(source: SampleSource) -> Result<Value> {
     let parse_result = match source {
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
         SampleSource::Text(text) => serde_json::from_str(text),
     };
-    parse_result.map_err(CodeGenError::JsonError)
+    Ok(parse_result.chain_err(|| "Unable to parse JSON sample")?)
 }

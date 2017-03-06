@@ -3,7 +3,7 @@ extern crate syn;
 extern crate quote;
 extern crate json_sample_shared;
 
-use json_sample_shared::{codegen_from_sample, SampleSource, CodeGenError};
+use json_sample_shared::{codegen_from_sample, SampleSource, ErrorKind};
 use syn::{MetaItem, NestedMetaItem, Attribute, Lit};
 use proc_macro::TokenStream;
 
@@ -39,7 +39,7 @@ fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource, CodeGenErro
             }
         }
     }
-    Err(CodeGenError::MissingSource)
+    Err(ErrorKind::MissingSource.into())
 }
 
 fn get_json_sample_meta_items(attr: &Attribute) -> Option<&Vec<NestedMetaItem>> {

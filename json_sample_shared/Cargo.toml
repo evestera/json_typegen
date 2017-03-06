@@ -10,3 +10,4 @@ serde = "0.9"
 serde_derive = "0.9"
 serde_json = { version = "0.9", features = ["preserve_order"] }
 reqwest = "0.4"
+error-chain = "0.10"

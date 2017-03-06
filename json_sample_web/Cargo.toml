@@ -13,3 +13,4 @@ serde_derive = "0.9"
 serde_json = "0.9"
 rustfmt = "0.7"
 json_sample_shared = { path = "../json_sample_shared" }
+error-chain = "0.10"
