@@ -65,13 +65,17 @@ pub enum SampleSource<'a> {
 }
 
 pub struct Options {
-    use_serde: bool
+    use_serde: bool,
+    extern_crate: bool,
+    runnable_example: bool
 }
 
 impl Default for Options {
     fn default() -> Options {
         Options {
-            use_serde: true
+            use_serde: true,
+            extern_crate: false,
+            runnable_example: false
         }
     }
 }
@@ -87,9 +91,52 @@ pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::To
     };
     let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
 
-    match type_def {
-        Some(tokens) => Ok(tokens),
-        None => Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into())
+    let example = if ctxt.options.runnable_example {
+        ctxt.options.extern_crate = true;
+        Some(usage_example(&type_name))
+    } else {
+        None
+    };
+
+    let crates = if ctxt.options.extern_crate {
+        Some(quote! {
+            #[macro_use]
+            extern crate serde_derive;
+
+            extern crate serde_json;
+        })
+    } else {
+        None
+    };
+
+    if type_def.is_none() && !ctxt.options.runnable_example {
+        return Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into());
+    }
+
+    Ok(quote! {
+        #crates
+
+        #type_def
+
+        #example
+    })
+}
+
+fn usage_example(type_id: &quote::Tokens) -> quote::Tokens {
+    let var_id = quote::Ident::from(snake_case(type_id.as_str()));
+
+    quote! {
+        fn main() {
+            let #var_id: #type_id = Default::default();
+
+            let serialized = serde_json::to_string(&#var_id).unwrap();
+
+            println!("serialized = {}", serialized);
+
+            let deserialized: #type_id = serde_json::from_str(&serialized).unwrap();
+
+            println!("deserialized = {:?}", deserialized);
+        }
     }
 }
 
@@ -163,9 +210,9 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
         .collect();
 
     let derives = if ctxt.options.use_serde {
-        quote! { #[derive(Debug, Clone, Serialize, Deserialize)] }
+        quote! { #[derive(Default, Debug, Clone, Serialize, Deserialize)] }
     } else {
-        quote! { #[derive(Debug, Clone)] }
+        quote! { #[derive(Default, Debug, Clone)] }
     };
 
     let code = quote! {
