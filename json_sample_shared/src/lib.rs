@@ -46,9 +46,28 @@ impl From<std::io::Error> for CodeGenError {
     }
 }
 
+pub struct Options {
+    use_serde: bool
+}
+
+impl Default for Options {
+    fn default() -> Options {
+        Options {
+            use_serde: true
+        }
+    }
+}
+
+struct Ctxt {
+    options: Options
+}
+
 pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens, CodeGenError> {
-    let value = get_sample(source)?;
-    let (type_name, type_def) = generate_type_from_value(name, &value);
+    let sample = get_and_parse_sample(source)?;
+    let mut ctxt = Ctxt {
+        options: Options::default()
+    };
+    let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
 
     match type_def {
         Some(tokens) => Ok(tokens),
@@ -56,7 +75,7 @@ pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::To
     }
 }
 
-fn generate_type_from_value(path: &str, value: &Value) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (quote::Tokens, Option<quote::Tokens>) {
     match *value {
         Value::Null => (quote!{ Option<::serde_json::Value> }, None),
         Value::Bool(_) => (quote!{ bool }, None),
@@ -69,20 +88,20 @@ fn generate_type_from_value(path: &str, value: &Value) -> (quote::Tokens, Option
         },
         Value::String(_) => (quote!{ String }, None),
         Value::Array(ref values) => {
-            generate_type_for_array(path, values)
+            generate_type_for_array(ctxt, path, values)
         },
         Value::Object(ref map) => {
-            generate_struct_from_object(path, map)
+            generate_struct_from_object(ctxt, path, map)
         }
     }
 }
 
-fn generate_type_for_array(path: &str, values: &Vec<Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &Vec<Value>) -> (quote::Tokens, Option<quote::Tokens>) {
     let mut defs = Vec::new();
     let mut types = HashSet::new();
 
     for value in values.iter() {
-        let (elemtype, elemtype_def) = generate_type_from_value(path, value);
+        let (elemtype, elemtype_def) = generate_type_from_value(ctxt, path, value);
         types.insert(elemtype.into_string());
         if let Some(def) = elemtype_def {
             defs.push(def);
@@ -97,7 +116,7 @@ fn generate_type_for_array(path: &str, values: &Vec<Value>) -> (quote::Tokens, O
     }
 }
 
-fn generate_struct_from_object(path: &str, map: &Map<String, Value>) -> (quote::Tokens, Option<quote::Tokens>) {
+fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Value>) -> (quote::Tokens, Option<quote::Tokens>) {
     let type_name = type_case(path);
     let ident = quote::Ident::new(&type_name as &str);
     let mut defs = Vec::new();
@@ -106,7 +125,7 @@ fn generate_struct_from_object(path: &str, map: &Map<String, Value>) -> (quote::
         .map(|(name, value)| {
             let field_name = snake_case(name);
             let field_ident = quote::Ident::new(&field_name as &str);
-            let (fieldtype, fieldtype_def) = generate_type_from_value(name, value);
+            let (fieldtype, fieldtype_def) = generate_type_from_value(ctxt, name, value);
             if let Some(def) = fieldtype_def {
                 defs.push(def);
             }
@@ -116,7 +135,14 @@ fn generate_struct_from_object(path: &str, map: &Map<String, Value>) -> (quote::
         })
         .collect();
 
+    let derives = if ctxt.options.use_serde {
+        quote! { #[derive(Debug, Clone, Serialize, Deserialize)] }
+    } else {
+        quote! { #[derive(Debug, Clone)] }
+    };
+
     let code = quote! {
+        #derives
         struct #ident {
             #(#fields),*
         }
@@ -127,7 +153,7 @@ fn generate_struct_from_object(path: &str, map: &Map<String, Value>) -> (quote::
     (quote! { #ident }, Some(code))
 }
 
-fn get_sample(source: SampleSource) -> Result<Value, CodeGenError> {
+fn get_and_parse_sample(source: SampleSource) -> Result<Value, CodeGenError> {
     let parse_result = match source {
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
