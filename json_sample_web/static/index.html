@@ -4,7 +4,12 @@
     <meta charset="utf-8">
     <title>Hello</title>
     <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,fetch" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/rust.min.js" charset="utf-8"></script>
     <script type="text/javascript">
+      hljs.configure({
+        languages: ['rust']
+      });
       function generate() {
         fetch('/api', {
           method: 'POST',
@@ -13,16 +18,17 @@
             input: document.querySelector('#input').value || '{}'
           })
         }).then(function(res) {
-          console.log(res);
           return res.text();
         }).then(function(res) {
-          console.log(res);
-          document.querySelector('#output').textContent = res;
+          var outnode = document.querySelector('#output code');
+          outnode.textContent = res;
+          hljs.highlightBlock(outnode);
         }).catch(function(error) {
           console.log('Error: ' + error.message);
         });
       }
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/idea.min.css">
     <style media="screen">
       body {
         max-width: 600px;
@@ -50,6 +56,6 @@
     <button onclick="generate();">Generate Rust types</button>
 
     <h2>Output</h2>
-    <div id="output"></div>
+    <pre id="output"><code></code></pre>
   </body>
 </html>
