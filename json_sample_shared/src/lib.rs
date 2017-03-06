@@ -84,6 +84,16 @@ struct Ctxt {
     options: Options
 }
 
+macro_rules! some_if {
+    ($cond:expr, $then:expr) => ({
+        if $cond {
+            Some($then)
+        } else {
+            None
+        }
+    })
+}
+
 pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
@@ -91,23 +101,16 @@ pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<quote::To
     };
     let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
 
-    let example = if ctxt.options.runnable_example {
+    let example = some_if!(ctxt.options.runnable_example, {
         ctxt.options.extern_crate = true;
-        Some(usage_example(&type_name))
-    } else {
-        None
-    };
+        usage_example(&type_name)
+    });
 
-    let crates = if ctxt.options.extern_crate {
-        Some(quote! {
-            #[macro_use]
-            extern crate serde_derive;
-
-            extern crate serde_json;
-        })
-    } else {
-        None
-    };
+    let crates = some_if!(ctxt.options.extern_crate, quote! {
+        #[macro_use]
+        extern crate serde_derive;
+        extern crate serde_json;
+    });
 
     if type_def.is_none() && !ctxt.options.runnable_example {
         return Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into());
@@ -142,16 +145,16 @@ fn usage_example(type_id: &quote::Tokens) -> quote::Tokens {
 
 fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (quote::Tokens, Option<quote::Tokens>) {
     match *value {
-        Value::Null => (quote!{ Option<::serde_json::Value> }, None),
-        Value::Bool(_) => (quote!{ bool }, None),
+        Value::Null => (quote! { Option<::serde_json::Value> }, None),
+        Value::Bool(_) => (quote! { bool }, None),
         Value::Number(ref n) => {
             if n.is_i64() {
-                (quote!{ i64 }, None)
+                (quote! { i64 }, None)
             } else {
-                (quote!{ f64 }, None)
+                (quote! { f64 }, None)
             }
         },
-        Value::String(_) => (quote!{ String }, None),
+        Value::String(_) => (quote! { String }, None),
         Value::Array(ref values) => {
             generate_type_for_array(ctxt, path, values)
         },
@@ -192,11 +195,9 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
             if RUST_KEYWORDS.contains::<str>(&field_name) {
                 field_name.push_str("_field")
             }
-            let rename = if &field_name == name {
-                None
-            } else {
-                Some(quote! { #[serde(rename = #name)] })
-            };
+            let rename = some_if!(&field_name != name,
+                quote! { #[serde(rename = #name)] });
+
             let field_ident = quote::Ident::new(&field_name as &str);
             let (fieldtype, fieldtype_def) = generate_type_from_value(ctxt, name, value);
             if let Some(def) = fieldtype_def {
