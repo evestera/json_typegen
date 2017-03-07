@@ -8,9 +8,9 @@ use rustfmt::config::{Config, WriteMode};
 fn main() {
     // TODO: Add proper arg parsing and more configuration
     // - At least: Input, output, name
-    match env::args().skip(1).next() {
+    match env::args().nth(1) {
         Some(str) => {
-            let tokens = codegen_from_sample("Sample", SampleSource::File(&str)).unwrap();
+            let tokens = codegen_from_sample("Sample", &SampleSource::File(&str)).unwrap();
             let input = rustfmt::Input::Text(String::from(tokens.as_str()));
             let mut output = std::io::stdout();
             let mut config = Config::default();

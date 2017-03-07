@@ -37,7 +37,7 @@ macro_rules! handle {
 fn handle_codegen_request(req: &mut Request) -> IronResult<Response> {
     let req_body: ReqBody = handle!(serde_json::de::from_reader(&mut req.body),
         "Error: Request body was invalid JSON");
-    let tokens = handle!(codegen_from_sample(&req_body.name, SampleSource::Text(&req_body.input)),
+    let tokens = handle!(codegen_from_sample(&req_body.name, &SampleSource::Text(&req_body.input)),
         err => format!("{}", err.display()));
 
     let input = rustfmt::Input::Text(String::from(tokens.as_str()));

@@ -19,7 +19,7 @@ pub fn derive_json_sample(input: TokenStream) -> TokenStream {
 fn expand_json_sample(ast: &syn::MacroInput) -> Result<quote::Tokens> {
     let name = &ast.ident;
     let sample_source = get_sample_source(&ast.attrs)?;
-    codegen_from_sample(name.as_ref(), sample_source)
+    codegen_from_sample(name.as_ref(), &sample_source)
 }
 
 fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource> {

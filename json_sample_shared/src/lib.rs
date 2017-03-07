@@ -3,8 +3,6 @@ extern crate quote;
 extern crate reqwest;
 extern crate serde_json;
 #[macro_use]
-extern crate serde_derive;
-#[macro_use]
 extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
@@ -95,7 +93,7 @@ macro_rules! some_if {
     })
 }
 
-pub fn codegen_from_sample(name: &str, source: SampleSource) -> Result<Tokens> {
+pub fn codegen_from_sample(name: &str, source: &SampleSource) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
         options: Options::default()
@@ -165,7 +163,7 @@ fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (Toke
     }
 }
 
-fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &Vec<Value>) -> (Tokens, Option<Tokens>) {
+fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &[Value]) -> (Tokens, Option<Tokens>) {
     let mut defs = Vec::new();
     let mut types = HashSet::new();
 
@@ -229,8 +227,8 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
     (quote! { #ident }, Some(code))
 }
 
-fn get_and_parse_sample(source: SampleSource) -> Result<Value> {
-    let parse_result = match source {
+fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
+    let parse_result = match *source {
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
         SampleSource::Text(text) => serde_json::from_str(text),
