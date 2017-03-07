@@ -16,6 +16,7 @@ use staticfile::Static;
 use mount::Mount;
 use rustfmt::config::{Config, WriteMode};
 use error_chain::ChainedError;
+use std::env;
 
 use json_sample_shared::{codegen_from_sample, SampleSource};
 
@@ -81,10 +82,16 @@ fn fix_rustfmt_issues(input: &str) -> String {
 fn main() {
     let mut mount = Mount::new();
 
-    mount.mount("/", Static::new(Path::new("static/")));
+    let p = env::current_dir().unwrap();
+    println!("Working directory is {}", p.display());
+    let static_path = Path::new("static/");
+    let canonical_static = static_path.canonicalize().unwrap();
+    println!("Looking for static files in {}", canonical_static.display());
+
+    mount.mount("/", Static::new(static_path));
     mount.mount("/api", handle_codegen_request);
 
-    let host = "localhost:3000";
-    let _server = Iron::new(mount).http(host).unwrap();
-    println!("Serving on {}", host);
+    let host = env::var("JSONSAMPLE_HOST").unwrap_or_else(|_| String::from("0.0.0.0:5555"));
+    let _server = Iron::new(mount).http(&host as &str).unwrap();
+    println!("Serving on http://{}", host);
 }
