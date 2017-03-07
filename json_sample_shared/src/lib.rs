@@ -93,10 +93,14 @@ macro_rules! some_if {
     })
 }
 
-pub fn codegen_from_sample(name: &str, source: &SampleSource) -> Result<Tokens> {
+pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
+    codegen(name, &SampleSource::Text(json), Options::default())
+}
+
+pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
-        options: Options::default()
+        options: options
     };
     let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
 

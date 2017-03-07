@@ -2,7 +2,7 @@ extern crate json_sample_shared;
 extern crate rustfmt;
 
 use std::env;
-use json_sample_shared::{codegen_from_sample, SampleSource};
+use json_sample_shared::{codegen, SampleSource, Options};
 use rustfmt::config::{Config, WriteMode};
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
     // - At least: Input, output, name
     match env::args().nth(1) {
         Some(str) => {
-            let tokens = codegen_from_sample("Sample", &SampleSource::File(&str)).unwrap();
+            let tokens = codegen("Sample", &SampleSource::File(&str), Options::default()).unwrap();
             let input = rustfmt::Input::Text(String::from(tokens.as_str()));
             let mut output = std::io::stdout();
             let mut config = Config::default();
