@@ -11,7 +11,7 @@ fn main() {
     match env::args().skip(1).next() {
         Some(str) => {
             let tokens = codegen_from_sample("Sample", SampleSource::File(&str)).unwrap();
-            let input = rustfmt::Input::Text(tokens.as_str());
+            let input = rustfmt::Input::Text(String::from(tokens.as_str()));
             let mut output = std::io::stdout();
             let mut config = Config::default();
             config.write_mode = WriteMode::Plain;

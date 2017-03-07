@@ -3,7 +3,7 @@ extern crate syn;
 extern crate quote;
 extern crate json_sample_shared;
 
-use json_sample_shared::{codegen_from_sample, SampleSource, ErrorKind};
+use json_sample_shared::{codegen_from_sample, SampleSource, Result, ErrorKind};
 use syn::{MetaItem, NestedMetaItem, Attribute, Lit};
 use proc_macro::TokenStream;
 
@@ -16,13 +16,13 @@ pub fn derive_json_sample(input: TokenStream) -> TokenStream {
     expanded.parse().unwrap()
 }
 
-fn expand_json_sample(ast: &syn::MacroInput) -> Result<quote::Tokens, CodeGenError> {
+fn expand_json_sample(ast: &syn::MacroInput) -> Result<quote::Tokens> {
     let name = &ast.ident;
     let sample_source = get_sample_source(&ast.attrs)?;
     codegen_from_sample(name.as_ref(), sample_source)
 }
 
-fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource, CodeGenError> {
+fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource> {
     for items in attrs.iter().filter_map(get_json_sample_meta_items) {
         for item in items {
             if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref name, ref value)) = item {
