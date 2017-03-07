@@ -58,7 +58,10 @@ fn fix_rustfmt_issues(input: &str) -> String {
     let mut output = String::new();
 
     for line in input.lines() {
-        if line.starts_with('#') {
+        if line.starts_with('#') || line.starts_with("    #") {
+            if line.starts_with("    #") {
+                output.push_str("    ");
+            }
             for c in line.chars() {
                 match c {
                     ' ' => {},
