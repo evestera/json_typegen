@@ -23,7 +23,8 @@ use json_sample_shared::{codegen, SampleSource, Options};
 #[derive(Debug, Deserialize)]
 struct ReqBody {
     name: String,
-    input: String
+    input: String,
+    runnable: bool,
 }
 
 macro_rules! handle {
@@ -38,7 +39,8 @@ macro_rules! handle {
 fn handle_codegen_request(req: &mut Request) -> IronResult<Response> {
     let req_body: ReqBody = handle!(serde_json::de::from_reader(&mut req.body),
         "Error: Request body was invalid JSON");
-    let options = Options::default();
+    let mut options = Options::default();
+    options.runnable = req_body.runnable;
     let tokens = handle!(codegen(&req_body.name, &SampleSource::Text(&req_body.input), options),
         err => format!("{}", err.display()));
 
@@ -67,6 +69,7 @@ fn fix_rustfmt_issues(input: &str) -> String {
                 match c {
                     ' ' => {},
                     ',' => { output.push_str(", "); }
+                    '=' => { output.push_str(" = "); }
                     _ => { output.push(c); }
                 }
             }

@@ -64,9 +64,9 @@ pub enum SampleSource<'a> {
 }
 
 pub struct Options {
-    use_serde: bool,
-    extern_crate: bool,
-    runnable_example: bool
+    pub use_serde: bool,
+    pub extern_crate: bool,
+    pub runnable: bool
 }
 
 impl Default for Options {
@@ -74,7 +74,7 @@ impl Default for Options {
         Options {
             use_serde: true,
             extern_crate: false,
-            runnable_example: false
+            runnable: false
         }
     }
 }
@@ -104,7 +104,7 @@ pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<To
     };
     let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
 
-    let example = some_if!(ctxt.options.runnable_example, {
+    let example = some_if!(ctxt.options.runnable, {
         ctxt.options.extern_crate = true;
         usage_example(&type_name)
     });
@@ -115,7 +115,7 @@ pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<To
         extern crate serde_json;
     });
 
-    if type_def.is_none() && !ctxt.options.runnable_example {
+    if type_def.is_none() && !ctxt.options.runnable {
         return Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into());
     }
 

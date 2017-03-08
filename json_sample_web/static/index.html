@@ -15,7 +15,8 @@
           method: 'POST',
           body: JSON.stringify({
             name: document.querySelector('#name').value || 'Sample',
-            input: document.querySelector('#input').value || '{}'
+            input: document.querySelector('#input').value || '{}',
+            runnable: document.querySelector('#runnable').checked
           })
         }).then(function(res) {
           return res.text();
@@ -53,6 +54,8 @@
     <input id="name" placeholder="Root struct name">
     <textarea id="input"
               placeholder="Paste JSON here..."></textarea>
+    <input type="checkbox" id="runnable">
+    <label for="runnable">Generate runnable example</label>
     <button onclick="generate();">Generate Rust types</button>
 
     <h2>Output</h2>
