@@ -1,0 +1,9 @@
+[package]
+name = "json_provider"
+version = "0.1.0"
+authors = ["Erik Vesteraas <erik@vestera.as>"]
+
+[dependencies]
+serde = "0.9"
+serde_derive = "0.9"
+json_sample_derive = { path = "../json_sample_derive" }

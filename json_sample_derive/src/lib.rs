@@ -17,7 +17,7 @@ pub fn derive_json_sample(input: TokenStream) -> TokenStream {
 }
 
 fn expand_json_sample(ast: &syn::MacroInput) -> Result<quote::Tokens> {
-    let name = &ast.ident;
+    let name = get_name(&ast.attrs)?;
     let sample_source = get_sample_source(&ast.attrs)?;
     codegen(name.as_ref(), &sample_source, Options::default())
 }
@@ -36,10 +36,30 @@ fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource> {
                         return Ok(SampleSource::File(str));
                     }
                 }
+                if name == "str" {
+                    if let &Lit::Str(ref str, ref _style) = value {
+                        return Ok(SampleSource::Text(str));
+                    }
+                }
             }
         }
     }
     Err(ErrorKind::MissingSource.into())
+}
+
+fn get_name(attrs: &Vec<Attribute>) -> Result<&str> {
+    for items in attrs.iter().filter_map(get_json_sample_meta_items) {
+        for item in items {
+            if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref name, ref value)) = item {
+                if name == "name" {
+                    if let &Lit::Str(ref s, ref _style) = value {
+                        return Ok(s);
+                    }
+                }
+            }
+        }
+    }
+    Ok("JsonRoot")
 }
 
 fn get_json_sample_meta_items(attr: &Attribute) -> Option<&Vec<NestedMetaItem>> {

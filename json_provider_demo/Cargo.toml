@@ -1,0 +1,10 @@
+[package]
+name = "json_provider_demo"
+version = "0.1.0"
+authors = ["Erik Vesteraas <erik@vestera.as>"]
+publish = false
+
+[dependencies]
+serde = "0.9"
+serde_json = "0.9"
+json_provider = { path = "../json_provider" }
