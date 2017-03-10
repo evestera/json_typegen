@@ -19,3 +19,10 @@ cargo test --verbose
 cd "$DIR/json_sample_web"
 cargo build --verbose
 cargo test --verbose
+
+cd "$DIR/json_provider"
+cargo build --verbose
+cargo test --verbose
+
+cd "$DIR/json_provider_demo"
+cargo run --verbose

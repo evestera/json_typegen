@@ -27,24 +27,40 @@ fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource> {
         for item in items {
             if let &NestedMetaItem::MetaItem(MetaItem::NameValue(ref name, ref value)) = item {
                 if name == "url" {
-                    if let &Lit::Str(ref str, ref _style) = value {
-                        return Ok(SampleSource::Url(str));
+                    if let &Lit::Str(ref s, ref _style) = value {
+                        return Ok(SampleSource::Url(s));
                     }
                 }
                 if name == "file" {
-                    if let &Lit::Str(ref str, ref _style) = value {
-                        return Ok(SampleSource::File(str));
+                    if let &Lit::Str(ref s, ref _style) = value {
+                        return Ok(SampleSource::File(s));
                     }
                 }
                 if name == "str" {
-                    if let &Lit::Str(ref str, ref _style) = value {
-                        return Ok(SampleSource::Text(str));
+                    if let &Lit::Str(ref s, ref _style) = value {
+                        return Ok(SampleSource::Text(s));
+                    }
+                }
+                if name == "source" {
+                    if let &Lit::Str(ref s, ref _style) = value {
+                        return Ok(infer_source_type(s));
                     }
                 }
             }
         }
     }
     Err(ErrorKind::MissingSource.into())
+}
+
+fn infer_source_type(s: &str) -> SampleSource {
+    let s = s.trim();
+    if s.starts_with('{') || s.starts_with('[') {
+        return SampleSource::Text(s);
+    }
+    if s.starts_with("http://") || s.starts_with("https://") {
+        return SampleSource::Url(s);
+    }
+    SampleSource::File(s)
 }
 
 fn get_name(attrs: &Vec<Attribute>) -> Result<&str> {

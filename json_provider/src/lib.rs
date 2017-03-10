@@ -7,11 +7,11 @@ pub use json_sample_derive::*;
 pub use serde_derive::*;
 
 #[macro_export]
-macro_rules! types_from_json_str {
-    ($name:expr, $text:expr) => {
+macro_rules! json_provider {
+    ($name:expr, $source:expr) => {
         #[derive(json_sample)]
         #[json_sample(name = $name)]
-        #[json_sample(str = $text)]
+        #[json_sample(source = $source)]
         #[allow(unused)]
         struct JsonProviderPlaceholder;
     }
