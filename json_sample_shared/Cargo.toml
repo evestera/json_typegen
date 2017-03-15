@@ -3,6 +3,11 @@ name = "json_sample_shared"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
+description = "Codegen from JSON samples. Not intended to be used directly. See repository for the intended crates."
+homepage = "https://github.com/evestera/json_sample"
+repository = "https://github.com/evestera/json_sample"
+documentation = "https://docs.rs/json_sample_shared"
+readme = "../README.md"
 
 [dependencies]
 quote = "0.3"

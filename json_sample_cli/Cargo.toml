@@ -3,6 +3,11 @@ name = "json_sample_cli"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
+description = "Command line interface for codegen from JSON samples"
+homepage = "https://github.com/evestera/json_sample"
+repository = "https://github.com/evestera/json_sample"
+documentation = "https://docs.rs/json_sample_cli"
+readme = "../README.md"
 
 [dependencies]
 rustfmt = "0.7"

@@ -3,6 +3,7 @@ name = "json_sample_web"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
+publish = false
 
 [dependencies]
 iron = "0.5.1"
