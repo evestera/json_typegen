@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello</title>
+    <title>JSON -> Rust (type generation)</title>
     <script src="https://cdn.polyfill.io/v2/polyfill.js?features=Promise,fetch" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/rust.min.js" charset="utf-8"></script>
@@ -19,11 +19,21 @@
             runnable: document.querySelector('#runnable').checked
           })
         }).then(function(res) {
-          return res.text();
+          return Promise.all([res.status, res.text()]);
         }).then(function(res) {
+          var status = res[0];
+          var code = res[1];
           var outnode = document.querySelector('#output code');
-          outnode.textContent = res;
-          hljs.highlightBlock(outnode);
+          outnode.textContent = code;
+          if (status < 300) {
+            hljs.highlightBlock(outnode);
+            document.querySelector('#output-footer').innerHTML =
+              '<a href="http://play.integer32.com/?code='
+              + encodeURIComponent(code)
+              + '">Open code in Rust Playground</a>';
+          } else {
+            document.querySelector('#output-footer').innerHTML = '';
+          }
         }).catch(function(error) {
           console.log('Error: ' + error.message);
         });
@@ -60,5 +70,6 @@
 
     <h2>Output</h2>
     <pre id="output"><code></code></pre>
+    <div id="output-footer"></div>
   </body>
 </html>
