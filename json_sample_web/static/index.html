@@ -11,7 +11,7 @@
         languages: ['rust']
       });
       function generate() {
-        fetch('/api', {
+        fetch('api', {
           method: 'POST',
           body: JSON.stringify({
             name: document.querySelector('#name').value || 'Sample',
