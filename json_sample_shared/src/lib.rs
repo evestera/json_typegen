@@ -231,6 +231,17 @@ fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Va
     (quote! { #ident }, Some(code))
 }
 
+pub fn infer_source_type(s: &str) -> SampleSource {
+    let s = s.trim();
+    if s.starts_with('{') || s.starts_with('[') {
+        return SampleSource::Text(s);
+    }
+    if s.starts_with("http://") || s.starts_with("https://") {
+        return SampleSource::Url(s);
+    }
+    SampleSource::File(s)
+}
+
 fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
     let parse_result = match *source {
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),

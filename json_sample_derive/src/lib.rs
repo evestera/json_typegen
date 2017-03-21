@@ -3,7 +3,7 @@ extern crate syn;
 extern crate quote;
 extern crate json_sample_shared;
 
-use json_sample_shared::{codegen, Options, SampleSource, Result, ErrorKind};
+use json_sample_shared::{codegen, Options, SampleSource, Result, ErrorKind, infer_source_type};
 use syn::{MetaItem, NestedMetaItem, Attribute, Lit};
 use proc_macro::TokenStream;
 
@@ -50,17 +50,6 @@ fn get_sample_source(attrs: &Vec<Attribute>) -> Result<SampleSource> {
         }
     }
     Err(ErrorKind::MissingSource.into())
-}
-
-fn infer_source_type(s: &str) -> SampleSource {
-    let s = s.trim();
-    if s.starts_with('{') || s.starts_with('[') {
-        return SampleSource::Text(s);
-    }
-    if s.starts_with("http://") || s.starts_with("https://") {
-        return SampleSource::Url(s);
-    }
-    SampleSource::File(s)
 }
 
 fn get_name(attrs: &Vec<Attribute>) -> Result<&str> {

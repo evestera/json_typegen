@@ -1,24 +1,41 @@
 extern crate json_sample_shared;
 extern crate rustfmt;
+extern crate clap;
 
-use std::env;
-use json_sample_shared::{codegen, SampleSource, Options};
+use json_sample_shared::{codegen, infer_source_type, Options};
 use rustfmt::config::{Config, WriteMode};
+use clap::{Arg, App};
 
 fn main() {
-    // TODO: Add proper arg parsing and more configuration
-    // - At least: Input, output, name
-    match env::args().nth(1) {
-        Some(str) => {
-            let tokens = codegen("Sample", &SampleSource::File(&str), Options::default()).unwrap();
-            let input = rustfmt::Input::Text(String::from(tokens.as_str()));
-            let mut output = std::io::stdout();
-            let mut config = Config::default();
-            config.write_mode = WriteMode::Plain;
-            rustfmt::format_input(input, &config, Some(&mut output)).unwrap();
-        }
-        None => {
-            println!("Usage: json_sample_cli <json file>");
-        }
+    let matches = App::new("JSON code generation CLI")
+                      .version("0.1.0")
+                      .about("Generate Rust types from JSON samples")
+                      .arg(Arg::with_name("input")
+                           .help("The input JSON to generate types from. Can be a file or a http/https URL")
+                           .takes_value(true)
+                           .required(true))
+                      .arg(Arg::with_name("output")
+                           .short("o")
+                           .long("output")
+                           .help("What file to write the output to. Default: standard output.")
+                           .takes_value(true))
+                      .arg(Arg::with_name("name")
+                           .short("n")
+                           .long("name")
+                           .help("Name for the root generated type. Default: Root.")
+                           .takes_value(true))
+                      .get_matches();
+
+    let source = infer_source_type(matches.value_of("input").unwrap());
+    let name = matches.value_of("name").unwrap_or("Root");
+    let tokens = codegen(&name, &source, Options::default()).unwrap();
+    let input = rustfmt::Input::Text(String::from(tokens.as_str()));
+    let mut config = Config::default();
+    config.write_mode = WriteMode::Plain;
+    if let Some(output) = matches.value_of("output") {
+        let mut file = std::fs::File::create(output).unwrap();
+        rustfmt::format_input(input, &config, Some(&mut file)).unwrap();
+    } else {
+        rustfmt::format_input(input, &config, Some(&mut std::io::stdout())).unwrap();
     }
 }

@@ -10,5 +10,6 @@ documentation = "https://docs.rs/json_sample_cli"
 readme = "../README.md"
 
 [dependencies]
+clap = "~2.19.0"
 rustfmt = "0.7"
 json_sample_shared = { path = "../json_sample_shared" }
