@@ -43,6 +43,21 @@
           console.log('Error: ' + error.message);
         });
       }
+      function saveState() {
+        localStorage.setItem('name', document.querySelector('#name').value);
+        localStorage.setItem('code', document.querySelector('#input').value);
+      }
+      function loadState() {
+        var name = localStorage.getItem('name');
+        if (name && name != 'null') {
+          document.querySelector('#name').value = name;
+        }
+        var code = localStorage.getItem('code');
+        if (code && name != 'null') {
+          document.querySelector('#input').value = code;
+          generate();
+        }
+      }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/idea.min.css">
     <style media="screen">
@@ -51,7 +66,7 @@
       }
       body {
         max-width: 600px;
-        margin: auto;
+        margin: 50px auto;
         font-family: 'Helvetica', 'Arial', sans-serif;
         background-color: #fafbfc;
       }
@@ -131,9 +146,10 @@
 
     <div id="input-wrapper">
       <h2>Input</h2>
-      <input id="name" placeholder="Root struct name">
+      <input id="name" placeholder="Root struct name" oninput="saveState();">
       <textarea id="input"
-                placeholder="Paste JSON here..."></textarea>
+                placeholder="Paste JSON here..."
+                oninput="saveState();"></textarea>
       <ul>
         <li>
           <input type="checkbox" id="runnable">
@@ -173,5 +189,9 @@
               fill="currentColor" class="octo-body"></path>
       </svg>
     </a>
+
+    <script type="text/javascript">
+      loadState();
+    </script>
   </body>
 </html>
