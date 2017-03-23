@@ -58,6 +58,17 @@
           generate();
         }
       }
+      function loadExample(name) {
+        fetch('examples/' + name + '.json').then(function(res) {
+          return res.text();
+        }).then(function(text) {
+          document.querySelector('#input').value = text;
+          document.querySelector('#name').value = name;
+          // Fix for removing sticky placeholder:
+          document.querySelector('#name').focus();
+        });
+        return false;
+      }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/idea.min.css">
     <style media="screen">
@@ -92,6 +103,9 @@
       }
       #input-wrapper ul {
         list-style-type: none;
+      }
+      .examples a {
+        color: black;
       }
       label {
         cursor: pointer;
@@ -146,6 +160,25 @@
 
     <div id="input-wrapper">
       <h2>Input</h2>
+      <p class="examples">Examples:
+        <!-- from https://hacker-news.firebaseio.com/v0/item/13940412.json?print=pretty -->
+        <a href="?example=hn_story"
+           onclick="return loadExample('hn_story');"
+           >Hacker News API story item</a>
+        <!-- from https://api.zalando.com/articles/AN621C0S5-K11 -->
+        <a href="?example=zalando_article"
+           onclick="return loadExample('zalando_article');"
+           >Zalando Article</a>
+        <!-- from https://api.magicthegathering.io/v1/sets/ktk/booster -->
+        <a href="?example=magic_card_list"
+           onclick="return loadExample('magic_card_list');"
+           >Magic Card List</a>
+        <!-- from http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=252950&count=3&maxlength=300&format=json -->
+        <a href="?example=steam_app_news"
+           onclick="return loadExample('steam_app_news');"
+           >Steam App News</a>
+      </p>
+
       <input id="name" placeholder="Root struct name" oninput="saveState();">
       <textarea id="input"
                 placeholder="Paste JSON here..."
@@ -191,7 +224,17 @@
     </a>
 
     <script type="text/javascript">
-      loadState();
+      var example = location.search.slice(1).split('&').map(function(opt) {
+        return { name: opt.split('=')[0], value: opt.split('=')[1] };
+      }).find(function(opt) {
+        return opt.name === "example";
+      });
+
+      if (example) {
+        loadExample(example.value);
+      } else {
+        loadState();
+      }
     </script>
   </body>
 </html>
