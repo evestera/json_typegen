@@ -9,7 +9,7 @@ extern crate lazy_static;
 
 use std::fs::File;
 use serde_json::{ Value, Map };
-use std::collections::HashSet;
+use std::collections::{ HashSet, HashMap };
 use quote::{ Tokens, Ident };
 
 mod util;
@@ -91,6 +91,72 @@ macro_rules! some_if {
             None
         }
     })
+}
+
+#[allow(dead_code)]
+#[derive(Debug, PartialEq, Clone)]
+enum InferredType {
+    Null,
+    Any,
+    Bool,
+    StringT,
+    Integer,
+    Floating,
+    VecT { elem_type: Box<InferredType> },
+    Struct { fields: HashMap<String, InferredType> },
+    Optional(Box<InferredType>)
+}
+
+#[allow(dead_code)]
+fn unify(a: InferredType, b: InferredType) -> InferredType {
+    if a == b {
+        return a;
+    }
+    use InferredType::*;
+    match (a, b) {
+        (Integer, Floating) |
+        (Floating, Integer) => Floating,
+        (a, Null) | (Null, a) => make_optional(a),
+        (a, Optional(b)) | (Optional(b), a) => make_optional(unify(a, *b)),
+        (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
+            VecT { elem_type: Box::new(unify(*e1, *e2)) }
+        }
+        (Struct { fields: f1 }, Struct { fields: f2 }) => {
+            Struct { fields: unify_struct_fields(f1, f2) }
+        }
+        _ => Any,
+    }
+}
+
+fn make_optional(a: InferredType) -> InferredType {
+    use InferredType::*;
+    match a {
+        Null | Any | Optional(_) => a,
+        non_nullable => Optional(Box::new(non_nullable)),
+    }
+}
+
+fn unify_struct_fields(mut f1: HashMap<String, InferredType>,
+                       mut f2: HashMap<String, InferredType>)
+                       -> HashMap<String, InferredType> {
+    if f1 == f2 {
+        return f1;
+    }
+    let mut unified = HashMap::new();
+    for (key, val) in f1.drain() {
+        match f2.remove(&key) {
+            Some(val2) => {
+                unified.insert(key, unify(val, val2));
+            },
+            None => {
+                unified.insert(key, make_optional(val));
+            }
+        }
+    }
+    for (key, val) in f2.drain() {
+        unified.insert(key, make_optional(val));
+    }
+    unified
 }
 
 pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
@@ -249,4 +315,60 @@ fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
         SampleSource::Text(text) => serde_json::from_str(text),
     };
     Ok(parse_result.chain_err(|| "Unable to parse JSON sample")?)
+}
+
+#[test]
+fn test_unify() {
+    use InferredType::*;
+    assert_eq!(unify(Bool, Bool), Bool);
+    assert_eq!(unify(Bool, Integer), Any);
+    assert_eq!(unify(Integer, Floating), Floating);
+    assert_eq!(unify(Null, Any), Any);
+    assert_eq!(unify(Null, Bool), Optional(Box::new(Bool)));
+    assert_eq!(unify(Null, Optional(Box::new(Integer))), Optional(Box::new(Integer)));
+    assert_eq!(unify(Any, Optional(Box::new(Integer))), Any);
+    assert_eq!(unify(Any, Optional(Box::new(Integer))), Any);
+    assert_eq!(unify(Optional(Box::new(Integer)), Optional(Box::new(Floating))),
+               Optional(Box::new(Floating)));
+    assert_eq!(unify(Optional(Box::new(StringT)), Optional(Box::new(Integer))), Any);
+}
+
+// based on hashmap! macro from maplit crate
+macro_rules! string_hashmap {
+    ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
+    ($($key:expr => $value:expr),*) => {
+        {
+            let mut _map = ::std::collections::HashMap::new();
+            $(
+                _map.insert($key.to_string(), $value);
+            )*
+            _map
+        }
+    };
+}
+
+#[test]
+fn test_unify_struct_fields() {
+    use InferredType::*;
+    {
+        let f1 = string_hashmap!{
+            "a" => Integer,
+            "b" => Bool,
+            "c" => Integer,
+            "d" => StringT,
+        };
+        let f2 = string_hashmap!{
+            "a" => Integer,
+            "c" => Floating,
+            "d" => Null,
+            "e" => Any,
+        };
+        assert_eq!(unify_struct_fields(f1, f2), string_hashmap!{
+            "a" => Integer,
+            "b" => Optional(Box::new(Bool)),
+            "c" => Floating,
+            "d" => Optional(Box::new(StringT)),
+            "e" => Any,
+        });
+    }
 }
