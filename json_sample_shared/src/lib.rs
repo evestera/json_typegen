@@ -66,9 +66,18 @@ pub enum SampleSource<'a> {
     Text(&'a str),
 }
 
+#[derive(Debug, PartialEq)]
+pub enum MissingFields {
+    Fail,
+    UseDefault,
+}
+
 pub struct Options {
     pub extern_crate: bool,
     pub runnable: bool,
+    pub missing_fields: MissingFields,
+    pub deny_unknown_fields: bool,
+    pub allow_option_vec: bool,
 }
 
 impl Default for Options {
@@ -76,6 +85,9 @@ impl Default for Options {
         Options {
             extern_crate: false,
             runnable: false,
+            missing_fields: MissingFields::Fail,
+            deny_unknown_fields: false,
+            allow_option_vec: false,
         }
     }
 }
@@ -140,7 +152,7 @@ fn make_optional(a: InferredType) -> InferredType {
     }
 }
 
-fn unify_struct_fields(mut f1: LinkedHashMap<String, InferredType>,
+fn unify_struct_fields(f1: LinkedHashMap<String, InferredType>,
                        mut f2: LinkedHashMap<String, InferredType>)
                        -> LinkedHashMap<String, InferredType> {
     if f1 == f2 {
@@ -277,7 +289,10 @@ fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredT
         }
         Optional(ref e) => {
             let inner = generate_type_from_inferred(ctxt, path, e);
-            quote! { Option<#inner> }
+            match ctxt.options.missing_fields {
+                MissingFields::Fail => quote! { Option<#inner> },
+                MissingFields::UseDefault => quote! { #inner },
+            }
         }
     }
 }
@@ -310,6 +325,22 @@ fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) ->
     unreachable!()
 }
 
+fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
+                           typ: &'a InferredType)
+                           -> (Option<Tokens>, &'a InferredType) {
+    if !ctxt.options.allow_option_vec && ctxt.options.missing_fields != MissingFields::UseDefault {
+        if let InferredType::Optional(ref inner) = *typ {
+            match **inner {
+                InferredType::EmptyVec | InferredType::VecT { .. } => {
+                    return (Some(quote! { #[serde(default)] }), &**inner);
+                }
+                _ => {}
+            }
+        }
+    }
+    (None, typ)
+}
+
 fn generate_struct_from_inferred_fields(
         ctxt: &mut Ctxt,
         path: &str,
@@ -327,10 +358,11 @@ fn generate_struct_from_inferred_fields(
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
             let field_ident = Ident::from(field_name);
-            // TODO: Handle Option<Vec<>> depending on missing fields option
-            let field_type = generate_type_from_inferred(ctxt, name, typ);
+            let (default, collapsed) = collapse_option_vec(ctxt, typ);
+            let field_type = generate_type_from_inferred(ctxt, name, collapsed);
             quote! {
                 #rename
+                #default
                 #field_ident: #field_type
             }
         })
@@ -338,8 +370,16 @@ fn generate_struct_from_inferred_fields(
 
     let derives = quote! { #[derive(Default, Debug, Clone, Serialize, Deserialize)] };
 
+    let unknown_fields = some_if!(ctxt.options.deny_unknown_fields,
+        quote! { #[serde(deny_unknown_fields)] });
+
+    let use_defaults = some_if!(ctxt.options.missing_fields == MissingFields::UseDefault,
+        quote! { #[serde(default)] });
+
     let code = quote! {
         #derives
+        #unknown_fields
+        #use_defaults
         struct #ident {
             #(#fields),*
         }
