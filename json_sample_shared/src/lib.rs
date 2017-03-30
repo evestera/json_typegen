@@ -102,6 +102,7 @@ enum InferredType {
     StringT,
     Integer,
     Floating,
+    EmptyVec,
     VecT { elem_type: Box<InferredType> },
     Struct { fields: HashMap<String, InferredType> },
     Optional(Box<InferredType>)
@@ -118,6 +119,8 @@ fn unify(a: InferredType, b: InferredType) -> InferredType {
         (Floating, Integer) => Floating,
         (a, Null) | (Null, a) => make_optional(a),
         (a, Optional(b)) | (Optional(b), a) => make_optional(unify(a, *b)),
+        (EmptyVec, VecT { elem_type: e }) |
+        (VecT { elem_type: e }, EmptyVec) => VecT { elem_type: e },
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
             VecT { elem_type: Box::new(unify(*e1, *e2)) }
         }
@@ -157,6 +160,50 @@ fn unify_struct_fields(mut f1: HashMap<String, InferredType>,
         unified.insert(key, make_optional(val));
     }
     unified
+}
+
+#[allow(dead_code)]
+fn infer_type_from_value(ctxt: &mut Ctxt, value: &Value) -> InferredType {
+    match *value {
+        Value::Null => InferredType::Null,
+        Value::Bool(_) => InferredType::Bool,
+        Value::Number(ref n) => {
+            if n.is_i64() {
+                InferredType::Integer
+            } else {
+                InferredType::Floating
+            }
+        },
+        Value::String(_) => InferredType::StringT,
+        Value::Array(ref values) => {
+            infer_type_for_array(ctxt, values)
+        },
+        Value::Object(ref map) => {
+            InferredType::Struct { fields: infer_types_for_fields(ctxt, map) }
+        }
+    }
+}
+
+#[allow(dead_code)]
+fn infer_type_for_array(ctxt: &mut Ctxt, values: &[Value]) -> InferredType {
+    match values.split_first() {
+        None => InferredType::EmptyVec,
+        Some((first, rest)) => {
+            let first_type = infer_type_from_value(ctxt, first);
+            let inner = rest.iter().fold(first_type, |typ, val| {
+                let new_type = infer_type_from_value(ctxt, val);
+                unify(typ, new_type)
+            });
+            InferredType::VecT { elem_type: Box::new(inner) }
+        }
+    }
+}
+
+#[allow(dead_code)]
+fn infer_types_for_fields(ctxt: &mut Ctxt, map: &Map<String, Value>) -> HashMap<String, InferredType> {
+    map.iter()
+        .map(|(name, value)| (name.clone(), infer_type_from_value(ctxt, value)))
+        .collect()
 }
 
 pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
