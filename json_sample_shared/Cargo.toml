@@ -17,3 +17,4 @@ serde_json = { version = "0.9", features = ["preserve_order"] }
 reqwest = "0.4"
 error-chain = "0.10"
 lazy_static = "0.2"
+linked-hash-map = { version = "0.4.1" }

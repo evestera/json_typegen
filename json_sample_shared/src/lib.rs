@@ -6,12 +6,14 @@ extern crate serde_json;
 extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
+extern crate linked_hash_map;
 
 use std::fs::File;
 use serde_json::{ Value, Map };
-use std::collections::{ HashSet, HashMap };
+use std::collections::{ HashSet };
 use quote::{ Tokens, Ident };
 use std::ascii::AsciiExt;
+use linked_hash_map::LinkedHashMap;
 
 mod util;
 
@@ -104,7 +106,7 @@ enum InferredType {
     Floating,
     EmptyVec,
     VecT { elem_type: Box<InferredType> },
-    Struct { fields: HashMap<String, InferredType> },
+    Struct { fields: LinkedHashMap<String, InferredType> },
     Optional(Box<InferredType>)
 }
 
@@ -138,14 +140,14 @@ fn make_optional(a: InferredType) -> InferredType {
     }
 }
 
-fn unify_struct_fields(mut f1: HashMap<String, InferredType>,
-                       mut f2: HashMap<String, InferredType>)
-                       -> HashMap<String, InferredType> {
+fn unify_struct_fields(mut f1: LinkedHashMap<String, InferredType>,
+                       mut f2: LinkedHashMap<String, InferredType>)
+                       -> LinkedHashMap<String, InferredType> {
     if f1 == f2 {
         return f1;
     }
-    let mut unified = HashMap::new();
-    for (key, val) in f1.drain() {
+    let mut unified = LinkedHashMap::new();
+    for (key, val) in f1.into_iter() {
         match f2.remove(&key) {
             Some(val2) => {
                 unified.insert(key, unify(val, val2));
@@ -155,7 +157,7 @@ fn unify_struct_fields(mut f1: HashMap<String, InferredType>,
             }
         }
     }
-    for (key, val) in f2.drain() {
+    for (key, val) in f2.into_iter() {
         unified.insert(key, make_optional(val));
     }
     unified
@@ -196,7 +198,7 @@ fn infer_type_for_array(ctxt: &mut Ctxt, values: &[Value]) -> InferredType {
     }
 }
 
-fn infer_types_for_fields(ctxt: &mut Ctxt, map: &Map<String, Value>) -> HashMap<String, InferredType> {
+fn infer_types_for_fields(ctxt: &mut Ctxt, map: &Map<String, Value>) -> LinkedHashMap<String, InferredType> {
     map.iter()
         .map(|(name, value)| (name.clone(), infer_type_from_value(ctxt, value)))
         .collect()
@@ -227,7 +229,7 @@ pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<To
         extern crate serde_json;
     });
 
-    let defs = &ctxt.types;
+    let defs = ctxt.types.iter().rev();
 
     Ok(quote! {
         #crates
@@ -311,7 +313,7 @@ fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) ->
 fn generate_struct_from_inferred_fields(
         ctxt: &mut Ctxt,
         path: &str,
-        map: &HashMap<String, InferredType>) -> Tokens {
+        map: &LinkedHashMap<String, InferredType>) -> Tokens {
     // TODO: Avoid type name collisions
     let type_name = type_case(path);
     let ident = Ident::from(type_name);
@@ -325,6 +327,7 @@ fn generate_struct_from_inferred_fields(
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
             let field_ident = Ident::from(field_name);
+            // TODO: Handle Option<Vec<>> depending on missing fields option
             let field_type = generate_type_from_inferred(ctxt, name, typ);
             quote! {
                 #rename
@@ -387,7 +390,7 @@ macro_rules! string_hashmap {
     ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
     ($($key:expr => $value:expr),*) => {
         {
-            let mut _map = ::std::collections::HashMap::new();
+            let mut _map = ::linked_hash_map::LinkedHashMap::new();
             $(
                 _map.insert($key.to_string(), $value);
             )*
