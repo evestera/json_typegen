@@ -11,6 +11,7 @@ use std::fs::File;
 use serde_json::{ Value, Map };
 use std::collections::{ HashSet, HashMap };
 use quote::{ Tokens, Ident };
+use std::ascii::AsciiExt;
 
 mod util;
 
@@ -64,23 +65,23 @@ pub enum SampleSource<'a> {
 }
 
 pub struct Options {
-    pub use_serde: bool,
     pub extern_crate: bool,
-    pub runnable: bool
+    pub runnable: bool,
 }
 
 impl Default for Options {
     fn default() -> Options {
         Options {
-            use_serde: true,
             extern_crate: false,
-            runnable: false
+            runnable: false,
         }
     }
 }
 
 struct Ctxt {
-    options: Options
+    options: Options,
+    type_names: HashSet<String>,
+    types: Vec<Tokens>,
 }
 
 macro_rules! some_if {
@@ -93,7 +94,6 @@ macro_rules! some_if {
     })
 }
 
-#[allow(dead_code)]
 #[derive(Debug, PartialEq, Clone)]
 enum InferredType {
     Null,
@@ -108,7 +108,6 @@ enum InferredType {
     Optional(Box<InferredType>)
 }
 
-#[allow(dead_code)]
 fn unify(a: InferredType, b: InferredType) -> InferredType {
     if a == b {
         return a;
@@ -162,7 +161,6 @@ fn unify_struct_fields(mut f1: HashMap<String, InferredType>,
     unified
 }
 
-#[allow(dead_code)]
 fn infer_type_from_value(ctxt: &mut Ctxt, value: &Value) -> InferredType {
     match *value {
         Value::Null => InferredType::Null,
@@ -184,7 +182,6 @@ fn infer_type_from_value(ctxt: &mut Ctxt, value: &Value) -> InferredType {
     }
 }
 
-#[allow(dead_code)]
 fn infer_type_for_array(ctxt: &mut Ctxt, values: &[Value]) -> InferredType {
     match values.split_first() {
         None => InferredType::EmptyVec,
@@ -199,7 +196,6 @@ fn infer_type_for_array(ctxt: &mut Ctxt, values: &[Value]) -> InferredType {
     }
 }
 
-#[allow(dead_code)]
 fn infer_types_for_fields(ctxt: &mut Ctxt, map: &Map<String, Value>) -> HashMap<String, InferredType> {
     map.iter()
         .map(|(name, value)| (name.clone(), infer_type_from_value(ctxt, value)))
@@ -213,9 +209,12 @@ pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
 pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
     let mut ctxt = Ctxt {
-        options: options
+        options: options,
+        type_names: HashSet::new(),
+        types: Vec::new(),
     };
-    let (type_name, type_def) = generate_type_from_value(&mut ctxt, name, &sample);
+    let inferred = infer_type_from_value(&mut ctxt, &sample);
+    let type_name = generate_type_from_inferred(&mut ctxt, name, &inferred);
 
     let example = some_if!(ctxt.options.runnable, {
         ctxt.options.extern_crate = true;
@@ -228,14 +227,12 @@ pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<To
         extern crate serde_json;
     });
 
-    if type_def.is_none() && !ctxt.options.runnable {
-        return Err(ErrorKind::ExistingType(String::from(type_name.as_str())).into());
-    }
+    let defs = &ctxt.types;
 
     Ok(quote! {
         #crates
 
-        #type_def
+        #(#defs)*
 
         #example
     })
@@ -259,89 +256,94 @@ fn usage_example(type_id: &Tokens) -> Tokens {
     }
 }
 
-fn generate_type_from_value(ctxt: &mut Ctxt, path: &str, value: &Value) -> (Tokens, Option<Tokens>) {
-    match *value {
-        Value::Null => (quote! { Option<::serde_json::Value> }, None),
-        Value::Bool(_) => (quote! { bool }, None),
-        Value::Number(ref n) => {
-            if n.is_i64() {
-                (quote! { i64 }, None)
-            } else {
-                (quote! { f64 }, None)
-            }
-        },
-        Value::String(_) => (quote! { String }, None),
-        Value::Array(ref values) => {
-            generate_type_for_array(ctxt, path, values)
-        },
-        Value::Object(ref map) => {
-            generate_struct_from_object(ctxt, path, map)
+fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredType) -> Tokens {
+    use InferredType::*;
+    match *inferred {
+        Null | Any => quote! { ::serde_json::Value },
+        Bool => quote! { bool },
+        StringT => quote! { String },
+        Integer => quote! { i64 },
+        Floating => quote! { f64 },
+        EmptyVec => quote! { Vec<::serde_json::Value> },
+        VecT { elem_type: ref e } => {
+            // TODO: Depluralize path
+            let inner = generate_type_from_inferred(ctxt, path, e);
+            quote! { Vec<#inner> }
+        }
+        Struct { fields: ref map } => {
+            generate_struct_from_inferred_fields(ctxt, path, map)
+        }
+        Optional(ref e) => {
+            let inner = generate_type_from_inferred(ctxt, path, e);
+            quote! { Option<#inner> }
         }
     }
 }
 
-fn generate_type_for_array(ctxt: &mut Ctxt, path: &str, values: &[Value]) -> (Tokens, Option<Tokens>) {
-    let mut defs = Vec::new();
-    let mut types = HashSet::new();
-
-    for value in values.iter() {
-        let (elemtype, elemtype_def) = generate_type_from_value(ctxt, path, value);
-        types.insert(elemtype.into_string());
-        if let Some(def) = elemtype_def {
-            defs.push(def);
+fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) -> String {
+    let name = name.trim();
+    if let Some(c) = name.chars().next() {
+        if c.is_ascii() && c.is_numeric() {
+            let temp = String::from("n") + name;
+            return snake_case(&temp);
         }
     }
-
-    if types.len() == 1 {
-        let ident = Ident::new(types.into_iter().next().unwrap());
-        (quote! { Vec<#ident> }, defs.into_iter().next())
-    } else {
-        (quote! { Vec<::serde_json::Value> }, None)
+    let mut field_name = snake_case(name);
+    if RUST_KEYWORDS.contains::<str>(&field_name) {
+        field_name.push_str("_field");
     }
+    if field_name == "" {
+        // TODO: Use type to get nicer name
+        field_name.push_str("field");
+    }
+    if !used_names.contains(&field_name) {
+        return field_name;
+    }
+    for n in 1.. {
+        let temp = format!("{}{}", field_name, n);
+        if !used_names.contains(&temp) {
+            return temp;
+        }
+    }
+    unreachable!()
 }
 
-fn generate_struct_from_object(ctxt: &mut Ctxt, path: &str, map: &Map<String, Value>) -> (Tokens, Option<Tokens>) {
+fn generate_struct_from_inferred_fields(
+        ctxt: &mut Ctxt,
+        path: &str,
+        map: &HashMap<String, InferredType>) -> Tokens {
+    // TODO: Avoid type name collisions
     let type_name = type_case(path);
     let ident = Ident::from(type_name);
-    let mut defs = Vec::new();
+
+    let mut field_names = HashSet::new();
 
     let fields: Vec<Tokens> = map.iter()
-        .map(|(name, value)| {
-            let mut field_name = snake_case(name);
-            if RUST_KEYWORDS.contains::<str>(&field_name) {
-                field_name.push_str("_field")
-            }
+        .map(|(name, typ)| {
+            let field_name = field_name(name, typ, &field_names);
+            field_names.insert(field_name.clone());
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
-
             let field_ident = Ident::from(field_name);
-            let (fieldtype, fieldtype_def) = generate_type_from_value(ctxt, name, value);
-            if let Some(def) = fieldtype_def {
-                defs.push(def);
-            }
+            let field_type = generate_type_from_inferred(ctxt, name, typ);
             quote! {
                 #rename
-                #field_ident: #fieldtype
+                #field_ident: #field_type
             }
         })
         .collect();
 
-    let derives = if ctxt.options.use_serde {
-        quote! { #[derive(Default, Debug, Clone, Serialize, Deserialize)] }
-    } else {
-        quote! { #[derive(Default, Debug, Clone)] }
-    };
+    let derives = quote! { #[derive(Default, Debug, Clone, Serialize, Deserialize)] };
 
     let code = quote! {
         #derives
         struct #ident {
             #(#fields),*
         }
-
-        #(#defs)*
     };
 
-    (quote! { #ident }, Some(code))
+    ctxt.types.push(code);
+    quote! { #ident }
 }
 
 pub fn infer_source_type(s: &str) -> SampleSource {
