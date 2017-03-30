@@ -299,13 +299,16 @@ fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredT
 
 fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) -> String {
     let name = name.trim();
-    if let Some(c) = name.chars().next() {
+    let mut field_name = if let Some(c) = name.chars().next() {
         if c.is_ascii() && c.is_numeric() {
             let temp = String::from("n") + name;
-            return snake_case(&temp);
+            snake_case(&temp)
+        } else {
+            snake_case(name)
         }
-    }
-    let mut field_name = snake_case(name);
+    } else {
+        snake_case(name)
+    };
     if RUST_KEYWORDS.contains::<str>(&field_name) {
         field_name.push_str("_field");
     }
@@ -317,7 +320,7 @@ fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) ->
         return field_name;
     }
     for n in 1.. {
-        let temp = format!("{}{}", field_name, n);
+        let temp = format!("{}_{}", field_name, n);
         if !used_names.contains(&temp) {
             return temp;
         }

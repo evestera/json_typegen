@@ -4,7 +4,7 @@ pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';
     for c in name.chars() {
-        if !c.is_alphabetic() {
+        if !c.is_alphanumeric() {
             last = c;
             continue;
         }
@@ -26,7 +26,7 @@ pub fn snake_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = 'A';
     for c in name.chars() {
-        if !c.is_alphabetic() {
+        if !c.is_alphanumeric() {
             last = c;
             continue;
         }
