@@ -11,7 +11,7 @@ extern crate linked_hash_map;
 use std::fs::File;
 use serde_json::{ Value, Map };
 use std::collections::{ HashSet };
-use quote::{ Tokens, Ident };
+use quote::{ Tokens, Ident, ToTokens };
 use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
 
@@ -72,12 +72,43 @@ pub enum MissingFields {
     UseDefault,
 }
 
+#[derive(Clone)]
+pub enum Visibility {
+    Private,
+    Pub,
+    PubRestricted(String)
+}
+
+impl ToTokens for Visibility {
+    fn to_tokens(&self, tokens: &mut Tokens) {
+        use Visibility::*;
+        match *self {
+            Private => {},
+            Pub => {
+                tokens.append("pub");
+            }
+            PubRestricted(ref path) => {
+                tokens.append("pub(");
+                tokens.append(path);
+                tokens.append(")");
+            }
+        }
+    }
+}
+
+pub enum FieldVisibility {
+    Inherited,
+    Specified(Visibility)
+}
+
 pub struct Options {
     pub extern_crate: bool,
     pub runnable: bool,
     pub missing_fields: MissingFields,
     pub deny_unknown_fields: bool,
     pub allow_option_vec: bool,
+    pub type_visibility: Visibility,
+    pub field_visibility: FieldVisibility,
 }
 
 impl Default for Options {
@@ -88,6 +119,8 @@ impl Default for Options {
             missing_fields: MissingFields::Fail,
             deny_unknown_fields: false,
             allow_option_vec: false,
+            type_visibility: Visibility::Private,
+            field_visibility: FieldVisibility::Inherited,
         }
     }
 }
@@ -351,6 +384,11 @@ fn generate_struct_from_inferred_fields(
     // TODO: Avoid type name collisions
     let type_name = type_case(path);
     let ident = Ident::from(type_name);
+    let visibility = ctxt.options.type_visibility.clone();
+    let field_visibility = match ctxt.options.field_visibility {
+        FieldVisibility::Inherited => visibility.clone(),
+        FieldVisibility::Specified(ref v) => v.clone(),
+    };
 
     let mut field_names = HashSet::new();
 
@@ -366,7 +404,7 @@ fn generate_struct_from_inferred_fields(
             quote! {
                 #rename
                 #default
-                #field_ident: #field_type
+                #field_visibility #field_ident: #field_type
             }
         })
         .collect();
@@ -383,7 +421,7 @@ fn generate_struct_from_inferred_fields(
         #derives
         #unknown_fields
         #use_defaults
-        struct #ident {
+        #visibility struct #ident {
             #(#fields),*
         }
     };
