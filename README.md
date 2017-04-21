@@ -1,8 +1,12 @@
 # JSON code generation tools for Rust
 
+[![Travis Build Status](https://api.travis-ci.org/evestera/json_typegen.svg?branch=master)](https://travis-ci.org/evestera/json_typegen)
+[![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
+[![docs.rs](https://docs.rs/json_typegen/badge.svg)](https://docs.rs/json_typegen/)
+
 **WARNING**: This project is still in early development and should not be relied upon. However, feedback and issues are very welcome.
 
-This is a collection of tools for generating structs from JSON samples.
+This is a collection of tools for generating Rust types from JSON samples.
 
 - [Procedural macro](#procedural-macro)
 - [Command line interface](#command-line-interface)
