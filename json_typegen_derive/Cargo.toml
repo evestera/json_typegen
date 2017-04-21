@@ -12,7 +12,7 @@ readme = "../README.md"
 [dependencies]
 syn = "0.10"
 quote = "0.3"
-json_typegen_shared = { path = "../json_typegen_shared" }
+json_typegen_shared = { path = "../json_typegen_shared", version = "0.1" }
 
 [lib]
 proc-macro = true

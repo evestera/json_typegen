@@ -15,4 +15,4 @@ travis-ci = { repository = "evestera/json_typegen" }
 [dependencies]
 serde = "0.9"
 serde_derive = "0.9"
-json_typegen_derive = { path = "../json_typegen_derive" }
+json_typegen_derive = { path = "../json_typegen_derive", version = "0.1" }
