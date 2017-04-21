@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "json_sample_shared",
-    "json_sample_derive",
-    "json_sample_cli",
-    "json_sample_web",
-    "json_provider",
-    "json_provider_demo"
+    "json_typegen_shared",
+    "json_typegen_derive",
+    "json_typegen_cli",
+    "json_typegen_web",
+    "json_typegen",
+    "json_typegen_demo"
 ]

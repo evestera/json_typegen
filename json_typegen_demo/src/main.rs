@@ -1,8 +1,8 @@
 extern crate serde_json;
 #[macro_use]
-extern crate json_provider;
+extern crate json_typegen;
 
-json_provider!("Point", r#"{ "x": 1, "y": 2 }"#);
+json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 
 fn main() {
     let mut p: Point = serde_json::from_str(r#"{ "x": 3, "y": 5 }"#).unwrap();

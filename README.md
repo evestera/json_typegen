@@ -10,14 +10,14 @@ This is a collection of tools for generating structs from JSON samples.
 
 ## Procedural macro
 
-The main interface to the code generation tools is a procedural macro `json_provider!`. As an example, the below code generates code for the type Point, including derives for serialization and deserialization (using [serde_derive](https://crates.io/crates/serde_derive)).
+The main interface to the code generation tools is a procedural macro `json_typegen!`. As an example, the below code generates code for the type Point, including derives for serialization and deserialization (using [serde_derive](https://crates.io/crates/serde_derive)).
 
 ```rust
 extern crate serde_json;
 #[macro_use]
-extern crate json_provider;
+extern crate json_typegen;
 
-json_provider!("Point", r#"{ "x": 1, "y": 2 }"#);
+json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 
 fn main() {
     let mut p: Point = serde_json::from_str(r#"{ "x": 3, "y": 5 }"#).unwrap();
@@ -32,15 +32,15 @@ fn main() {
 [dependencies]
 serde = "0.9"
 serde_json = "0.9"
-json_provider = { git = "https://github.com/evestera/json_sample/" }
+json_typegen = { git = "https://github.com/evestera/json_typegen/" }
 ```
 
 The sample json can also come from local or remote files, like so:
 
 ```rust
-json_provider!("Point", "json_samples/point.json");
+json_typegen!("Point", "json_samples/point.json");
 
-json_provider!("Point", "http://example.com/someapi/point.json");
+json_typegen!("Point", "http://example.com/someapi/point.json");
 ```
 
 ### Conditional compilation
@@ -49,9 +49,9 @@ To avoid incurring the cost of a http request per sample used for every build yo
 
 ```rust
 #[cfg(not(feature = "online-samples"))]
-json_provider!("Point", r#"{ "x": 1, "y": 2 }"#);
+json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 #[cfg(feature = "online-samples")]
-json_provider!("Point", "http://vestera.as/json_sample/examples/point.json");
+json_typegen!("Point", "http://vestera.as/json_typegen/examples/point.json");
 ```
 
 And in Cargo.toml:
@@ -68,11 +68,11 @@ cargo check --features "online-samples"
 
 ## Command line interface
 
-The crate `json_sample_cli` provides a CLI to the same code generation as the procedural macro uses internally. This provides a useful migration path if you at some point need to customize the generated code beyond what is practical through macro arguments.
+The crate `json_typegen_cli` provides a CLI to the same code generation as the procedural macro uses internally. This provides a useful migration path if you at some point need to customize the generated code beyond what is practical through macro arguments.
 
-For details on usage see [its readme](json_sample_cli/README.md).
+For details on usage see [its readme](json_typegen_cli/README.md).
 
 
 ## Web interface
 
-For simple testing and one-time use there is also a web interface (in `json_sample_web`). An instance of this interface is currently hosted at <http://vestera.as/json_sample>
+For simple testing and one-time use there is also a web interface (in `json_typegen_web`). An instance of this interface is currently hosted at <http://vestera.as/json_typegen>

@@ -8,8 +8,8 @@
 Since the crate is not on crates.io yet, this is a bit more cumbersome than it will be in the future. Due to using `rustfmt` to make code look reasonable, compilation also takes a while. If you are impatient, you can use the [web interface](../README.md#web-interface) in the meantime.
 
 ```
-git clone https://github.com/evestera/json_sample
-cd json_sample/json_sample_cli
+git clone https://github.com/evestera/json_typegen
+cd json_typegen/json_typegen_cli
 cargo install
 ```
 
@@ -19,7 +19,7 @@ cargo install
 To generate the type `Point` in `point.rs` from an online sample, run:
 
 ```
-json_sample_cli 'http://vestera.as/json_sample/examples/point.json' -o src/point.rs -n Point
+json_typegen_cli 'http://vestera.as/json_typegen/examples/point.json' -o src/point.rs -n Point
 ```
 
 The generated code assumes the availability of `serde` and `serde_derive`, so make sure your `Cargo.toml` contains something like:

@@ -1,15 +1,15 @@
 [package]
-name = "json_sample_cli"
+name = "json_typegen_cli"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 description = "Command line interface for codegen from JSON samples"
-homepage = "https://github.com/evestera/json_sample"
-repository = "https://github.com/evestera/json_sample"
-documentation = "https://docs.rs/json_sample_cli"
+homepage = "https://github.com/evestera/json_typegen"
+repository = "https://github.com/evestera/json_typegen"
+documentation = "https://docs.rs/json_typegen_cli"
 readme = "../README.md"
 
 [dependencies]
 clap = "~2.19.0"
 rustfmt = "0.7"
-json_sample_shared = { path = "../json_sample_shared" }
+json_typegen_shared = { path = "../json_typegen_shared" }

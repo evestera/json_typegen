@@ -1,5 +1,5 @@
 [package]
-name = "json_provider_demo"
+name = "json_typegen_demo"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
@@ -8,4 +8,4 @@ publish = false
 [dependencies]
 serde = "0.9"
 serde_json = "0.9"
-json_provider = { path = "../json_provider" }
+json_typegen = { path = "../json_typegen" }

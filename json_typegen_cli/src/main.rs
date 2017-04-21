@@ -1,8 +1,8 @@
-extern crate json_sample_shared;
+extern crate json_typegen_shared;
 extern crate rustfmt;
 extern crate clap;
 
-use json_sample_shared::{codegen, infer_source_type, Options};
+use json_typegen_shared::{codegen, infer_source_type, Options};
 use rustfmt::config::{Config, WriteMode};
 use clap::{Arg, App};
 

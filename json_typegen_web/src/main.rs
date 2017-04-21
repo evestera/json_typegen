@@ -5,7 +5,7 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 extern crate rustfmt;
-extern crate json_sample_shared;
+extern crate json_typegen_shared;
 extern crate error_chain;
 
 use std::path::Path;
@@ -18,7 +18,7 @@ use rustfmt::config::{Config, WriteMode};
 use error_chain::ChainedError;
 use std::env;
 
-use json_sample_shared::{codegen, SampleSource, Options};
+use json_typegen_shared::{codegen, SampleSource, Options};
 
 #[derive(Debug, Deserialize)]
 struct ReqBody {

@@ -1,18 +1,18 @@
 [package]
-name = "json_provider"
+name = "json_typegen"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 description = "Macro to infer types from a JSON sample"
-homepage = "https://github.com/evestera/json_sample"
-repository = "https://github.com/evestera/json_sample"
-documentation = "https://docs.rs/json_provider"
+homepage = "https://github.com/evestera/json_typegen"
+repository = "https://github.com/evestera/json_typegen"
+documentation = "https://docs.rs/json_typegen"
 readme = "../README.md"
 
 [badges]
-travis-ci = { repository = "evestera/json_sample" }
+travis-ci = { repository = "evestera/json_typegen" }
 
 [dependencies]
 serde = "0.9"
 serde_derive = "0.9"
-json_sample_derive = { path = "../json_sample_derive" }
+json_typegen_derive = { path = "../json_typegen_derive" }
