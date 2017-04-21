@@ -3,13 +3,19 @@ name = "json_typegen_cli"
 version = "0.1.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
-description = "Command line interface for codegen from JSON samples"
+description = "Command line utility for generating Rust types from JSON samples"
+keywords = ["json", "code-generation", "cli", "serde"]
+categories = ["command-line-utilities", "encoding"]
 homepage = "https://github.com/evestera/json_typegen"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_cli"
-readme = "../README.md"
+readme = "README.md"
 
 [dependencies]
 clap = "~2.19.0"
 rustfmt = "0.7"
-json_typegen_shared = { path = "../json_typegen_shared" }
+json_typegen_shared = { path = "../json_typegen_shared", version = "0.1" }
+
+[[bin]]
+name = "json_typegen"
+path = "src/main.rs"
