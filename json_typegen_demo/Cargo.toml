@@ -8,4 +8,4 @@ publish = false
 [dependencies]
 serde = "0.9"
 serde_json = "0.9"
-json_typegen = { path = "../json_typegen" }
+json_typegen = "0.1"

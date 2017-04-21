@@ -7,7 +7,7 @@ description = "Codegen from JSON samples. Not intended to be used directly. See 
 homepage = "https://github.com/evestera/json_typegen"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_shared"
-readme = "../README.md"
+readme = "README.md"
 
 [dependencies]
 quote = "0.3"

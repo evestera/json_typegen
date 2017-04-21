@@ -1,6 +1,6 @@
-extern crate serde_json;
 #[macro_use]
 extern crate json_typegen;
+extern crate serde_json;
 
 json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 

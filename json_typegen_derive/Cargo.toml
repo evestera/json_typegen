@@ -7,7 +7,7 @@ description = "Custom derive for codegen from JSON samples. Primarily for use by
 homepage = "https://github.com/evestera/json_typegen"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_derive"
-readme = "../README.md"
+readme = "README.md"
 
 [dependencies]
 syn = "0.10"

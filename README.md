@@ -13,9 +13,9 @@ This is a collection of tools for generating structs from JSON samples.
 The main interface to the code generation tools is a procedural macro `json_typegen!`. As an example, the below code generates code for the type Point, including derives for serialization and deserialization (using [serde_derive](https://crates.io/crates/serde_derive)).
 
 ```rust
-extern crate serde_json;
 #[macro_use]
 extern crate json_typegen;
+extern crate serde_json;
 
 json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 
@@ -61,6 +61,7 @@ online-samples = []
 ```
 
 You can then verify that remote samples match your expectations in e.g. CI builds as follows:
+
 ```sh
 cargo check --features "online-samples"
 ```
