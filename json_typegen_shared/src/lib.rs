@@ -226,30 +226,41 @@ fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredT
     }
 }
 
-fn field_name(name: &str, _type: &InferredType, used_names: &HashSet<String>) -> String {
+fn field_name(name: &str, used_names: &HashSet<String>) -> String {
+    type_or_field_name(name, used_names, "field", snake_case)
+}
+
+fn type_name(name: &str, used_names: &HashSet<String>) -> String {
+    type_or_field_name(name, used_names, "GeneratedType", type_case)
+}
+
+fn type_or_field_name(name: &str,
+                      used_names: &HashSet<String>,
+                      default_name: &str,
+                      case_fn: fn(&str) -> String)
+                      -> String {
     let name = name.trim();
-    let mut field_name = if let Some(c) = name.chars().next() {
+    let mut output_name = if let Some(c) = name.chars().next() {
         if c.is_ascii() && c.is_numeric() {
             let temp = String::from("n") + name;
-            snake_case(&temp)
+            case_fn(&temp)
         } else {
-            snake_case(name)
+            case_fn(name)
         }
     } else {
-        snake_case(name)
+        case_fn(name)
     };
-    if RUST_KEYWORDS.contains::<str>(&field_name) {
-        field_name.push_str("_field");
+    if RUST_KEYWORDS.contains::<str>(&output_name) {
+        output_name.push_str("_field");
     }
-    if field_name == "" {
-        // TODO: Use type to get nicer name
-        field_name.push_str("field");
+    if output_name == "" {
+        output_name.push_str(default_name);
     }
-    if !used_names.contains(&field_name) {
-        return field_name;
+    if !used_names.contains(&output_name) {
+        return output_name;
     }
-    for n in 1.. {
-        let temp = format!("{}_{}", field_name, n);
+    for n in 2.. {
+        let temp = format!("{}{}", output_name, n);
         if !used_names.contains(&temp) {
             return temp;
         }
@@ -277,8 +288,8 @@ fn generate_struct_from_inferred_fields(
         ctxt: &mut Ctxt,
         path: &str,
         map: &LinkedHashMap<String, InferredType>) -> Tokens {
-    // TODO: Avoid type name collisions
-    let type_name = type_case(path);
+    let type_name = type_name(path, &ctxt.type_names);
+    ctxt.type_names.insert(type_name.clone());
     let ident = Ident::from(type_name);
     let visibility = ctxt.options.type_visibility.clone();
     let field_visibility = match ctxt.options.field_visibility {
@@ -290,7 +301,7 @@ fn generate_struct_from_inferred_fields(
 
     let fields: Vec<Tokens> = map.iter()
         .map(|(name, typ)| {
-            let field_name = field_name(name, typ, &field_names);
+            let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
