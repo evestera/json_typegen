@@ -4,9 +4,9 @@
 [![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
 [![docs.rs](https://docs.rs/json_typegen/badge.svg)](https://docs.rs/json_typegen/)
 
-**WARNING**: This project is still in early development and should not be relied upon. However, feedback and issues are very welcome.
+WARNING: This project is still in early development and you should not rely on it outputting exactly the same code tomorrow as it does today. That said, feel free to try things out, and feedback/issues are very welcome.
 
-This is a collection of tools for generating Rust types from JSON samples.
+This is a collection of tools for generating Rust types from JSON samples. It was inspired by and uses the same kind of inference algorithm as [F# Data](http://fsharp.github.io/FSharp.Data/). There are three interfaces to the code generation:
 
 - [Procedural macro](#procedural-macro)
 - [Command line interface](#command-line-interface)
