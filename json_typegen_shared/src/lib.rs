@@ -7,6 +7,7 @@ extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
 extern crate linked_hash_map;
+extern crate inflector;
 
 use std::fs::File;
 use serde_json::{ Value };
@@ -14,6 +15,7 @@ use std::collections::{ HashSet };
 use quote::{ Tokens, Ident, ToTokens };
 use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
+use inflector::Inflector;
 
 mod util;
 mod inference;
@@ -207,8 +209,8 @@ fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredT
         Floating => quote! { f64 },
         EmptyVec => quote! { Vec<::serde_json::Value> },
         VecT { elem_type: ref e } => {
-            // TODO: Depluralize path
-            let inner = generate_type_from_inferred(ctxt, path, e);
+            let singular = path.to_singular();
+            let inner = generate_type_from_inferred(ctxt, &singular, e);
             quote! { Vec<#inner> }
         }
         Struct { fields: ref map } => {
