@@ -8,6 +8,7 @@ extern crate error_chain;
 extern crate lazy_static;
 extern crate linked_hash_map;
 extern crate inflector;
+extern crate regex;
 
 use std::fs::File;
 use serde_json::{ Value };
@@ -16,6 +17,7 @@ use quote::{ Tokens, Ident, ToTokens };
 use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
+use regex::Regex;
 
 mod util;
 mod inference;
@@ -76,7 +78,7 @@ pub enum MissingFields {
     UseDefault,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Visibility {
     Private,
     Pub,
@@ -149,8 +151,10 @@ pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
     codegen(name, &SampleSource::Text(json), Options::default())
 }
 
-pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<Tokens> {
+pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
+    let name = handle_pub_in_name(name, &mut options);
+
     let mut ctxt = Ctxt {
         options: options,
         type_names: HashSet::new(),
@@ -179,6 +183,31 @@ pub fn codegen(name: &str, source: &SampleSource, options: Options) -> Result<To
 
         #example
     })
+}
+
+/// Parse "names" like `pub(crate) Foo` into a name and a visibility option
+fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
+    lazy_static! {
+        static ref PUB_RE: Regex =
+            Regex::new(r"(?x)
+                pub ( \( (?P<restriction> [^)]+ ) \) )?
+                \s+
+                (?P<name> .+ )
+            ").unwrap();
+    }
+    match PUB_RE.captures(name) {
+        Some(captures) => {
+            options.type_visibility = match captures.name("restriction") {
+                Some(restriction) => Visibility::PubRestricted(restriction.as_str().to_owned()),
+                None => Visibility::Pub,
+            };
+            captures.name("name").unwrap().as_str()
+        }
+        None => {
+            // If there is no visibility specified here, we want to use whatever is set elsewhere
+            name
+        }
+    }
 }
 
 fn usage_example(type_id: &Tokens) -> Tokens {
@@ -355,4 +384,25 @@ fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
         SampleSource::Text(text) => serde_json::from_str(text),
     };
     Ok(parse_result.chain_err(|| "Unable to parse JSON sample")?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_handle_pub_in_name() {
+        let mut options = Options::default();
+        let name = handle_pub_in_name("Foo", &mut options);
+        assert_eq!(name, "Foo");
+        assert_eq!(options.type_visibility, Options::default().type_visibility);
+        let name = handle_pub_in_name("pub Foo", &mut options);
+        assert_eq!(name, "Foo");
+        assert_eq!(options.type_visibility, Visibility::Pub);
+        let name = handle_pub_in_name("pub(crate) Foo Bar", &mut options);
+        assert_eq!(name, "Foo Bar");
+        assert_eq!(options.type_visibility, Visibility::PubRestricted("crate".to_string()));
+        let name = handle_pub_in_name("pub(some::path) Foo", &mut options);
+        assert_eq!(name, "Foo");
+        assert_eq!(options.type_visibility, Visibility::PubRestricted("some::path".to_string()));
+    }
 }

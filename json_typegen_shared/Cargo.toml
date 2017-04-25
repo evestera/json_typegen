@@ -19,3 +19,4 @@ error-chain = "0.10"
 lazy_static = "0.2"
 linked-hash-map = { version = "0.4.1" }
 Inflector = "0.10"
+regex = "0.2"
