@@ -20,11 +20,13 @@ use std::env;
 
 use json_typegen_shared::{codegen, SampleSource, Options};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
+#[serde(default)]
 struct ReqBody {
     name: String,
     input: String,
     runnable: bool,
+    derives: String,
 }
 
 macro_rules! handle {
@@ -41,6 +43,9 @@ fn handle_codegen_request(req: &mut Request) -> IronResult<Response> {
         "Error: Request body was invalid JSON");
     let mut options = Options::default();
     options.runnable = req_body.runnable;
+    if !(req_body.derives.trim().is_empty()) {
+        options.derives = req_body.derives;
+    }
     let tokens = handle!(codegen(&req_body.name, &SampleSource::Text(&req_body.input), options),
         err => format!("{}", err.display()));
 

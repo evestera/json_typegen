@@ -15,9 +15,10 @@
         fetch('api', {
           method: 'POST',
           body: JSON.stringify({
-            name: document.querySelector('#name').value || 'Sample',
+            name: document.querySelector('#name').value,
             input: document.querySelector('#input').value || '{}',
-            runnable: document.querySelector('#runnable').checked
+            runnable: document.querySelector('#runnable').checked,
+            derives: document.querySelector('#derives').value
           })
         }).then(function(res) {
           return Promise.all([res.status, res.text()]);
@@ -53,7 +54,7 @@
           document.querySelector('#name').value = name;
         }
         var code = localStorage.getItem('code');
-        if (code && name != 'null') {
+        if (code && code != 'null') {
           document.querySelector('#input').value = code;
           generate();
         }
@@ -88,21 +89,29 @@
       h2 {
         font-weight: lighter;
       }
-      #name {
+      h4 {
+        margin: 15px 0 4px 0;
+        font-size: 16px;
+      }
+      #name, input[type=text] {
         width: 100%;
         border: 1px solid #ccc;
         padding: 5px;
+        border-radius: 3px;
+        font-size: 14px;
       }
       #input {
         width: 100%;
         height: 300px;
         font-family: monospace;
-        margin-top: 10px;
         border: 1px solid #ccc;
         padding: 5px;
+        border-radius: 3px;
+        font-size: 14px;
       }
       #input-wrapper ul {
         list-style-type: none;
+        padding: 0;
       }
       .examples a {
         color: black;
@@ -183,14 +192,28 @@
            >Steam App News</a>
       </p>
 
-      <input id="name" placeholder="Root struct name" oninput="saveState();">
+      <h4><label for="name">Root struct name</label></h4>
+      <input id="name"
+             type="text"
+             placeholder="GeneratedType"
+             oninput="saveState();">
+
+      <h4><label for="input">Input sample JSON</label></h4>
       <textarea id="input"
-                placeholder="Paste JSON here..."
+                placeholder="{}"
                 oninput="saveState();"></textarea>
       <ul>
         <li>
-          <input type="checkbox" id="runnable">
-          <label for="runnable">Generate runnable example</label>
+          <h4>Included code</h4>
+          <input type="radio" name="runnable" id="types-only" checked> <label for="types-only">Types only</label> <br>
+          <input type="radio" name="runnable" id="runnable"> <label for="runnable">Full runnable example</label>
+        </li>
+        <li>
+          <h4><label for="derives">Derives</label></h4>
+          <input id="derives"
+                 type="text"
+                 placeholder="Default, Debug, Clone, PartialEq, Serialize, Deserialize"
+                 oninput="saveState();">
         </li>
       </ul>
       <button onclick="generate();">Generate Rust types</button>
