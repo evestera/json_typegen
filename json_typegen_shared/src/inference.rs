@@ -2,7 +2,7 @@ use linked_hash_map::LinkedHashMap;
 use serde_json::{ Value, Map };
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum InferredType {
+pub enum Shape {
     Null,
     Any,
     Bottom,
@@ -10,43 +10,43 @@ pub enum InferredType {
     StringT,
     Integer,
     Floating,
-    VecT { elem_type: Box<InferredType> },
-    Struct { fields: LinkedHashMap<String, InferredType> },
-    Optional(Box<InferredType>)
+    VecT { elem_type: Box<Shape> },
+    Struct { fields: LinkedHashMap<String, Shape> },
+    Optional(Box<Shape>)
 }
 
-fn unify(a: InferredType, b: InferredType) -> InferredType {
+fn common_shape(a: Shape, b: Shape) -> Shape {
     if a == b {
         return a;
     }
-    use self::InferredType::*;
+    use self::Shape::*;
     match (a, b) {
         (a, Bottom) | (Bottom, a) => a,
         (Integer, Floating) |
         (Floating, Integer) => Floating,
         (a, Null) | (Null, a) => make_optional(a),
-        (a, Optional(b)) | (Optional(b), a) => make_optional(unify(a, *b)),
+        (a, Optional(b)) | (Optional(b), a) => make_optional(common_shape(a, *b)),
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
-            VecT { elem_type: Box::new(unify(*e1, *e2)) }
+            VecT { elem_type: Box::new(common_shape(*e1, *e2)) }
         }
         (Struct { fields: f1 }, Struct { fields: f2 }) => {
-            Struct { fields: unify_struct_fields(f1, f2) }
+            Struct { fields: common_field_shapes(f1, f2) }
         }
         _ => Any,
     }
 }
 
-fn make_optional(a: InferredType) -> InferredType {
-    use self::InferredType::*;
+fn make_optional(a: Shape) -> Shape {
+    use self::Shape::*;
     match a {
         Null | Any | Bottom | Optional(_) => a,
         non_nullable => Optional(Box::new(non_nullable)),
     }
 }
 
-fn unify_struct_fields(f1: LinkedHashMap<String, InferredType>,
-                       mut f2: LinkedHashMap<String, InferredType>)
-                       -> LinkedHashMap<String, InferredType> {
+fn common_field_shapes(f1: LinkedHashMap<String, Shape>,
+                       mut f2: LinkedHashMap<String, Shape>)
+                       -> LinkedHashMap<String, Shape> {
     if f1 == f2 {
         return f1;
     }
@@ -54,7 +54,7 @@ fn unify_struct_fields(f1: LinkedHashMap<String, InferredType>,
     for (key, val) in f1.into_iter() {
         match f2.remove(&key) {
             Some(val2) => {
-                unified.insert(key, unify(val, val2));
+                unified.insert(key, common_shape(val, val2));
             },
             None => {
                 unified.insert(key, make_optional(val));
@@ -67,55 +67,52 @@ fn unify_struct_fields(f1: LinkedHashMap<String, InferredType>,
     unified
 }
 
-pub fn infer_type_from_value(value: &Value) -> InferredType {
+pub fn value_to_shape(value: &Value) -> Shape {
     match *value {
-        Value::Null => InferredType::Null,
-        Value::Bool(_) => InferredType::Bool,
+        Value::Null => Shape::Null,
+        Value::Bool(_) => Shape::Bool,
         Value::Number(ref n) => {
             if n.is_i64() {
-                InferredType::Integer
+                Shape::Integer
             } else {
-                InferredType::Floating
+                Shape::Floating
             }
         },
-        Value::String(_) => InferredType::StringT,
-        Value::Array(ref values) => {
-            infer_type_for_array(values)
-        },
-        Value::Object(ref map) => {
-            InferredType::Struct { fields: infer_types_for_fields(map) }
-        }
+        Value::String(_) => Shape::StringT,
+        Value::Array(ref values) => array_to_shape(values),
+        Value::Object(ref map) => object_to_shape(map),
     }
 }
 
-fn infer_type_for_array(values: &[Value]) -> InferredType {
-    let inner = values.iter().fold(InferredType::Bottom, |typ, val| {
-        let new_type = infer_type_from_value(val);
-        unify(typ, new_type)
+fn array_to_shape(values: &[Value]) -> Shape {
+    let inner = values.iter().fold(Shape::Bottom, |shape, val| {
+        let shape2 = value_to_shape(val);
+        common_shape(shape, shape2)
     });
-    InferredType::VecT { elem_type: Box::new(inner) }
+    Shape::VecT { elem_type: Box::new(inner) }
 }
 
-fn infer_types_for_fields(map: &Map<String, Value>) -> LinkedHashMap<String, InferredType> {
-    map.iter()
-        .map(|(name, value)| (name.clone(), infer_type_from_value(value)))
-        .collect()
+fn object_to_shape(map: &Map<String, Value>) -> Shape {
+    let inner = map.iter()
+        .map(|(name, value)| (name.clone(), value_to_shape(value)))
+        .collect();
+    Shape::Struct { fields: inner }
 }
 
 #[test]
 fn test_unify() {
-    use InferredType::*;
-    assert_eq!(unify(Bool, Bool), Bool);
-    assert_eq!(unify(Bool, Integer), Any);
-    assert_eq!(unify(Integer, Floating), Floating);
-    assert_eq!(unify(Null, Any), Any);
-    assert_eq!(unify(Null, Bool), Optional(Box::new(Bool)));
-    assert_eq!(unify(Null, Optional(Box::new(Integer))), Optional(Box::new(Integer)));
-    assert_eq!(unify(Any, Optional(Box::new(Integer))), Any);
-    assert_eq!(unify(Any, Optional(Box::new(Integer))), Any);
-    assert_eq!(unify(Optional(Box::new(Integer)), Optional(Box::new(Floating))),
+    use Shape::*;
+    assert_eq!(common_shape(Bool, Bool), Bool);
+    assert_eq!(common_shape(Bool, Integer), Any);
+    assert_eq!(common_shape(Integer, Floating), Floating);
+    assert_eq!(common_shape(Null, Any), Any);
+    assert_eq!(common_shape(Null, Bool), Optional(Box::new(Bool)));
+    assert_eq!(common_shape(Null, Optional(Box::new(Integer))), Optional(Box::new(Integer)));
+    assert_eq!(common_shape(Any, Optional(Box::new(Integer))), Any);
+    assert_eq!(common_shape(Any, Optional(Box::new(Integer))), Any);
+    assert_eq!(common_shape(Optional(Box::new(Integer)), Optional(Box::new(Floating))),
                Optional(Box::new(Floating)));
-    assert_eq!(unify(Optional(Box::new(StringT)), Optional(Box::new(Integer))), Any);
+    assert_eq!(common_shape(Optional(Box::new(StringT)), Optional(Box::new(Integer))), Any);
 }
 
 // based on hashmap! macro from maplit crate
@@ -133,8 +130,8 @@ macro_rules! string_hashmap {
 }
 
 #[test]
-fn test_unify_struct_fields() {
-    use InferredType::*;
+fn test_common_field_shapes() {
+    use Shape::*;
     {
         let f1 = string_hashmap!{
             "a" => Integer,
@@ -148,7 +145,7 @@ fn test_unify_struct_fields() {
             "d" => Null,
             "e" => Any,
         };
-        assert_eq!(unify_struct_fields(f1, f2), string_hashmap!{
+        assert_eq!(common_field_shapes(f1, f2), string_hashmap!{
             "a" => Integer,
             "b" => Optional(Box::new(Bool)),
             "c" => Floating,

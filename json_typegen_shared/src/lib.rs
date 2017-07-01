@@ -162,8 +162,8 @@ pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Resul
         type_names: HashSet::new(),
         types: Vec::new(),
     };
-    let inferred = infer_type_from_value(&sample);
-    let type_name = generate_type_from_inferred(&mut ctxt, name, &inferred);
+    let shape = value_to_shape(&sample);
+    let type_name = generate_type_from_shape(&mut ctxt, name, &shape);
 
     let example = some_if!(ctxt.options.runnable, {
         ctxt.options.extern_crate = true;
@@ -230,9 +230,9 @@ fn usage_example(type_id: &Tokens) -> Tokens {
     }
 }
 
-fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredType) -> Tokens {
-    use InferredType::*;
-    match *inferred {
+fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Tokens {
+    use Shape::*;
+    match *shape {
         Null | Any | Bottom => quote! { ::serde_json::Value },
         Bool => quote! { bool },
         StringT => quote! { String },
@@ -240,14 +240,14 @@ fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredT
         Floating => quote! { f64 },
         VecT { elem_type: ref e } => {
             let singular = path.to_singular();
-            let inner = generate_type_from_inferred(ctxt, &singular, e);
+            let inner = generate_type_from_shape(ctxt, &singular, e);
             quote! { Vec<#inner> }
         }
         Struct { fields: ref map } => {
-            generate_struct_from_inferred_fields(ctxt, path, map)
+            generate_struct_from_field_shapes(ctxt, path, map)
         }
         Optional(ref e) => {
-            let inner = generate_type_from_inferred(ctxt, path, e);
+            let inner = generate_type_from_shape(ctxt, path, e);
             match ctxt.options.missing_fields {
                 MissingFields::Fail => quote! { Option<#inner> },
                 MissingFields::UseDefault => quote! { #inner },
@@ -299,11 +299,11 @@ fn type_or_field_name(name: &str,
 }
 
 fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
-                           typ: &'a InferredType)
-                           -> (Option<Tokens>, &'a InferredType) {
+                           typ: &'a Shape)
+                           -> (Option<Tokens>, &'a Shape) {
     if !ctxt.options.allow_option_vec && ctxt.options.missing_fields != MissingFields::UseDefault {
-        if let InferredType::Optional(ref inner) = *typ {
-            if let InferredType::VecT { .. } = **inner {
+        if let Shape::Optional(ref inner) = *typ {
+            if let Shape::VecT { .. } = **inner {
                 return (Some(quote! { #[serde(default)] }), &**inner);
             }
         }
@@ -311,10 +311,10 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
     (None, typ)
 }
 
-fn generate_struct_from_inferred_fields(
+fn generate_struct_from_field_shapes(
         ctxt: &mut Ctxt,
         path: &str,
-        map: &LinkedHashMap<String, InferredType>) -> Tokens {
+        map: &LinkedHashMap<String, Shape>) -> Tokens {
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
     let ident = Ident::from(type_name);
@@ -334,7 +334,7 @@ fn generate_struct_from_inferred_fields(
                 quote! { #[serde(rename = #name)] });
             let field_ident = Ident::from(field_name);
             let (default, collapsed) = collapse_option_vec(ctxt, typ);
-            let field_type = generate_type_from_inferred(ctxt, name, collapsed);
+            let field_type = generate_type_from_shape(ctxt, name, collapsed);
             quote! {
                 #rename
                 #default
