@@ -5,11 +5,11 @@ use serde_json::{ Value, Map };
 pub enum InferredType {
     Null,
     Any,
+    Bottom,
     Bool,
     StringT,
     Integer,
     Floating,
-    EmptyVec,
     VecT { elem_type: Box<InferredType> },
     Struct { fields: LinkedHashMap<String, InferredType> },
     Optional(Box<InferredType>)
@@ -21,12 +21,11 @@ fn unify(a: InferredType, b: InferredType) -> InferredType {
     }
     use self::InferredType::*;
     match (a, b) {
+        (a, Bottom) | (Bottom, a) => a,
         (Integer, Floating) |
         (Floating, Integer) => Floating,
         (a, Null) | (Null, a) => make_optional(a),
         (a, Optional(b)) | (Optional(b), a) => make_optional(unify(a, *b)),
-        (EmptyVec, VecT { elem_type: e }) |
-        (VecT { elem_type: e }, EmptyVec) => VecT { elem_type: e },
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
             VecT { elem_type: Box::new(unify(*e1, *e2)) }
         }
@@ -40,7 +39,7 @@ fn unify(a: InferredType, b: InferredType) -> InferredType {
 fn make_optional(a: InferredType) -> InferredType {
     use self::InferredType::*;
     match a {
-        Null | Any | Optional(_) => a,
+        Null | Any | Bottom | Optional(_) => a,
         non_nullable => Optional(Box::new(non_nullable)),
     }
 }
@@ -90,17 +89,11 @@ pub fn infer_type_from_value(value: &Value) -> InferredType {
 }
 
 fn infer_type_for_array(values: &[Value]) -> InferredType {
-    match values.split_first() {
-        None => InferredType::EmptyVec,
-        Some((first, rest)) => {
-            let first_type = infer_type_from_value(first);
-            let inner = rest.iter().fold(first_type, |typ, val| {
-                let new_type = infer_type_from_value(val);
-                unify(typ, new_type)
-            });
-            InferredType::VecT { elem_type: Box::new(inner) }
-        }
-    }
+    let inner = values.iter().fold(InferredType::Bottom, |typ, val| {
+        let new_type = infer_type_from_value(val);
+        unify(typ, new_type)
+    });
+    InferredType::VecT { elem_type: Box::new(inner) }
 }
 
 fn infer_types_for_fields(map: &Map<String, Value>) -> LinkedHashMap<String, InferredType> {

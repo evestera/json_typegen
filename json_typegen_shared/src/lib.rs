@@ -233,12 +233,11 @@ fn usage_example(type_id: &Tokens) -> Tokens {
 fn generate_type_from_inferred(ctxt: &mut Ctxt, path: &str, inferred: &InferredType) -> Tokens {
     use InferredType::*;
     match *inferred {
-        Null | Any => quote! { ::serde_json::Value },
+        Null | Any | Bottom => quote! { ::serde_json::Value },
         Bool => quote! { bool },
         StringT => quote! { String },
         Integer => quote! { i64 },
         Floating => quote! { f64 },
-        EmptyVec => quote! { Vec<::serde_json::Value> },
         VecT { elem_type: ref e } => {
             let singular = path.to_singular();
             let inner = generate_type_from_inferred(ctxt, &singular, e);
@@ -304,11 +303,8 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
                            -> (Option<Tokens>, &'a InferredType) {
     if !ctxt.options.allow_option_vec && ctxt.options.missing_fields != MissingFields::UseDefault {
         if let InferredType::Optional(ref inner) = *typ {
-            match **inner {
-                InferredType::EmptyVec | InferredType::VecT { .. } => {
-                    return (Some(quote! { #[serde(default)] }), &**inner);
-                }
-                _ => {}
+            if let InferredType::VecT { .. } = **inner {
+                return (Some(quote! { #[serde(default)] }), &**inner);
             }
         }
     }
