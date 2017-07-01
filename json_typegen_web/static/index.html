@@ -8,18 +8,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/languages/rust.min.js" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.6.0/clipboard.min.js"></script>
     <script type="text/javascript">
+      var fields = ['name', 'input', 'runnable', 'derives'];
       hljs.configure({
         languages: ['rust']
       });
       function generate() {
         fetch('api', {
           method: 'POST',
-          body: JSON.stringify({
-            name: document.querySelector('#name').value,
-            input: document.querySelector('#input').value || '{}',
-            runnable: document.querySelector('#runnable').checked,
-            derives: document.querySelector('#derives').value
-          })
+          body: JSON.stringify(getState())
         }).then(function(res) {
           return Promise.all([res.status, res.text()]);
         }).then(function(res) {
@@ -44,20 +40,51 @@
           console.log('Error: ' + error.message);
         });
       }
+      function saveField(name) {
+        var element = document.querySelector('#' + name);
+        if (element.type === 'text' || element.type === 'textarea') {
+          localStorage.setItem(name, element.value);
+        } else if (element.type === 'radio' || element.type === 'checkbox') {
+          localStorage.setItem(name, JSON.stringify(element.checked));
+        }
+      }
+      function loadField(name) {
+        var element = document.querySelector('#' + name);
+        if (element.type === 'text' || element.type === 'textarea') {
+          var value = localStorage.getItem(name);
+          if (value && value != 'null') {
+            element.value = value;
+          }
+        } else if (element.type === 'radio' || element.type === 'checkbox') {
+          var value = JSON.parse(localStorage.getItem(name));
+          if (value === true || value === false) {
+            element.checked = value;
+          }
+        }
+      }
       function saveState() {
-        localStorage.setItem('name', document.querySelector('#name').value);
-        localStorage.setItem('code', document.querySelector('#input').value);
+        for (var field of fields) {
+          saveField(field);
+        }
       }
       function loadState() {
-        var name = localStorage.getItem('name');
-        if (name && name != 'null') {
-          document.querySelector('#name').value = name;
+        for (var field of fields) {
+          loadField(field);
         }
-        var code = localStorage.getItem('code');
-        if (code && code != 'null') {
-          document.querySelector('#input').value = code;
-          generate();
+        generate();
+      }
+      function getState() {
+        var state = {};
+        for (var field of fields) {
+          var element = document.querySelector('#' + field);
+          if (element.type === 'text' || element.type === 'textarea') {
+            state[field] = element.value;
+          }
+          if (element.type === 'radio' || element.type === 'checkbox') {
+            state[field] = element.checked;
+          }
         }
+        return state;
       }
       function loadExample(name) {
         fetch('examples/' + name + '.json').then(function(res) {
@@ -67,6 +94,8 @@
           document.querySelector('#name').value = name;
           // Fix for removing sticky placeholder:
           document.querySelector('#name').focus();
+          saveState();
+          generate();
         });
         return false;
       }
@@ -205,8 +234,15 @@
       <ul>
         <li>
           <h4>Included code</h4>
-          <input type="radio" name="runnable" id="types-only" checked> <label for="types-only">Types only</label> <br>
-          <input type="radio" name="runnable" id="runnable"> <label for="runnable">Full runnable example</label>
+          <input id="types-only"
+                 type="radio"
+                 name="runnable"
+                 onclick="saveState();"
+                 checked> <label for="types-only">Types only</label> <br>
+          <input id="runnable"
+                 type="radio"
+                 name="runnable"
+                 onclick="saveState();"> <label for="runnable">Full runnable example</label>
         </li>
         <li>
           <h4><label for="derives">Derives</label></h4>

@@ -39,12 +39,15 @@ macro_rules! handle {
 }
 
 fn handle_codegen_request(req: &mut Request) -> IronResult<Response> {
-    let req_body: ReqBody = handle!(serde_json::de::from_reader(&mut req.body),
+    let mut req_body: ReqBody = handle!(serde_json::de::from_reader(&mut req.body),
         "Error: Request body was invalid JSON");
     let mut options = Options::default();
     options.runnable = req_body.runnable;
     if !(req_body.derives.trim().is_empty()) {
         options.derives = req_body.derives;
+    }
+    if req_body.input.trim().is_empty() {
+        req_body.input.push_str("{}");
     }
     let tokens = handle!(codegen(&req_body.name, &SampleSource::Text(&req_body.input), options),
         err => format!("{}", err.display()));
