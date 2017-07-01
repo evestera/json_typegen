@@ -115,6 +115,7 @@ pub struct Options {
     pub allow_option_vec: bool,
     pub type_visibility: Visibility,
     pub field_visibility: FieldVisibility,
+    pub derives: String,
 }
 
 impl Default for Options {
@@ -127,6 +128,7 @@ impl Default for Options {
             allow_option_vec: false,
             type_visibility: Visibility::Private,
             field_visibility: FieldVisibility::Inherited,
+            derives: "Default, Debug, Clone, PartialEq, Serialize, Deserialize".into(),
         }
     }
 }
@@ -345,7 +347,7 @@ fn generate_struct_from_inferred_fields(
         })
         .collect();
 
-    let derives = quote! { #[derive(Default, Debug, Clone, Serialize, Deserialize)] };
+    let derive_list = Ident::from(&*ctxt.options.derives);
 
     let unknown_fields = some_if!(ctxt.options.deny_unknown_fields,
         quote! { #[serde(deny_unknown_fields)] });
@@ -354,7 +356,7 @@ fn generate_struct_from_inferred_fields(
         quote! { #[serde(default)] });
 
     let code = quote! {
-        #derives
+        #[derive(#derive_list)]
         #unknown_fields
         #use_defaults
         #visibility struct #ident {
