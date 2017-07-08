@@ -9,6 +9,9 @@ repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_shared"
 readme = "README.md"
 
+[features]
+unstable = []
+
 [dependencies]
 quote = "0.3"
 serde = "0.9"
