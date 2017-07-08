@@ -136,7 +136,6 @@ impl Default for Options {
 struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
-    types: Vec<Tokens>,
 }
 
 macro_rules! some_if {
@@ -160,10 +159,9 @@ pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Resul
     let mut ctxt = Ctxt {
         options: options,
         type_names: HashSet::new(),
-        types: Vec::new(),
     };
     let shape = value_to_shape(&sample);
-    let type_name = generate_type_from_shape(&mut ctxt, name, &shape);
+    let (type_name, defs) = generate_type_from_shape(&mut ctxt, name, &shape);
 
     let example = some_if!(ctxt.options.runnable, {
         ctxt.options.extern_crate = true;
@@ -176,12 +174,10 @@ pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Resul
         extern crate serde_json;
     });
 
-    let defs = ctxt.types.iter().rev();
-
     Ok(quote! {
         #crates
 
-        #(#defs)*
+        #defs
 
         #example
     })
@@ -230,27 +226,27 @@ fn usage_example(type_id: &Tokens) -> Tokens {
     }
 }
 
-fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Tokens {
+fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Tokens, Option<Tokens>) {
     use Shape::*;
     match *shape {
-        Null | Any | Bottom => quote! { ::serde_json::Value },
-        Bool => quote! { bool },
-        StringT => quote! { String },
-        Integer => quote! { i64 },
-        Floating => quote! { f64 },
+        Null | Any | Bottom => (quote! { ::serde_json::Value }, None),
+        Bool => (quote! { bool }, None),
+        StringT => (quote! { String }, None),
+        Integer => (quote! { i64 }, None),
+        Floating => (quote! { f64 }, None),
         VecT { elem_type: ref e } => {
             let singular = path.to_singular();
-            let inner = generate_type_from_shape(ctxt, &singular, e);
-            quote! { Vec<#inner> }
+            let (inner, defs) = generate_type_from_shape(ctxt, &singular, e);
+            (quote! { Vec<#inner> }, defs)
         }
         Struct { fields: ref map } => {
             generate_struct_from_field_shapes(ctxt, path, map)
         }
         Optional(ref e) => {
-            let inner = generate_type_from_shape(ctxt, path, e);
+            let (inner, defs) = generate_type_from_shape(ctxt, path, e);
             match ctxt.options.missing_fields {
-                MissingFields::Fail => quote! { Option<#inner> },
-                MissingFields::UseDefault => quote! { #inner },
+                MissingFields::Fail => (quote! { Option<#inner> }, defs),
+                MissingFields::UseDefault => (quote! { #inner }, defs),
             }
         }
     }
@@ -314,7 +310,7 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
 fn generate_struct_from_field_shapes(
         ctxt: &mut Ctxt,
         path: &str,
-        map: &LinkedHashMap<String, Shape>) -> Tokens {
+        map: &LinkedHashMap<String, Shape>) -> (Tokens, Option<Tokens>) {
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
     let ident = Ident::from(type_name);
@@ -325,6 +321,7 @@ fn generate_struct_from_field_shapes(
     };
 
     let mut field_names = HashSet::new();
+    let mut defs = Vec::new();
 
     let fields: Vec<Tokens> = map.iter()
         .map(|(name, typ)| {
@@ -334,7 +331,8 @@ fn generate_struct_from_field_shapes(
                 quote! { #[serde(rename = #name)] });
             let field_ident = Ident::from(field_name);
             let (default, collapsed) = collapse_option_vec(ctxt, typ);
-            let field_type = generate_type_from_shape(ctxt, name, collapsed);
+            let (field_type, child_defs) = generate_type_from_shape(ctxt, name, collapsed);
+            defs.push(child_defs);
             quote! {
                 #rename
                 #default
@@ -358,10 +356,11 @@ fn generate_struct_from_field_shapes(
         #visibility struct #ident {
             #(#fields),*
         }
+
+        #(#defs)*
     };
 
-    ctxt.types.push(code);
-    quote! { #ident }
+    (quote! { #ident }, Some(code))
 }
 
 pub fn infer_source_type(s: &str) -> SampleSource {

@@ -134,7 +134,10 @@ fn nesting() {
         r##"
             [
                 {
-                    "nested": { "a": 5 },
+                    "nested": {
+                        "a": 5,
+                        "doubly_nested": { "c": 10 }
+                    },
                     "in_array": [{ "b": 5 }]
                 }
             ]
@@ -147,13 +150,19 @@ fn nesting() {
             }
 
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-            struct InArray {
-                b: i64,
+            struct Nested {
+                a: i64,
+                doubly_nested: DoublyNested,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-            struct Nested {
-                a: i64,
+            struct DoublyNested {
+                c: i64,
+            }
+
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            struct InArray {
+                b: i64,
             }
         "##
     );
