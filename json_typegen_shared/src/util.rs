@@ -3,7 +3,7 @@ use std::ascii::AsciiExt;
 pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';
-    for c in name.chars() {
+    for c in name.chars().skip_while(|c| !(c.is_alphanumeric() && c.is_ascii())) {
         if !c.is_alphanumeric() {
             last = c;
             continue;
@@ -25,7 +25,7 @@ pub fn camel_case(name: &str) -> String {
 pub fn snake_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = 'A';
-    for c in name.chars() {
+    for c in name.chars().skip_while(|c| !(c.is_alphanumeric() && c.is_ascii())) {
         if !c.is_alphanumeric() {
             last = c;
             continue;
@@ -67,6 +67,9 @@ mod tests {
         assert_eq!("FooBar", &camel_case("fooBar"));
         assert_eq!("FooBar", &camel_case("foo bar"));
         assert_eq!("FooBar", &camel_case("foo_bar"));
+        assert_eq!("FooBar", &camel_case("_foo_bar"));
+        assert_eq!("FooBar", &camel_case("åfoo_bar"));
+        assert_eq!("FooBar", &camel_case("foåo_bar"));
         assert_eq!("FooBar", &camel_case("FOO_BAR"));
     }
 
@@ -76,6 +79,9 @@ mod tests {
         assert_eq!("foo_bar", &snake_case("fooBar"));
         assert_eq!("foo_bar", &snake_case("foo bar"));
         assert_eq!("foo_bar", &snake_case("foo_bar"));
+        assert_eq!("foo_bar", &snake_case("_foo_bar"));
+        assert_eq!("foo_bar", &snake_case("åfoo_bar"));
+        assert_eq!("foo_bar", &snake_case("foåo_bar"));
         assert_eq!("foo_bar", &snake_case("FOO_BAR"));
     }
 }
