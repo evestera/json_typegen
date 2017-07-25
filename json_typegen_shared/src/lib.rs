@@ -234,6 +234,10 @@ fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Toke
         StringT => (quote! { String }, None),
         Integer => (quote! { i64 }, None),
         Floating => (quote! { f64 }, None),
+        Tuple(ref shapes, n) => {
+            // TODO: Add codegen for tuples
+            generate_type_from_shape(ctxt, path, &inference::to_vect(shapes.clone()))
+        }
         VecT { elem_type: ref e } => {
             let singular = path.to_singular();
             let (inner, defs) = generate_type_from_shape(ctxt, &singular, e);

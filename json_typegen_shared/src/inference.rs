@@ -12,7 +12,13 @@ pub enum Shape {
     Floating,
     VecT { elem_type: Box<Shape> },
     Struct { fields: LinkedHashMap<String, Shape> },
+    Tuple(Vec<Shape>, u64),
     Optional(Box<Shape>)
+}
+
+pub fn to_vect(shapes: Vec<Shape>) -> Shape {
+    let e = shapes.into_iter().fold(Shape::Bottom, common_shape);
+    Shape::VecT { elem_type: Box::new(e) }
 }
 
 fn common_shape(a: Shape, b: Shape) -> Shape {
@@ -26,6 +32,25 @@ fn common_shape(a: Shape, b: Shape) -> Shape {
         (Floating, Integer) => Floating,
         (a, Null) | (Null, a) => make_optional(a),
         (a, Optional(b)) | (Optional(b), a) => make_optional(common_shape(a, *b)),
+        (Tuple(shapes1, n1), Tuple(shapes2, n2)) => {
+            if shapes1.len() == shapes2.len() {
+                let shapes: Vec<_> =
+                    shapes1.into_iter()
+                        .zip(shapes2.into_iter())
+                        .map(|(a, b)| common_shape(a, b))
+                        .collect();
+                Tuple(shapes, n1 + n2)
+            } else {
+                let inner1 = shapes1.into_iter().fold(Shape::Bottom, common_shape);
+                let inner2 = shapes2.into_iter().fold(Shape::Bottom, common_shape);
+                VecT { elem_type: Box::new(common_shape(inner1, inner2)) }
+            }
+        }
+        (Tuple(shapes, _), VecT { elem_type: e1 }) |
+        (VecT { elem_type: e1 }, Tuple(shapes, _)) => {
+            let e2 = shapes.into_iter().fold(Shape::Bottom, common_shape);
+            VecT { elem_type: Box::new(common_shape(*e1, e2)) }
+        }
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
             VecT { elem_type: Box::new(common_shape(*e1, *e2)) }
         }
@@ -85,6 +110,10 @@ pub fn value_to_shape(value: &Value) -> Shape {
 }
 
 fn array_to_shape(values: &[Value]) -> Shape {
+    if values.len() <= 12 {
+        let shapes: Vec<_> = values.iter().map(value_to_shape).collect();
+        return Shape::Tuple(shapes, 1);
+    }
     let inner = values.iter().fold(Shape::Bottom, |shape, val| {
         let shape2 = value_to_shape(val);
         common_shape(shape, shape2)
