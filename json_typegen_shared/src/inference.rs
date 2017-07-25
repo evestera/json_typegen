@@ -17,8 +17,11 @@ pub enum Shape {
 }
 
 pub fn to_vect(shapes: Vec<Shape>) -> Shape {
-    let e = shapes.into_iter().fold(Shape::Bottom, common_shape);
-    Shape::VecT { elem_type: Box::new(e) }
+    Shape::VecT { elem_type: Box::new(fold_shapes(shapes)) }
+}
+
+fn fold_shapes(shapes: Vec<Shape>) -> Shape {
+    shapes.into_iter().fold(Shape::Bottom, common_shape)
 }
 
 fn common_shape(a: Shape, b: Shape) -> Shape {
@@ -34,22 +37,20 @@ fn common_shape(a: Shape, b: Shape) -> Shape {
         (a, Optional(b)) | (Optional(b), a) => make_optional(common_shape(a, *b)),
         (Tuple(shapes1, n1), Tuple(shapes2, n2)) => {
             if shapes1.len() == shapes2.len() {
-                let shapes: Vec<_> =
-                    shapes1.into_iter()
-                        .zip(shapes2.into_iter())
-                        .map(|(a, b)| common_shape(a, b))
-                        .collect();
+                let shapes: Vec<_> = shapes1.into_iter()
+                                            .zip(shapes2.into_iter())
+                                            .map(|(a, b)| common_shape(a, b))
+                                            .collect();
                 Tuple(shapes, n1 + n2)
             } else {
-                let inner1 = shapes1.into_iter().fold(Shape::Bottom, common_shape);
-                let inner2 = shapes2.into_iter().fold(Shape::Bottom, common_shape);
-                VecT { elem_type: Box::new(common_shape(inner1, inner2)) }
+                VecT {
+                    elem_type: Box::new(common_shape(fold_shapes(shapes1), fold_shapes(shapes2)))
+                }
             }
         }
         (Tuple(shapes, _), VecT { elem_type: e1 }) |
         (VecT { elem_type: e1 }, Tuple(shapes, _)) => {
-            let e2 = shapes.into_iter().fold(Shape::Bottom, common_shape);
-            VecT { elem_type: Box::new(common_shape(*e1, e2)) }
+            VecT { elem_type: Box::new(common_shape(*e1, fold_shapes(shapes))) }
         }
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
             VecT { elem_type: Box::new(common_shape(*e1, *e2)) }
