@@ -234,14 +234,16 @@ fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Toke
         StringT => (quote! { String }, None),
         Integer => (quote! { i64 }, None),
         Floating => (quote! { f64 }, None),
-        Tuple(ref shapes, n) => {
-            // TODO: Add codegen for tuples
-            generate_type_from_shape(ctxt, path, &inference::to_vect(shapes.clone()))
+        Tuple(ref shapes, _n) => {
+            let folded = inference::fold_shapes(shapes.clone());
+            if folded == Any && shapes.iter().any(|s| s != &Any) {
+                generate_tuple_type(ctxt, path, shapes)
+            } else {
+                generate_vec_type(ctxt, path, &folded)
+            }
         }
         VecT { elem_type: ref e } => {
-            let singular = path.to_singular();
-            let (inner, defs) = generate_type_from_shape(ctxt, &singular, e);
-            (quote! { Vec<#inner> }, defs)
+            generate_vec_type(ctxt, path, e)
         }
         Struct { fields: ref map } => {
             generate_struct_from_field_shapes(ctxt, path, map)
@@ -254,6 +256,30 @@ fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Toke
             }
         }
     }
+}
+
+fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Tokens, Option<Tokens>) {
+    let singular = path.to_singular();
+    let (inner, defs) = generate_type_from_shape(ctxt, &singular, shape);
+    (quote! { Vec<#inner> }, defs)
+}
+
+fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> (Tokens, Option<Tokens>) {
+    let mut types = Vec::new();
+    let mut defs = quote!{ };
+
+    for shape in shapes {
+        let (typ, def) = generate_type_from_shape(ctxt, path, shape);
+        types.push(typ);
+        if let Some(tokens) = def {
+            defs.append(tokens);
+        }
+    }
+
+    let typ = quote!{
+        (#(#types),*)
+    };
+    (typ, Some(defs))
 }
 
 fn field_name(name: &str, used_names: &HashSet<String>) -> String {

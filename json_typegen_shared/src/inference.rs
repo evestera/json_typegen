@@ -16,11 +16,7 @@ pub enum Shape {
     Optional(Box<Shape>)
 }
 
-pub fn to_vect(shapes: Vec<Shape>) -> Shape {
-    Shape::VecT { elem_type: Box::new(fold_shapes(shapes)) }
-}
-
-fn fold_shapes(shapes: Vec<Shape>) -> Shape {
+pub fn fold_shapes(shapes: Vec<Shape>) -> Shape {
     shapes.into_iter().fold(Shape::Bottom, common_shape)
 }
 
@@ -111,7 +107,7 @@ pub fn value_to_shape(value: &Value) -> Shape {
 }
 
 fn array_to_shape(values: &[Value]) -> Shape {
-    if values.len() <= 12 {
+    if values.len() > 1 && values.len() <= 12 {
         let shapes: Vec<_> = values.iter().map(value_to_shape).collect();
         return Shape::Tuple(shapes, 1);
     }
@@ -146,6 +142,7 @@ fn test_unify() {
 }
 
 // based on hashmap! macro from maplit crate
+#[cfg(test)]
 macro_rules! string_hashmap {
     ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
     ($($key:expr => $value:expr),*) => {

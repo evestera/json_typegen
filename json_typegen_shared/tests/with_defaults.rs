@@ -167,3 +167,41 @@ fn nesting() {
         "##
     );
 }
+
+#[test]
+fn tuple() {
+    code_output_test(
+        "Pagination",
+        r##"
+            [
+                {
+                    "pages": 1,
+                    "items": 3
+                },
+                [
+                    {
+                        "name": "John"
+                    },
+                    {
+                        "name": "James"
+                    },
+                    {
+                        "name": "Jake"
+                    }
+                ]
+            ]
+        "##,
+        r##"
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            struct Pagination {
+                pages: i64 ,
+                items: i64
+            }
+
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            struct Pagination2 {
+                name : String
+            }
+        "##
+    );
+}
