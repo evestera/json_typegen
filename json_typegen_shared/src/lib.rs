@@ -21,6 +21,7 @@ use regex::Regex;
 
 mod util;
 mod inference;
+mod hints;
 
 use util::*;
 use inference::*;
