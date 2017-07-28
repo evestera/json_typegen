@@ -1,6 +1,8 @@
 use linked_hash_map::LinkedHashMap;
 use serde_json::{ Value, Map };
 
+use hints::*;
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Shape {
     Null,
@@ -89,7 +91,16 @@ fn common_field_shapes(f1: LinkedHashMap<String, Shape>,
     unified
 }
 
-pub fn value_to_shape(value: &Value) -> Shape {
+pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
+    for hint in hints.applicable.iter() {
+        match hint.hint_type {
+            HintType::UseMap(_) => {
+                unimplemented!();
+            }
+            _ => {}
+        }
+    }
+
     match *value {
         Value::Null => Shape::Null,
         Value::Bool(_) => Shape::Bool,
@@ -101,26 +112,32 @@ pub fn value_to_shape(value: &Value) -> Shape {
             }
         },
         Value::String(_) => Shape::StringT,
-        Value::Array(ref values) => array_to_shape(values),
-        Value::Object(ref map) => object_to_shape(map),
+        Value::Array(ref values) => array_to_shape(values, hints),
+        Value::Object(ref map) => object_to_shape(map, hints),
     }
 }
 
-fn array_to_shape(values: &[Value]) -> Shape {
+fn array_to_shape(values: &[Value], hints: &Hints) -> Shape {
     if values.len() > 1 && values.len() <= 12 {
-        let shapes: Vec<_> = values.iter().map(value_to_shape).collect();
+        let shapes: Vec<_> = values
+            .iter()
+            .enumerate()
+            .map(|(i, val)| value_to_shape(val, &hints.step_index(i)))
+            .collect();
         return Shape::Tuple(shapes, 1);
     }
     let inner = values.iter().fold(Shape::Bottom, |shape, val| {
-        let shape2 = value_to_shape(val);
+        let shape2 = value_to_shape(val, &hints.step_array());
         common_shape(shape, shape2)
     });
     Shape::VecT { elem_type: Box::new(inner) }
 }
 
-fn object_to_shape(map: &Map<String, Value>) -> Shape {
+fn object_to_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
     let inner = map.iter()
-        .map(|(name, value)| (name.clone(), value_to_shape(value)))
+        .map(|(name, value)| {
+            (name.clone(), value_to_shape(value, &hints.step_field(&name)))
+        })
         .collect();
     Shape::Struct { fields: inner }
 }

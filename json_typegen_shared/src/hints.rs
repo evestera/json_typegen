@@ -10,22 +10,22 @@ pub enum HintType {
 }
 
 pub struct Hint {
-    kind: HintType,
-    used: Cell<bool>,
+    pub hint_type: HintType,
+    pub used: Cell<bool>,
 }
 
 impl Hint {
     pub fn default_map() -> Self {
         Hint {
-            kind: HintType::UseMap("::std::collections::HashMap".into()),
+            hint_type: HintType::UseMap("::std::collections::HashMap".into()),
             used: Cell::new(false),
         }
     }
 }
 
 pub struct Hints<'a> {
-    hints: Vec<(Cow<'a, [&'a str]>, &'a Hint)>,
-    applicable: Vec<&'a Hint>,
+    pub hints: Vec<(Cow<'a, [&'a str]>, &'a Hint)>,
+    pub applicable: Vec<&'a Hint>,
 }
 
 fn is_index(s: &str) -> bool {
@@ -68,7 +68,7 @@ impl<'a> Hints<'a> {
     }
 
     /// ([/2/b, /a/c, /-/e, /3/d], 3) -> [/e, /d]
-    pub fn step_index(&self, index: u64) -> Hints {
+    pub fn step_index(&self, index: usize) -> Hints {
         let i_str = &index.to_string();
         self.step(|first| first == i_str)
     }

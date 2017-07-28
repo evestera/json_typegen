@@ -25,6 +25,7 @@ mod hints;
 
 use util::*;
 use inference::*;
+use hints::*;
 
 mod errors {
     error_chain! {
@@ -157,11 +158,13 @@ pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Resul
     let sample = get_and_parse_sample(source)?;
     let name = handle_pub_in_name(name, &mut options);
 
+    let hints = Hints::new();
+
     let mut ctxt = Ctxt {
         options: options,
         type_names: HashSet::new(),
     };
-    let shape = value_to_shape(&sample);
+    let shape = value_to_shape(&sample, &hints);
     let (type_name, defs) = generate_type_from_shape(&mut ctxt, name, &shape);
 
     let example = some_if!(ctxt.options.runnable, {
