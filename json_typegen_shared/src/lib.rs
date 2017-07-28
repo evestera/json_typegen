@@ -252,6 +252,9 @@ fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Toke
         Struct { fields: ref map } => {
             generate_struct_from_field_shapes(ctxt, path, map)
         }
+        MapT { val_type: ref v } => {
+            generate_map_type(ctxt, path, v)
+        }
         Optional(ref e) => {
             let (inner, defs) = generate_type_from_shape(ctxt, path, e);
             match ctxt.options.missing_fields {
@@ -266,6 +269,12 @@ fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Tokens, Opt
     let singular = path.to_singular();
     let (inner, defs) = generate_type_from_shape(ctxt, &singular, shape);
     (quote! { Vec<#inner> }, defs)
+}
+
+fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Tokens, Option<Tokens>) {
+    let singular = path.to_singular();
+    let (inner, defs) = generate_type_from_shape(ctxt, &singular, shape);
+    (quote! { ::std::collections::HashMap<String, #inner> }, defs)
 }
 
 fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> (Tokens, Option<Tokens>) {

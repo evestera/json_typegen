@@ -62,6 +62,11 @@ impl<'a> Hints<'a> {
         self.step(|first| first == name)
     }
 
+    /// [/1/b, /a/c, /-/e] -> [/b, /c, /e]
+    pub fn step_any(&self) -> Hints {
+        self.step(|_first| true)
+    }
+
     /// [/1/b, /a/c, /-/e] -> [/b, /e]
     pub fn step_array(&self) -> Hints {
         self.step(is_index)

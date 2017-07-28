@@ -15,6 +15,7 @@ pub enum Shape {
     VecT { elem_type: Box<Shape> },
     Struct { fields: LinkedHashMap<String, Shape> },
     Tuple(Vec<Shape>, u64),
+    MapT { val_type: Box<Shape> },
     Optional(Box<Shape>)
 }
 
@@ -52,6 +53,9 @@ fn common_shape(a: Shape, b: Shape) -> Shape {
         }
         (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
             VecT { elem_type: Box::new(common_shape(*e1, *e2)) }
+        }
+        (MapT { val_type: v1 }, MapT { val_type: v2 }) => {
+            MapT { val_type: Box::new(common_shape(*v1, *v2)) }
         }
         (Struct { fields: f1 }, Struct { fields: f2 }) => {
             Struct { fields: common_field_shapes(f1, f2) }
@@ -95,7 +99,12 @@ pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
     for hint in hints.applicable.iter() {
         match hint.hint_type {
             HintType::UseMap(_) => {
-                unimplemented!();
+                if let Value::Object(ref map) = *value {
+                    hint.used.set(true);
+                    return object_to_map_shape(map, hints);
+                } else {
+                    panic!("Hint use_type map used on invalid value {:?}", value);
+                }
             }
             _ => {}
         }
@@ -113,7 +122,7 @@ pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
         },
         Value::String(_) => Shape::StringT,
         Value::Array(ref values) => array_to_shape(values, hints),
-        Value::Object(ref map) => object_to_shape(map, hints),
+        Value::Object(ref map) => object_to_struct_shape(map, hints),
     }
 }
 
@@ -133,13 +142,21 @@ fn array_to_shape(values: &[Value], hints: &Hints) -> Shape {
     Shape::VecT { elem_type: Box::new(inner) }
 }
 
-fn object_to_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
+fn object_to_struct_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
     let inner = map.iter()
         .map(|(name, value)| {
             (name.clone(), value_to_shape(value, &hints.step_field(&name)))
         })
         .collect();
     Shape::Struct { fields: inner }
+}
+
+fn object_to_map_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
+    let inner = map.values().fold(Shape::Bottom, |shape, val| {
+        let shape2 = value_to_shape(val, &hints.step_any());
+        common_shape(shape, shape2)
+    });
+    Shape::MapT { val_type: Box::new(inner) }
 }
 
 #[test]
