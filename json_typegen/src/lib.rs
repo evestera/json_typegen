@@ -71,13 +71,14 @@ pub use json_typegen_derive::*;
 pub use serde_derive::*;
 
 /// The main point of this crate
+/// See root documentation
 #[macro_export]
 macro_rules! json_typegen {
-    ($name:expr, $source:expr) => {
+    ($($input:tt)*) => {
         #[derive(json_types)]
-        #[json_typegen(name = $name)]
-        #[json_typegen(source = $source)]
         #[allow(unused)]
-        struct JsonProviderPlaceholder;
-    }
+        enum JsonTypegenPlaceholder {
+            Input = (stringify!($($input)*), 0).1
+        }
+    };
 }

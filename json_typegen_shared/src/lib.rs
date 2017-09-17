@@ -9,11 +9,14 @@ extern crate lazy_static;
 extern crate linked_hash_map;
 extern crate inflector;
 extern crate regex;
+extern crate syn;
+#[macro_use]
+extern crate synom;
 
 use std::fs::File;
 use serde_json::{ Value };
 use std::collections::{ HashSet };
-use quote::{ Tokens, Ident, ToTokens };
+use quote::{ Tokens, Ident };
 use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
@@ -22,10 +25,15 @@ use regex::Regex;
 mod util;
 mod inference;
 mod hints;
+mod options;
+mod parse;
 
 use util::*;
 use inference::*;
 use hints::*;
+use options::*;
+
+pub use options::Options;
 
 mod errors {
     error_chain! {
@@ -74,67 +82,6 @@ pub enum SampleSource<'a> {
     Text(&'a str),
 }
 
-#[derive(Debug, PartialEq)]
-pub enum MissingFields {
-    Fail,
-    UseDefault,
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Visibility {
-    Private,
-    Pub,
-    PubRestricted(String)
-}
-
-impl ToTokens for Visibility {
-    fn to_tokens(&self, tokens: &mut Tokens) {
-        use Visibility::*;
-        match *self {
-            Private => {},
-            Pub => {
-                tokens.append("pub");
-            }
-            PubRestricted(ref path) => {
-                tokens.append("pub(");
-                tokens.append(path);
-                tokens.append(")");
-            }
-        }
-    }
-}
-
-pub enum FieldVisibility {
-    Inherited,
-    Specified(Visibility)
-}
-
-pub struct Options {
-    pub extern_crate: bool,
-    pub runnable: bool,
-    pub missing_fields: MissingFields,
-    pub deny_unknown_fields: bool,
-    pub allow_option_vec: bool,
-    pub type_visibility: Visibility,
-    pub field_visibility: FieldVisibility,
-    pub derives: String,
-}
-
-impl Default for Options {
-    fn default() -> Options {
-        Options {
-            extern_crate: false,
-            runnable: false,
-            missing_fields: MissingFields::Fail,
-            deny_unknown_fields: false,
-            allow_option_vec: false,
-            type_visibility: Visibility::Private,
-            field_visibility: FieldVisibility::Inherited,
-            derives: "Default, Debug, Clone, PartialEq, Serialize, Deserialize".into(),
-        }
-    }
-}
-
 struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
@@ -154,17 +101,45 @@ pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
     codegen(name, &SampleSource::Text(json), Options::default())
 }
 
+pub fn codegen_from_macro(input: &str) -> String {
+    let macro_input = parse::full_macro(input).unwrap();
+
+    codegen(
+        &macro_input.name,
+        &infer_source_type(&macro_input.sample_source),
+        macro_input.options,
+    ).unwrap()
+        .to_string()
+}
+
+pub fn codegen_from_macro_input(input: &str) -> String {
+    let macro_input = parse::macro_input(input).unwrap();
+
+    codegen(
+        &macro_input.name,
+        &infer_source_type(&macro_input.sample_source),
+        macro_input.options,
+    ).unwrap()
+        .to_string()
+}
+
 pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Result<Tokens> {
     let sample = get_and_parse_sample(source)?;
     let name = handle_pub_in_name(name, &mut options);
 
-    let hints = Hints::new();
+    let mut hints_vec = Vec::new();
+    std::mem::swap(&mut options.hints, &mut hints_vec);
 
+    let mut hints = Hints::new();
+    for &(ref pointer, ref hint) in hints_vec.iter() {
+        hints.add(&pointer, &hint);
+    }
+
+    let shape = value_to_shape(&sample, &hints);
     let mut ctxt = Ctxt {
         options: options,
         type_names: HashSet::new(),
     };
-    let shape = value_to_shape(&sample, &hints);
     let (type_name, defs) = generate_type_from_shape(&mut ctxt, name, &shape);
 
     let example = some_if!(ctxt.options.runnable, {
@@ -217,14 +192,10 @@ fn usage_example(type_id: &Tokens) -> Tokens {
 
     quote! {
         fn main() {
-            let #var_id: #type_id = Default::default();
-
+            let #var_id = #type_id::default();
             let serialized = serde_json::to_string(&#var_id).unwrap();
-
             println!("serialized = {}", serialized);
-
             let deserialized: #type_id = serde_json::from_str(&serialized).unwrap();
-
             println!("deserialized = {:?}", deserialized);
         }
     }

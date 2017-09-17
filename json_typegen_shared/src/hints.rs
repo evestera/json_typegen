@@ -3,23 +3,33 @@
 use std::borrow::Cow;
 use std::cell::Cell;
 
+#[derive(Debug, PartialEq, Clone)]
 pub enum HintType {
     UseType(String),
     UseMap(String),
     UseName(String),
 }
 
+#[derive(Debug, PartialEq, Clone)]
 pub struct Hint {
     pub hint_type: HintType,
     pub used: Cell<bool>,
 }
 
 impl Hint {
-    pub fn default_map() -> Self {
+    pub fn new(hint_type: HintType) -> Self {
         Hint {
-            hint_type: HintType::UseMap("::std::collections::HashMap".into()),
+            hint_type,
             used: Cell::new(false),
         }
+    }
+
+    pub fn default_map() -> Self {
+        Hint::new(HintType::UseMap("::std::collections::HashMap".into()))
+    }
+
+    pub fn use_name<T: Into<String>>(name: T) -> Self {
+        Hint::new(HintType::UseName(name.into()))
     }
 }
 
