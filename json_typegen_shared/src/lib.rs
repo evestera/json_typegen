@@ -31,8 +31,6 @@ mod parse;
 use util::*;
 use inference::*;
 use hints::*;
-use options::*;
-
 pub use options::Options;
 
 mod errors {
@@ -175,8 +173,8 @@ fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
     match PUB_RE.captures(name) {
         Some(captures) => {
             options.type_visibility = match captures.name("restriction") {
-                Some(restriction) => Visibility::PubRestricted(restriction.as_str().to_owned()),
-                None => Visibility::Pub,
+                Some(restriction) => format!("pub({})", restriction.as_str()),
+                None => "pub".into(),
             };
             captures.name("name").unwrap().as_str()
         }
@@ -228,9 +226,10 @@ fn generate_type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Toke
         }
         Optional(ref e) => {
             let (inner, defs) = generate_type_from_shape(ctxt, path, e);
-            match ctxt.options.missing_fields {
-                MissingFields::Fail => (quote! { Option<#inner> }, defs),
-                MissingFields::UseDefault => (quote! { #inner }, defs),
+            if ctxt.options.use_default_for_missing_fields {
+                (quote! { #inner }, defs)
+            } else {
+                (quote! { Option<#inner> }, defs)
             }
         }
     }
@@ -311,7 +310,7 @@ fn type_or_field_name(name: &str,
 fn collapse_option_vec<'a>(ctxt: &mut Ctxt,
                            typ: &'a Shape)
                            -> (Option<Tokens>, &'a Shape) {
-    if !ctxt.options.allow_option_vec && ctxt.options.missing_fields != MissingFields::UseDefault {
+    if !(ctxt.options.allow_option_vec || ctxt.options.use_default_for_missing_fields) {
         if let Shape::Optional(ref inner) = *typ {
             if let Shape::VecT { .. } = **inner {
                 return (Some(quote! { #[serde(default)] }), &**inner);
@@ -330,8 +329,8 @@ fn generate_struct_from_field_shapes(
     let ident = Ident::from(type_name);
     let visibility = ctxt.options.type_visibility.clone();
     let field_visibility = match ctxt.options.field_visibility {
-        FieldVisibility::Inherited => visibility.clone(),
-        FieldVisibility::Specified(ref v) => v.clone(),
+        None => visibility.clone(),
+        Some(ref v) => v.clone(),
     };
 
     let mut field_names = HashSet::new();
@@ -344,6 +343,7 @@ fn generate_struct_from_field_shapes(
             let rename = some_if!(&field_name != name,
                 quote! { #[serde(rename = #name)] });
             let field_ident = Ident::from(field_name);
+            let field_visibility = Ident::from(field_visibility.clone());
             let (default, collapsed) = collapse_option_vec(ctxt, typ);
             let (field_type, child_defs) = generate_type_from_shape(ctxt, name, collapsed);
             defs.push(child_defs);
@@ -360,8 +360,10 @@ fn generate_struct_from_field_shapes(
     let unknown_fields = some_if!(ctxt.options.deny_unknown_fields,
         quote! { #[serde(deny_unknown_fields)] });
 
-    let use_defaults = some_if!(ctxt.options.missing_fields == MissingFields::UseDefault,
+    let use_defaults = some_if!(ctxt.options.use_default_for_missing_fields,
         quote! { #[serde(default)] });
+
+    let visibility = Ident::from(visibility);
 
     let code = quote! {
         #[derive(#derive_list)]
@@ -408,12 +410,12 @@ mod tests {
         assert_eq!(options.type_visibility, Options::default().type_visibility);
         let name = handle_pub_in_name("pub Foo", &mut options);
         assert_eq!(name, "Foo");
-        assert_eq!(options.type_visibility, Visibility::Pub);
+        assert_eq!(options.type_visibility, "pub".to_string());
         let name = handle_pub_in_name("pub(crate) Foo Bar", &mut options);
         assert_eq!(name, "Foo Bar");
-        assert_eq!(options.type_visibility, Visibility::PubRestricted("crate".to_string()));
+        assert_eq!(options.type_visibility, "pub(crate)".to_string());
         let name = handle_pub_in_name("pub(some::path) Foo", &mut options);
         assert_eq!(name, "Foo");
-        assert_eq!(options.type_visibility, Visibility::PubRestricted("some::path".to_string()));
+        assert_eq!(options.type_visibility, "pub(some::path)".to_string());
     }
 }

@@ -2,8 +2,8 @@ use synom::IResult;
 use syn;
 use syn::parse::{ident, string, boolean};
 
-use hints::{Hint};
-use options::{Options, MissingFields};
+use hints::Hint;
+use options::Options;
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {
@@ -24,6 +24,10 @@ named!(string_or_ident -> String,
         |
         string => { |lit: syn::StrLit| lit.value }
     )
+);
+
+named!(comma_or_closing_brace -> &str,
+    alt!(punct!(",") | punct!("}"))
 );
 
 pub fn full_macro(input: &str) -> Result<MacroInput, String> {
@@ -83,16 +87,14 @@ pub fn options(input: &str) -> Result<Options, String> {
             "derives" => string_option(remaining, "derives", |val| {
                 options.derives = val;
             }),
-            // TODO: "field_visibility"
+            "field_visibility" => string_option(remaining, "field_visibility", |val| {
+                options.field_visibility = Some(val);
+            }),
             "deny_unknown_fields" => boolean_option(remaining, "deny_unknown_fields", |val| {
                 options.deny_unknown_fields = val;
             }),
             "use_default_for_missing_fields" => boolean_option(remaining, "use_default_for_missing_fields", |val| {
-                options.missing_fields = if val {
-                    MissingFields::UseDefault
-                } else {
-                    MissingFields::Fail
-                };
+                options.use_default_for_missing_fields = val;
             }),
             "allow_option_vec" => boolean_option(remaining, "allow_option_vec", |val| {
                 options.allow_option_vec = val;
@@ -160,7 +162,12 @@ fn boolean_option<'a, F: FnMut(bool)>(
     name: &'static str,
     mut consumer: F,
 ) -> Result<&'a str, String> {
-    // TODO: Allow option name only as true
+
+    // interpret { foo, bar } as { foo: true, bar: true }
+    if let IResult::Done(_, _) = comma_or_closing_brace(input) {
+        consumer(true);
+        return Ok(input);
+    }
 
     let input = skip_colon(input)?;
 
