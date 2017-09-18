@@ -1,9 +1,9 @@
 use synom::IResult;
 use syn;
-use syn::parse::{ident, string};
+use syn::parse::{ident, string, boolean};
 
 use hints::{Hint};
-use options::{Options};
+use options::{Options, MissingFields};
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {
@@ -83,6 +83,20 @@ pub fn options(input: &str) -> Result<Options, String> {
             "derives" => string_option(remaining, "derives", |val| {
                 options.derives = val;
             }),
+            // TODO: "field_visibility"
+            "deny_unknown_fields" => boolean_option(remaining, "deny_unknown_fields", |val| {
+                options.deny_unknown_fields = val;
+            }),
+            "use_default_for_missing_fields" => boolean_option(remaining, "use_default_for_missing_fields", |val| {
+                options.missing_fields = if val {
+                    MissingFields::UseDefault
+                } else {
+                    MissingFields::Fail
+                };
+            }),
+            "allow_option_vec" => boolean_option(remaining, "allow_option_vec", |val| {
+                options.allow_option_vec = val;
+            }),
             key if key.is_empty() || key.starts_with("/") => {
                 let (rem, hints) = pointer_block(remaining)?;
                 for hint in hints {
@@ -136,6 +150,27 @@ fn string_option<'a, F: FnMut(String)>(
         }
         IResult::Error => fail!(
             format!("The argument to '{}' has to be a string literal", name),
+            input
+        ),
+    }
+}
+
+fn boolean_option<'a, F: FnMut(bool)>(
+    input: &'a str,
+    name: &'static str,
+    mut consumer: F,
+) -> Result<&'a str, String> {
+    // TODO: Allow option name only as true
+
+    let input = skip_colon(input)?;
+
+    match boolean(input) {
+        IResult::Done(rem, val) => {
+            consumer(val);
+            Ok(rem)
+        }
+        IResult::Error => fail!(
+            format!("The argument to '{}' has to be a boolean literal", name),
             input
         ),
     }
