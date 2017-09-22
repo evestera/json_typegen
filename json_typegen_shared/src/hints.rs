@@ -5,9 +5,9 @@ use std::cell::Cell;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum HintType {
-    UseType(String),
-    UseMap(String),
-    UseName(String),
+    OpaqueType(String),
+    MapType(String),
+    TypeName(String),
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -25,11 +25,15 @@ impl Hint {
     }
 
     pub fn default_map() -> Self {
-        Hint::new(HintType::UseMap("::std::collections::HashMap".into()))
+        Hint::new(HintType::MapType("::std::collections::HashMap".into()))
     }
 
-    pub fn use_name<T: Into<String>>(name: T) -> Self {
-        Hint::new(HintType::UseName(name.into()))
+    pub fn opaque_type<T: Into<String>>(name: T) -> Self {
+        Hint::new(HintType::OpaqueType(name.into()))
+    }
+
+    pub fn type_name<T: Into<String>>(name: T) -> Self {
+        Hint::new(HintType::TypeName(name.into()))
     }
 }
 

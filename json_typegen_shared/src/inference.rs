@@ -16,6 +16,7 @@ pub enum Shape {
     Struct { fields: LinkedHashMap<String, Shape> },
     Tuple(Vec<Shape>, u64),
     MapT { val_type: Box<Shape> },
+    Opaque(String),
     Optional(Box<Shape>)
 }
 
@@ -59,7 +60,8 @@ fn common_shape(a: Shape, b: Shape) -> Shape {
         }
         (Struct { fields: f1 }, Struct { fields: f2 }) => {
             Struct { fields: common_field_shapes(f1, f2) }
-        }
+        },
+        (Opaque(t), _) | (_, Opaque(t)) => Opaque(t),
         _ => Any,
     }
 }
@@ -98,13 +100,16 @@ fn common_field_shapes(f1: LinkedHashMap<String, Shape>,
 pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
     for hint in hints.applicable.iter() {
         match hint.hint_type {
-            HintType::UseMap(_) => {
+            HintType::MapType(_) => {
                 if let Value::Object(ref map) = *value {
                     hint.used.set(true);
                     return object_to_map_shape(map, hints);
                 } else {
                     panic!("Hint use_type map used on invalid value {:?}", value);
                 }
+            }
+            HintType::OpaqueType(ref t) => {
+                return Shape::Opaque(t.clone());
             }
             _ => {}
         }

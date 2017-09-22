@@ -69,6 +69,10 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Tokens, Optio
         MapT { val_type: ref v } => {
             generate_map_type(ctxt, path, v)
         }
+        Opaque(ref t) => {
+            let ident = Ident::from(t.clone());
+            (quote!{ #ident }, None)
+        }
         Optional(ref e) => {
             let (inner, defs) = type_from_shape(ctxt, path, e);
             if ctxt.options.use_default_for_missing_fields {

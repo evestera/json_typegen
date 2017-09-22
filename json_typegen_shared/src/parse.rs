@@ -124,12 +124,15 @@ fn pointer_block(input: &str) -> Result<(&str, Vec<Hint>), String> {
 
     let input_after_block = block(input, |input_after_key, key| {
         match key.as_ref() {
-            "use_map" => {
-                hints.push(Hint::default_map());
-                Ok(input_after_key)
-            },
-            "use_name" => string_option(input_after_key, "use_name", |val| {
-                hints.push(Hint::use_name(val));
+            "use_type" => string_option(input_after_key, "use_type", |val| {
+                let hint = match val.as_ref() {
+                    "map" => Hint::default_map(),
+                    _ => Hint::opaque_type(val),
+                };
+                hints.push(hint);
+            }),
+            "type_name" => string_option(input_after_key, "type_name", |val| {
+                hints.push(Hint::type_name(val));
             }),
             _ => return Err(format!("Unknown option: {}", key)),
         }
@@ -295,14 +298,14 @@ mod options_tests {
     }
 
     #[test]
-    fn parses_use_map_hint() {
+    fn parses_map_hint() {
         let mut expected = Options::default();
         expected.hints.push(("/foo/bar".to_string(), Hint::default_map()));
 
         assert_eq!(
             options(r#"{
                 "/foo/bar": {
-                    use_map
+                    use_type: "map"
                 },
             }"#),
             Ok(expected)
@@ -310,14 +313,29 @@ mod options_tests {
     }
 
     #[test]
-    fn parses_use_name_hint() {
+    fn parses_opaque_type_hint() {
         let mut expected = Options::default();
-        expected.hints.push(("/baz".to_string(), Hint::use_name("some_name")));
+        expected.hints.push(("/foo/bar".to_string(), Hint::opaque_type("FooBar")));
+
+        assert_eq!(
+            options(r#"{
+                "/foo/bar": {
+                    use_type: "FooBar"
+                },
+            }"#),
+            Ok(expected)
+        );
+    }
+
+    #[test]
+    fn parses_type_name_hint() {
+        let mut expected = Options::default();
+        expected.hints.push(("/baz".to_string(), Hint::type_name("SomeName")));
 
         assert_eq!(
             options(r#"{
                 "/baz": {
-                    use_name: "some_name"
+                    type_name: "SomeName"
                 },
             }"#),
             Ok(expected)
