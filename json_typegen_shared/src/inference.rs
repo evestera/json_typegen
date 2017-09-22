@@ -161,7 +161,7 @@ fn object_to_map_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
 
 #[test]
 fn test_unify() {
-    use Shape::*;
+    use self::Shape::*;
     assert_eq!(common_shape(Bool, Bool), Bool);
     assert_eq!(common_shape(Bool, Integer), Any);
     assert_eq!(common_shape(Integer, Floating), Floating);
@@ -192,7 +192,7 @@ macro_rules! string_hashmap {
 
 #[test]
 fn test_common_field_shapes() {
-    use Shape::*;
+    use self::Shape::*;
     {
         let f1 = string_hashmap!{
             "a" => Integer,

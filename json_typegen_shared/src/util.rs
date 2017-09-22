@@ -1,5 +1,15 @@
 use std::ascii::AsciiExt;
 
+macro_rules! some_if {
+    ($cond:expr, $then:expr) => ({
+        if $cond {
+            Some($then)
+        } else {
+            None
+        }
+    })
+}
+
 pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';
