@@ -13,7 +13,6 @@ readme = "README.md"
 unstable = []
 
 [dependencies]
-quote = "0.3"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = { version = "0.9", features = ["preserve_order"] }
@@ -25,3 +24,4 @@ Inflector = "0.10"
 regex = "0.2"
 syn = { version = "0.11", features = ["full", "parsing"] }
 synom = "*"
+unindent = "0.1.2"

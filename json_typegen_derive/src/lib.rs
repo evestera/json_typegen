@@ -8,7 +8,7 @@ use proc_macro::TokenStream;
 pub fn derive_json_typegen(input: TokenStream) -> TokenStream {
     let source = input.to_string();
     let macro_input = extract_from_proc_macro_hack(&source);
-    codegen_from_macro_input(macro_input).parse().unwrap()
+    codegen_from_macro_input(macro_input).unwrap().parse().unwrap()
 }
 
 // Adapted from:

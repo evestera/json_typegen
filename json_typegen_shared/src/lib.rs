@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate quote;
 extern crate reqwest;
 extern crate serde_json;
 #[macro_use]
@@ -12,13 +10,12 @@ extern crate regex;
 extern crate syn;
 #[macro_use]
 extern crate synom;
+extern crate unindent;
 
 use std::fs::File;
 use serde_json::Value;
-use quote::Tokens;
 use regex::Regex;
 
-#[macro_use]
 mod util;
 mod inference;
 mod generation;
@@ -63,33 +60,31 @@ pub enum SampleSource<'a> {
     Text(&'a str),
 }
 
-pub fn from_str_with_defaults(name: &str, json: &str) -> Result<Tokens> {
+pub fn from_str_with_defaults(name: &str, json: &str) -> Result<String> {
     codegen(name, &SampleSource::Text(json), Options::default())
 }
 
-pub fn codegen_from_macro(input: &str) -> String {
-    let macro_input = parse::full_macro(input).unwrap();
+pub fn codegen_from_macro(input: &str) -> Result<String> {
+    let macro_input = parse::full_macro(input)?;
 
     codegen(
         &macro_input.name,
         &infer_source_type(&macro_input.sample_source),
         macro_input.options,
-    ).unwrap()
-        .to_string()
+    )
 }
 
-pub fn codegen_from_macro_input(input: &str) -> String {
-    let macro_input = parse::macro_input(input).unwrap();
+pub fn codegen_from_macro_input(input: &str) -> Result<String> {
+    let macro_input = parse::macro_input(input)?;
 
     codegen(
         &macro_input.name,
         &infer_source_type(&macro_input.sample_source),
         macro_input.options,
-    ).unwrap()
-        .to_string()
+    )
 }
 
-pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Result<Tokens> {
+pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Result<String> {
     let sample = get_and_parse_sample(source)?;
     let name = handle_pub_in_name(name, &mut options);
 

@@ -8,10 +8,10 @@ fn code_output_test(name: &str, input: &str, expected: &str) {
     let res = from_str_with_defaults(name, input);
     let output = res.unwrap();
     assert_eq!(
-        syn::parse_items(output.as_ref()),
+        syn::parse_items(&output),
         syn::parse_items(expected),
         "\n\nUnexpected output code:\n  input: {}\n  output:\n{}\n  expected: {}",
-        input, output.as_ref(), expected);
+        input, output, expected);
 }
 
 #[test]
@@ -201,6 +201,25 @@ fn tuple() {
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             struct Pagination2 {
                 name : String
+            }
+        "##
+    );
+}
+
+#[test]
+fn rename() {
+    code_output_test(
+        "Renamed",
+        r##"
+            {
+                "type": 5
+            }
+        "##,
+        r##"
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            struct Renamed {
+                #[serde(rename = "type")]
+                type_field: i64
             }
         "##
     );

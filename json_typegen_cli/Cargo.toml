@@ -13,7 +13,6 @@ readme = "README.md"
 
 [dependencies]
 clap = "~2.19.0"
-rustfmt = "0.7"
 json_typegen_shared = { path = "../json_typegen_shared", version = "0.1" }
 
 [[bin]]
