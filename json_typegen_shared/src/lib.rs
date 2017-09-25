@@ -1,4 +1,3 @@
-extern crate reqwest;
 extern crate serde_json;
 #[macro_use]
 extern crate error_chain;
@@ -11,6 +10,9 @@ extern crate syn;
 #[macro_use]
 extern crate synom;
 extern crate unindent;
+
+#[cfg(feature = "remote-samples")]
+extern crate reqwest;
 
 use std::fs::File;
 use serde_json::Value;
@@ -36,7 +38,7 @@ mod errors {
         }
 
         foreign_links {
-            ReqwestError(::reqwest::Error);
+            ReqwestError(::reqwest::Error) #[cfg(feature = "remote-samples")];
             JsonError(::serde_json::Error);
             IoError(::std::io::Error);
         }
@@ -146,7 +148,11 @@ pub fn infer_source_type(s: &str) -> SampleSource {
 
 fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
     let parse_result = match *source {
+        #[cfg(feature = "remote-samples")]
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
+        #[cfg(not(feature = "remote-samples"))]
+        SampleSource::Url(_) => { return Err("Remote samples disabled".into()); },
+
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
         SampleSource::Text(text) => serde_json::from_str(text),
     };
