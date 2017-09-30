@@ -1,3 +1,7 @@
+//! Note: This crate is considered internal API of the `json_typegen` tools. If you want to use this
+//! crate directly, and thus care about its stability, please
+//! [open an issue](https://github.com/evestera/json_typegen/issues/new) to let me know.
+
 extern crate serde_json;
 #[macro_use]
 extern crate error_chain;
@@ -33,7 +37,7 @@ pub use options::Options;
 mod errors {
     error_chain! {
         types {
-            Error, ErrorKind, ResultExt, Result;
+            JTError, ErrorKind, ResultExt;
         }
 
         links {
@@ -58,38 +62,38 @@ mod errors {
 
 pub use errors::*;
 
-pub enum SampleSource<'a> {
+enum SampleSource<'a> {
     Url(&'a str),
     File(&'a str),
     Text(&'a str),
 }
 
-pub fn from_str_with_defaults(name: &str, json: &str) -> Result<String> {
-    codegen(name, &SampleSource::Text(json), Options::default())
-}
-
-pub fn codegen_from_macro(input: &str) -> Result<String> {
+/// Generate code from a `json_typegen` macro invocation
+pub fn codegen_from_macro(input: &str) -> Result<String, JTError> {
     let macro_input = parse::full_macro(input)?;
 
     codegen(
         &macro_input.name,
-        &infer_source_type(&macro_input.sample_source),
+        &macro_input.sample_source,
         macro_input.options,
     )
 }
 
-pub fn codegen_from_macro_input(input: &str) -> Result<String> {
+/// Generate code from the arguments to a `json_typegen` macro invocation
+pub fn codegen_from_macro_input(input: &str) -> Result<String, JTError> {
     let macro_input = parse::macro_input(input)?;
 
     codegen(
         &macro_input.name,
-        &infer_source_type(&macro_input.sample_source),
+        &macro_input.sample_source,
         macro_input.options,
     )
 }
 
-pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Result<String> {
-    let sample = get_and_parse_sample(source)?;
+/// The main code generation function for `json_typegen`
+pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, JTError> {
+    let source = infer_source_type(input);
+    let sample = get_and_parse_sample(&source)?;
     let name = handle_pub_in_name(name, &mut options);
 
     let mut hints_vec = Vec::new();
@@ -106,7 +110,7 @@ pub fn codegen(name: &str, source: &SampleSource, mut options: Options) -> Resul
         generation::shape_to_example_program(name, &shape, options)
     } else {
         let (name, defs) = generation::shape_to_type_defs(name, &shape, options);
-        defs.ok_or(Error::from(ErrorKind::ExistingType(name.to_string())))?
+        defs.ok_or(JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
 
     Ok(generated_code)
@@ -137,7 +141,7 @@ fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
     }
 }
 
-pub fn infer_source_type(s: &str) -> SampleSource {
+fn infer_source_type(s: &str) -> SampleSource {
     let s = s.trim();
     if s.starts_with('{') || s.starts_with('[') {
         return SampleSource::Text(s);
@@ -148,7 +152,7 @@ pub fn infer_source_type(s: &str) -> SampleSource {
     SampleSource::File(s)
 }
 
-fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
+fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),

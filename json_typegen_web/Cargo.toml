@@ -12,5 +12,9 @@ staticfile = "0.4.0"
 serde = "0.9"
 serde_derive = "0.9"
 serde_json = "0.9"
-json_typegen_shared = { path = "../json_typegen_shared" }
 error-chain = "0.10"
+
+[dependencies.json_typegen_shared]
+path = "../json_typegen_shared"
+default-features = false
+features = []

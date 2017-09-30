@@ -7,7 +7,7 @@
 extern crate json_typegen_shared;
 extern crate test;
 
-use json_typegen_shared::from_str_with_defaults;
+use json_typegen_shared::{codegen, Options};
 use test::Bencher;
 
 macro_rules! file_bench {
@@ -15,7 +15,7 @@ macro_rules! file_bench {
         #[bench]
         fn $name(b: &mut Bencher) {
             b.iter(|| {
-                from_str_with_defaults("Article", include_str!($file_path))
+                codegen("Article", include_str!($file_path), Options::default())
             });
         }
     )

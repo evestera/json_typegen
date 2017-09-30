@@ -16,7 +16,7 @@ use mount::Mount;
 use error_chain::ChainedError;
 use std::env;
 
-use json_typegen_shared::{codegen, SampleSource, Options};
+use json_typegen_shared::{codegen, Options};
 
 #[derive(Debug, Deserialize, Default)]
 #[serde(default)]
@@ -47,7 +47,7 @@ fn handle_codegen_request(req: &mut Request) -> IronResult<Response> {
     if req_body.input.trim().is_empty() {
         req_body.input.push_str("{}");
     }
-    let code = handle!(codegen(&req_body.name, &SampleSource::Text(&req_body.input), options),
+    let code = handle!(codegen(&req_body.name, &req_body.input, options),
         err => format!("{}", err.display()));
 
     Ok(Response::with((status::Ok, code)))

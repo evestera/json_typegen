@@ -1,11 +1,11 @@
 extern crate json_typegen_shared;
 extern crate syn;
 
-use json_typegen_shared::from_str_with_defaults;
+use json_typegen_shared::{codegen, Options};
 
 /// Function to test AST equality, not string equality
 fn code_output_test(name: &str, input: &str, expected: &str) {
-    let res = from_str_with_defaults(name, input);
+    let res = codegen(name, input, Options::default());
     let output = res.unwrap();
     assert_eq!(
         syn::parse_items(&output),

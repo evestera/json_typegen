@@ -1,3 +1,5 @@
+//! Functions for parsing `json_typegen` macro invocations and their arguments
+
 use synom::IResult;
 use syn;
 use syn::parse::{ident, string, boolean};

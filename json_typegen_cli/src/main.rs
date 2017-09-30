@@ -1,7 +1,7 @@
 extern crate json_typegen_shared;
 extern crate clap;
 
-use json_typegen_shared::{codegen, codegen_from_macro, Options, parse, infer_source_type};
+use json_typegen_shared::{codegen, codegen_from_macro, Options, parse};
 use clap::{Arg, App};
 use std::io::{self, Read, Write};
 use std::fs::OpenOptions;
@@ -60,7 +60,7 @@ fn main_with_result() -> Result<(), Box<std::error::Error>> {
             Some(block) => parse::options(block)?,
             None => Options::default(),
         };
-        codegen(&name, &infer_source_type(&input), options)
+        codegen(&name, &input, options)
     };
 
     if let Some(filename) = matches.value_of("output") {
