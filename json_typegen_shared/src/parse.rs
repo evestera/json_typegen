@@ -30,6 +30,8 @@ named!(comma_or_closing_brace -> &str,
     alt!(punct!(",") | punct!("}"))
 );
 
+/// Parses a full `json_typegen` macro invocation. E.g. something like
+/// `json_typegen!("Foo", "http://example.com/sample.json", { deny_unknown_fields });`
 pub fn full_macro(input: &str) -> Result<MacroInput, String> {
     let input = input.trim();
 
@@ -48,6 +50,8 @@ pub fn full_macro(input: &str) -> Result<MacroInput, String> {
     macro_input(input)
 }
 
+/// Parses the arguments to a `json_typegen` macro invocation. E.g. something like
+/// `"Foo", "http://example.com/sample.json", { deny_unknown_fields }`
 pub fn macro_input(input: &str) -> Result<MacroInput, String> {
     let (input, name) = match string(input) {
         IResult::Done(input, lit) => (input, lit.value),
@@ -79,6 +83,8 @@ pub fn macro_input(input: &str) -> Result<MacroInput, String> {
     Ok(MacroInput { name, sample_source, options })
 }
 
+/// Parses the options block of a `json_typegen` macro invocation. E.g. something like:
+/// `{ deny_unknown_fields }`
 pub fn options(input: &str) -> Result<Options, String> {
     let mut options = Options::default();
 
