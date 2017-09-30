@@ -6,7 +6,7 @@ use clap::{Arg, App};
 use std::io::{self, Read, Write};
 use std::fs::OpenOptions;
 
-fn main() {
+fn main_with_result() -> Result<(), Box<std::error::Error>> {
     let matches = App::new("JSON code generation CLI")
         .version("0.1.0")
         .about("Generate Rust types from JSON samples")
@@ -32,11 +32,11 @@ fn main() {
         )
         .get_matches();
 
-    let source = matches.value_of("input").unwrap();
+    let source = matches.value_of("input").expect("input argument is required");
 
     let input = if source == "-" {
         let mut buffer = String::new();
-        io::stdin().read_to_string(&mut buffer).unwrap();
+        io::stdin().read_to_string(&mut buffer)?;
         buffer
     } else {
         source.to_string()
@@ -55,11 +55,21 @@ fn main() {
             .write(true)
             .create(true)
             .truncate(true)
-            .open(filename)
-            .unwrap();
+            .open(filename)?;
 
-        file.write_all(code.unwrap().as_bytes()).unwrap();
+        file.write_all(code?.as_bytes())?;
     } else {
-        print!("{}", code.unwrap());
+        print!("{}", code?);
+    }
+
+    Ok(())
+}
+
+fn main() {
+    let result = main_with_result();
+
+    if let Err(e) = result {
+        eprintln!("{}", e);
+        std::process::exit(1);
     }
 }
