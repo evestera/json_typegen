@@ -14,7 +14,9 @@ extern crate unindent;
 #[cfg(feature = "remote-samples")]
 extern crate reqwest;
 
+#[cfg(feature = "local-samples")]
 use std::fs::File;
+
 use serde_json::Value;
 use regex::Regex;
 
@@ -39,8 +41,8 @@ mod errors {
 
         foreign_links {
             ReqwestError(::reqwest::Error) #[cfg(feature = "remote-samples")];
+            IoError(::std::io::Error) #[cfg(feature = "local-samples")];
             JsonError(::serde_json::Error);
-            IoError(::std::io::Error);
         }
 
         errors {
@@ -153,7 +155,11 @@ fn get_and_parse_sample(source: &SampleSource) -> Result<Value> {
         #[cfg(not(feature = "remote-samples"))]
         SampleSource::Url(_) => { return Err("Remote samples disabled".into()); },
 
+        #[cfg(feature = "local-samples")]
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
+        #[cfg(not(feature = "local-samples"))]
+        SampleSource::File(_) => { return Err("Local samples disabled".into()); },
+
         SampleSource::Text(text) => serde_json::from_str(text),
     };
     Ok(parse_result.chain_err(|| "Unable to parse JSON sample")?)

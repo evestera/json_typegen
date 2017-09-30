@@ -11,8 +11,9 @@ readme = "README.md"
 
 [features]
 unstable = []
-default = ["remote-samples"]
+default = ["remote-samples", "local-samples"]
 remote-samples = ["reqwest"]
+local-samples = []
 
 [dependencies]
 serde = "0.9"
