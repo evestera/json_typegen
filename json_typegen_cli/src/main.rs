@@ -7,12 +7,14 @@ use std::io::{self, Read, Write};
 use std::fs::OpenOptions;
 
 fn main_with_result() -> Result<(), Box<std::error::Error>> {
-    let matches = App::new("JSON code generation CLI")
+    let matches = App::new("json_typegen CLI")
         .version("0.1.0")
         .about("Generate Rust types from JSON samples")
         .arg(
             Arg::with_name("input")
-                .help("The input to generate types from. A sample, file, URL, or macro.")
+                .help(concat!(
+                    "The input to generate types from. A sample, file, URL, or macro. To read ",
+                    "from standard input, a dash, '-', can be used as the input argument."))
                 .takes_value(true)
                 .required(true),
         )
