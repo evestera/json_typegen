@@ -25,7 +25,7 @@ mod inference;
 mod generation;
 mod hints;
 mod options;
-mod parse;
+pub mod parse;
 
 use hints::Hints;
 pub use options::Options;
