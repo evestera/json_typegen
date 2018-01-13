@@ -1,20 +1,26 @@
-# JSON code generation tools for Rust
+# json_typegen - Rust types from JSON samples
 
 [![Travis Build Status](https://api.travis-ci.org/evestera/json_typegen.svg?branch=master)](https://travis-ci.org/evestera/json_typegen)
 [![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
 [![docs.rs](https://docs.rs/json_typegen/badge.svg)](https://docs.rs/json_typegen/)
 
-WARNING: This project is still in early development and you should not rely on it outputting exactly the same code tomorrow as it does today. That said, feel free to try things out, and feedback/issues are very welcome.
+*json_typegen* is a collection of tools for generating Rust types from JSON samples, built on top of [serde]. I.e. you give it some JSON, it gives you the type definitions necessary to use that JSON in a Rust program. If you are familiar with [F#], the procedural macro `json_typegen!` works as a [type provider] for JSON in Rust. It was inspired by and uses the same kind of inference algorithm as [F# Data].
 
-This is a collection of tools for generating Rust types from JSON samples. It was inspired by and uses the same kind of inference algorithm as [F# Data](http://fsharp.github.io/FSharp.Data/). There are three interfaces to the code generation:
+[serde]: https://serde.rs/
+[F# Data]: http://fsharp.github.io/FSharp.Data/
+[F#]: http://fsharp.org/
+[type provider]: https://docs.microsoft.com/en-us/dotnet/fsharp/tutorials/type-providers/
+
+There are three interfaces to this code generation logic:
 
 - [Procedural macro](#procedural-macro)
 - [Command line interface](#command-line-interface)
 - [Web interface](#web-interface)
 
+
 ## Procedural macro
 
-The main interface to the code generation tools is a procedural macro `json_typegen!`. As an example, the below code generates code for the type Point, including derives for serialization and deserialization (using [serde_derive](https://crates.io/crates/serde_derive)).
+The first interface to the code generation tools is a procedural macro `json_typegen!`. As an example, the below code generates code for the type `Point`.
 
 ```rust
 #[macro_use]
@@ -34,22 +40,34 @@ fn main() {
 
 ```toml
 [dependencies]
-serde = "0.9"
-serde_json = "0.9"
-json_typegen = { git = "https://github.com/evestera/json_typegen/" }
+serde = "1.0"
+serde_json = "1.0"
+json_typegen = "0.2"
 ```
 
-The sample json can also come from local or remote files, like so:
+The sample json can also come from local or remote files:
 
 ```rust
 json_typegen!("Point", "json_samples/point.json");
-
 json_typegen!("Point", "http://example.com/someapi/point.json");
 ```
 
+The code generation can also be customized:
+
+```rust
+json_typegen!("Point", "http://example.com/someapi/point.json", {
+    use_default_for_missing_fields,
+    "/foo/bar": {
+        use_type: "map"
+    }
+});
+```
+
+For the details, see [the relevant documentation](http://link.to.config.docs).
+
 ### Conditional compilation
 
-To avoid incurring the cost of a http request per sample used for every build you can use conditional compilation to only check against remote samples when desired:
+To avoid incurring the cost of a HTTP request per sample used for every build you can use conditional compilation to only check against remote samples when desired:
 
 ```rust
 #[cfg(not(feature = "online-samples"))]
@@ -81,3 +99,7 @@ For details on usage see [its readme](json_typegen_cli/README.md).
 ## Web interface
 
 For simple testing and one-time use there is also a web interface (in `json_typegen_web`). An instance of this interface is currently hosted at <http://vestera.as/json_typegen>
+
+## License
+
+This project is dual licensed, under either the Apache 2.0 or the MIT license, at your option.
