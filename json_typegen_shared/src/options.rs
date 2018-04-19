@@ -3,6 +3,7 @@ use hints::{Hint};
 /// Options for the code generation
 #[derive(Debug, PartialEq, Clone)]
 pub struct Options {
+    pub output_mode: OutputMode,
     pub runnable: bool,
     pub use_default_for_missing_fields: bool,
     pub deny_unknown_fields: bool,
@@ -16,6 +17,7 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Options {
         Options {
+            output_mode: OutputMode::Rust,
             runnable: false,
             use_default_for_missing_fields: false,
             deny_unknown_fields: false,
@@ -24,6 +26,24 @@ impl Default for Options {
             field_visibility: None,
             derives: "Default, Debug, Clone, PartialEq, Serialize, Deserialize".into(),
             hints: Vec::new(),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum OutputMode {
+    Rust,
+    Typescript,
+    JsonSchema,
+}
+
+impl OutputMode {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "rust" => Some(OutputMode::Rust),
+            "typescript" => Some(OutputMode::Typescript),
+            "json_schema" => Some(OutputMode::JsonSchema),
+            _ => None,
         }
     }
 }

@@ -2,6 +2,7 @@
 //! crate directly, and thus care about its stability, please
 //! [open an issue](https://github.com/evestera/json_typegen/issues/new) to let me know.
 
+#[macro_use]
 extern crate serde_json;
 #[macro_use]
 extern crate error_chain;
@@ -27,12 +28,15 @@ use regex::Regex;
 mod util;
 mod inference;
 mod generation;
+mod generation_typescript;
+mod generation_json_schema;
 mod hints;
 mod options;
 pub mod parse;
 
 use hints::Hints;
 pub use options::Options;
+pub use options::OutputMode;
 
 mod errors {
     error_chain! {
@@ -109,7 +113,11 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     let generated_code = if options.runnable {
         generation::shape_to_example_program(name, &shape, options)
     } else {
-        let (name, defs) = generation::shape_to_type_defs(name, &shape, options);
+        let (name, defs) = match options.output_mode {
+            OutputMode::Rust => generation::shape_to_type_defs(name, &shape, options),
+            OutputMode::Typescript => generation_typescript::shape_to_type_defs(name, &shape, options),
+            OutputMode::JsonSchema => generation_json_schema::shape_to_type_defs(name, &shape, options),
+        };
         defs.ok_or(JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
 

@@ -6,6 +6,7 @@ use syn::parse::{ident, string, boolean};
 
 use hints::Hint;
 use options::Options;
+use options::OutputMode;
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {
@@ -92,6 +93,9 @@ pub fn options(input: &str) -> Result<Options, String> {
 
     let input_after_block = block(input, |remaining, option_name| {
         match option_name.as_ref() {
+            "output_mode" => string_option(remaining, "output_mode", |val| {
+                options.output_mode = OutputMode::from_str(&val).unwrap_or(OutputMode::Rust);
+            }),
             "derives" => string_option(remaining, "derives", |val| {
                 options.derives = val;
             }),
