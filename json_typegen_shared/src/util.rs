@@ -1,5 +1,3 @@
-use std::ascii::AsciiExt;
-
 pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';

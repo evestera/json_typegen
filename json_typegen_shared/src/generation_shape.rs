@@ -21,18 +21,7 @@ pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident
     let ident = "".to_string();
     let value = type_from_shape(&mut ctxt, name, shape);
 
-    let mut schema = json!({
-        "$schema": "http://json-schema.org/schema#",
-        "title": name
-    });
-
-    if let Value::Object(map) = value {
-        for (key, val) in map.into_iter() {
-            schema[key] = val;
-        }
-    }
-
-    let code = ::serde_json::to_string_pretty(&schema);
+    let code = ::serde_json::to_string_pretty(&value);
 
     (ident, code.ok())
 }
@@ -40,11 +29,13 @@ pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     use inference::Shape::*;
     match *shape {
-        Null | Any | Bottom => json!({}),
-        Bool => json!({ "type": "boolean" }),
-        StringT => json!({ "type": "string" }),
-        Integer => json!({ "type": "number" }),
-        Floating => json!({ "type": "number" }),
+        Null => Value::Null,
+        Any => json!("any"),
+        Bottom => json!("bottom"),
+        Bool => json!("bool"),
+        StringT => json!("string"),
+        Integer => json!("integer"),
+        Floating => json!("floating"),
         Tuple(ref shapes, _n) => {
             let folded = inference::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
@@ -62,9 +53,12 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         MapT { val_type: ref v } => {
             generate_map_type(ctxt, path, v)
         }
-        Opaque(ref t) => json!({ "type": t }),
+        Opaque(ref t) => json!(t),
         Optional(ref e) => {
-            type_from_shape(ctxt, path, e)
+            json!({
+                "__type__": "optional",
+                "item": type_from_shape(ctxt, path, e),
+            })
         }
     }
 }
@@ -72,18 +66,15 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
 fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     let singular = path.to_singular();
     let inner = type_from_shape(ctxt, &singular, shape);
-    json!({
-        "type": "array",
-        "items": inner
-    })
+    json!([inner])
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     let singular = path.to_singular();
     let inner = type_from_shape(ctxt, &singular, shape);
     json!({
-        "type": "object",
-        "additionalProperties": inner
+        "__type__": "map",
+        "values": inner
     })
 }
 
@@ -96,9 +87,8 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> Valu
     }
 
     json!({
-        "type": "array",
+        "__type__": "tuple",
         "items": types,
-        "additionalItems": false
     })
 }
 
@@ -114,24 +104,21 @@ fn generate_struct_from_field_shapes(
         _path: &str,
         map: &LinkedHashMap<String, Shape>) -> Value {
 
-    let mut required: Vec<String> = Vec::new();
     let mut properties = json!({});
 
     for (name, typ) in map.iter() {
         let (was_optional, collapsed) = collapse_option(typ);
 
-        if !was_optional {
-            required.push(name.clone());
-        }
+        let annotated_name = if was_optional {
+            name.to_owned() + "?"
+        } else {
+            name.to_owned()
+        };
 
         let field_code = type_from_shape(ctxt, name, collapsed);
 
-        properties[name] = field_code;
+        properties[annotated_name] = field_code;
     }
 
-    json!({
-        "type": "object",
-        "properties": properties,
-        "required": required
-    })
+    properties
 }

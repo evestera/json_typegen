@@ -1,5 +1,4 @@
 use std::collections::{ HashSet };
-use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use regex::Regex;
@@ -18,7 +17,7 @@ pub type Code = String;
 
 pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
-        options: options,
+        options,
         type_names: HashSet::new(),
     };
 

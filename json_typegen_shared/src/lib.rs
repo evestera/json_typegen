@@ -28,8 +28,9 @@ use regex::Regex;
 mod util;
 mod inference;
 mod generation;
-mod generation_typescript;
 mod generation_json_schema;
+mod generation_shape;
+mod generation_typescript;
 mod hints;
 mod options;
 pub mod parse;
@@ -115,8 +116,9 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     } else {
         let (name, defs) = match options.output_mode {
             OutputMode::Rust => generation::shape_to_type_defs(name, &shape, options),
-            OutputMode::Typescript => generation_typescript::shape_to_type_defs(name, &shape, options),
             OutputMode::JsonSchema => generation_json_schema::shape_to_type_defs(name, &shape, options),
+            OutputMode::Shape => generation_shape::shape_to_type_defs(name, &shape, options),
+            OutputMode::Typescript => generation_typescript::shape_to_type_defs(name, &shape, options),
         };
         defs.ok_or(JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };

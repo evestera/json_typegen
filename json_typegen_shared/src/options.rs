@@ -35,6 +35,7 @@ pub enum OutputMode {
     Rust,
     Typescript,
     JsonSchema,
+    Shape,
 }
 
 impl OutputMode {
@@ -43,6 +44,7 @@ impl OutputMode {
             "rust" => Some(OutputMode::Rust),
             "typescript" => Some(OutputMode::Typescript),
             "json_schema" => Some(OutputMode::JsonSchema),
+            "shape" => Some(OutputMode::Shape),
             _ => None,
         }
     }

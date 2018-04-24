@@ -44,7 +44,7 @@ fn main_with_result() -> Result<(), Box<std::error::Error>> {
             Arg::with_name("output-mode")
                 .long("output-mode")
                 .short("-O")
-                .possible_values(&["rust", "typescript", "json_schema"])
+                .possible_values(&["rust", "typescript", "json_schema", "shape"])
                 .help("What to output.")
                 .takes_value(true)
         )

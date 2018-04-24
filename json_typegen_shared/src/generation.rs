@@ -1,5 +1,4 @@
 use std::collections::{ HashSet };
-use std::ascii::AsciiExt;
 use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use unindent::unindent;
@@ -44,7 +43,7 @@ pub fn shape_to_example_program(name: &str, shape: &Shape, options: Options) -> 
 
 pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
-        options: options,
+        options,
         type_names: HashSet::new(),
     };
 
