@@ -2,7 +2,7 @@ use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use serde_json::Value;
 
-use inference::{self, Shape};
+use shape::{self, Shape};
 use options::Options;
 
 #[allow(dead_code)]
@@ -13,7 +13,7 @@ pub struct Ctxt {
 pub type Ident = String;
 pub type Code = String;
 
-pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
         options,
     };
@@ -38,7 +38,7 @@ pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    use inference::Shape::*;
+    use shape::Shape::*;
     match *shape {
         Null | Any | Bottom => json!({}),
         Bool => json!({ "type": "boolean" }),
@@ -46,7 +46,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         Integer => json!({ "type": "number" }),
         Floating => json!({ "type": "number" }),
         Tuple(ref shapes, _n) => {
-            let folded = inference::fold_shapes(shapes.clone());
+            let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, path, shapes)
             } else {

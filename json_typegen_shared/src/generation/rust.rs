@@ -3,7 +3,7 @@ use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use unindent::unindent;
 
-use inference::{self, Shape};
+use shape::{self, Shape};
 use util::{snake_case, type_case};
 use options::Options;
 
@@ -15,8 +15,8 @@ pub struct Ctxt {
 pub type Ident = String;
 pub type Code = String;
 
-pub fn shape_to_example_program(name: &str, shape: &Shape, options: Options) -> Code {
-    let (type_name, defs) = shape_to_type_defs(name, &shape, options);
+pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
+    let (type_name, defs) = rust_types(name, &shape, options);
 
     let var_name = snake_case(&type_name);
 
@@ -41,7 +41,7 @@ pub fn shape_to_example_program(name: &str, shape: &Shape, options: Options) -> 
     }
 }
 
-pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
@@ -51,7 +51,7 @@ pub fn shape_to_type_defs(name: &str, shape: &Shape, options: Options) -> (Ident
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    use inference::Shape::*;
+    use shape::Shape::*;
     match *shape {
         Null | Any | Bottom => ("::serde_json::Value".into(), None),
         Bool => ("bool".into(), None),
@@ -59,7 +59,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
         Integer => ("i64".into(), None),
         Floating => ("f64".into(), None),
         Tuple(ref shapes, _n) => {
-            let folded = inference::fold_shapes(shapes.clone());
+            let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, path, shapes)
             } else {

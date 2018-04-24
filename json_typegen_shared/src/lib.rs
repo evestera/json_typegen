@@ -25,15 +25,13 @@ use std::fs::File;
 use serde_json::Value;
 use regex::Regex;
 
-mod util;
-mod inference;
 mod generation;
-mod generation_json_schema;
-mod generation_shape;
-mod generation_typescript;
 mod hints;
+mod inference;
 mod options;
 pub mod parse;
+mod shape;
+mod util;
 
 use hints::Hints;
 pub use options::Options;
@@ -112,13 +110,13 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     let shape = inference::value_to_shape(&sample, &hints);
 
     let generated_code = if options.runnable {
-        generation::shape_to_example_program(name, &shape, options)
+        generation::rust::rust_program(name, &shape, options)
     } else {
         let (name, defs) = match options.output_mode {
-            OutputMode::Rust => generation::shape_to_type_defs(name, &shape, options),
-            OutputMode::JsonSchema => generation_json_schema::shape_to_type_defs(name, &shape, options),
-            OutputMode::Shape => generation_shape::shape_to_type_defs(name, &shape, options),
-            OutputMode::Typescript => generation_typescript::shape_to_type_defs(name, &shape, options),
+            OutputMode::Rust => generation::rust::rust_types(name, &shape, options),
+            OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
+            OutputMode::Shape => generation::shape::shape_string(name, &shape, options),
+            OutputMode::Typescript => generation::typescript::typescript_types(name, &shape, options),
         };
         defs.ok_or(JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
