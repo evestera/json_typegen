@@ -1,6 +1,6 @@
 [package]
 name = "json_typegen"
-version = "0.1.1"
+version = "0.2.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 description = "Procedural macro that generates Rust types from JSON samples"
@@ -17,7 +17,7 @@ travis-ci = { repository = "evestera/json_typegen" }
 [dependencies]
 serde = "0.9"
 serde_derive = "0.9"
-json_typegen_derive = { path = "../json_typegen_derive", version = "0.1" }
+json_typegen_derive = { path = "../json_typegen_derive", version = "0.2" }
 
 [dev-dependencies]
 serde_json = "0.9"
