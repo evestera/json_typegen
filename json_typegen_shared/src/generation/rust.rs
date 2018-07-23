@@ -52,34 +52,34 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
     use shape::Shape::*;
-    match *shape {
+    match shape {
         Null | Any | Bottom => ("::serde_json::Value".into(), None),
         Bool => ("bool".into(), None),
         StringT => ("String".into(), None),
         Integer => ("i64".into(), None),
         Floating => ("f64".into(), None),
-        Tuple(ref shapes, _n) => {
+        Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
-                generate_tuple_type(ctxt, path, shapes)
+                generate_tuple_type(ctxt, path, &shapes)
             } else {
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: ref e } => {
-            generate_vec_type(ctxt, path, e)
+        VecT { elem_type: e } => {
+            generate_vec_type(ctxt, path, &e)
         }
-        Struct { fields: ref map } => {
-            generate_struct_from_field_shapes(ctxt, path, map)
+        Struct { fields: map } => {
+            generate_struct_from_field_shapes(ctxt, path, &map)
         }
-        MapT { val_type: ref v } => {
-            generate_map_type(ctxt, path, v)
+        MapT { val_type: v } => {
+            generate_map_type(ctxt, path, &v)
         }
-        Opaque(ref t) => {
+        Opaque(t) => {
             (t.clone(), None)
         }
-        Optional(ref e) => {
-            let (inner, defs) = type_from_shape(ctxt, path, e);
+        Optional(e) => {
+            let (inner, defs) = type_from_shape(ctxt, path, &e);
             if ctxt.options.use_default_for_missing_fields {
                 (inner, defs)
             } else {
@@ -173,7 +173,7 @@ fn type_or_field_name(name: &str,
 
 fn collapse_option_vec<'a>(ctxt: &mut Ctxt, typ: &'a Shape) -> (bool, &'a Shape) {
     if !(ctxt.options.allow_option_vec || ctxt.options.use_default_for_missing_fields) {
-        if let Shape::Optional(ref inner) = *typ {
+        if let Shape::Optional(inner) = typ {
             if let Shape::VecT { .. } = **inner {
                 return (true, &**inner);
             }

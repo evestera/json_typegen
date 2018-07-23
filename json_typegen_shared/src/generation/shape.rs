@@ -92,8 +92,8 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> Valu
     })
 }
 
-fn collapse_option<'a>(typ: &'a Shape) -> (bool, &'a Shape) {
-    if let Shape::Optional(ref inner) = *typ {
+fn collapse_option(typ: &Shape) -> (bool, &Shape) {
+    if let Shape::Optional(inner) = typ {
         return (true, &**inner);
     }
     (false, typ)

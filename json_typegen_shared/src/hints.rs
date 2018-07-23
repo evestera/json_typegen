@@ -66,7 +66,7 @@ impl<'a> Hints<'a> {
                 );
             }
             let tokens: Vec<_> = pointer.split('/').skip(1).collect();
-            let pair: (Cow<[&str]>, &Hint) = (tokens.into(), &hint);
+            let pair: (Cow<[&str]>, &Hint) = (tokens.into(), hint);
             self.hints.push(pair);
         }
     }

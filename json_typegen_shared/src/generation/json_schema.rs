@@ -39,32 +39,32 @@ pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Optio
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     use shape::Shape::*;
-    match *shape {
+    match shape {
         Null | Any | Bottom => json!({}),
         Bool => json!({ "type": "boolean" }),
         StringT => json!({ "type": "string" }),
         Integer => json!({ "type": "number" }),
         Floating => json!({ "type": "number" }),
-        Tuple(ref shapes, _n) => {
+        Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
-                generate_tuple_type(ctxt, path, shapes)
+                generate_tuple_type(ctxt, path, &shapes)
             } else {
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: ref e } => {
-            generate_vec_type(ctxt, path, e)
+        VecT { elem_type: e } => {
+            generate_vec_type(ctxt, path, &e)
         }
-        Struct { fields: ref map } => {
-            generate_struct_from_field_shapes(ctxt, path, map)
+        Struct { fields: map } => {
+            generate_struct_from_field_shapes(ctxt, path, &map)
         }
-        MapT { val_type: ref v } => {
-            generate_map_type(ctxt, path, v)
+        MapT { val_type: v } => {
+            generate_map_type(ctxt, path, &v)
         }
-        Opaque(ref t) => json!({ "type": t }),
-        Optional(ref e) => {
-            type_from_shape(ctxt, path, e)
+        Opaque(t) => json!({ "type": t }),
+        Optional(e) => {
+            type_from_shape(ctxt, path, &e)
         }
     }
 }
@@ -102,8 +102,8 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> Valu
     })
 }
 
-fn collapse_option<'a>(typ: &'a Shape) -> (bool, &'a Shape) {
-    if let Shape::Optional(ref inner) = *typ {
+fn collapse_option(typ: &Shape) -> (bool, &Shape) {
+    if let Shape::Optional(inner) = typ {
         return (true, &**inner);
     }
     (false, typ)

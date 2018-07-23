@@ -2,9 +2,18 @@ use linked_hash_map::LinkedHashMap;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Shape {
-    Null,
-    Any,
+    /// `Bottom` represents the absence of any inference information
     Bottom,
+
+    /// `Any` represents conflicting inference information that can not be
+    /// represented by any single shape
+    Any,
+
+    /// `Optional(T)` represents that a value is nullable, or not always present
+    Optional(Box<Shape>),
+
+    /// Equivalent to `Optional(Bottom)`, `Null` represents optionality with no further information
+    Null,
     Bool,
     StringT,
     Integer,
@@ -14,7 +23,6 @@ pub enum Shape {
     Tuple(Vec<Shape>, u64),
     MapT { val_type: Box<Shape> },
     Opaque(String),
-    Optional(Box<Shape>)
 }
 
 pub fn fold_shapes(shapes: Vec<Shape>) -> Shape {

@@ -117,8 +117,8 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     unreachable!()
 }
 
-fn collapse_option<'a>(typ: &'a Shape) -> (bool, &'a Shape) {
-    if let Shape::Optional(ref inner) = *typ {
+fn collapse_option(typ: &Shape) -> (bool, &Shape) {
+    if let Shape::Optional(inner) = typ {
         return (true, &**inner);
     }
     (false, typ)

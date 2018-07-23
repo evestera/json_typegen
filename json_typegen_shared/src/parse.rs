@@ -231,7 +231,7 @@ fn skip<'a>(input: &'a str, symbol: &'static str, msg: &str) -> Result<&'a str, 
     match punct!(input, symbol) {
         IResult::Done(rem, _) => Ok(rem),
         IResult::Error => {
-            fail!(msg, input);
+            fail!(msg, input)
         }
     }
 }

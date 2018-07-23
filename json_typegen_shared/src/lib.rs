@@ -103,8 +103,8 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     std::mem::swap(&mut options.hints, &mut hints_vec);
 
     let mut hints = Hints::new();
-    for &(ref pointer, ref hint) in hints_vec.iter() {
-        hints.add(&pointer, &hint);
+    for (pointer, hint) in hints_vec.iter() {
+        hints.add(pointer, hint);
     }
 
     let shape = inference::value_to_shape(&sample, &hints);
