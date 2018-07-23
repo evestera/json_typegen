@@ -63,7 +63,7 @@ json_typegen!("Point", "http://example.com/someapi/point.json", {
 });
 ```
 
-For the details, see [the relevant documentation](http://link.to.config.docs).
+For the details, see [the relevant documentation](CONFIGURATION.md).
 
 ### Conditional compilation
 
