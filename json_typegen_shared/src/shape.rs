@@ -14,6 +14,7 @@ pub enum Shape {
 
     /// Equivalent to `Optional(Bottom)`, `Null` represents optionality with no further information
     Null,
+
     Bool,
     StringT,
     Integer,

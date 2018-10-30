@@ -8,7 +8,7 @@ use std::fs::OpenOptions;
 
 fn main_with_result() -> Result<(), Box<std::error::Error>> {
     let matches = App::new("json_typegen CLI")
-        .version("0.2.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .about("Generate Rust types from JSON samples")
         .arg(
             Arg::with_name("input")
@@ -44,7 +44,7 @@ fn main_with_result() -> Result<(), Box<std::error::Error>> {
             Arg::with_name("output-mode")
                 .long("output-mode")
                 .short("-O")
-                .possible_values(&["rust", "typescript", "json_schema", "shape"])
+                .possible_values(&["rust", "typescript", "kotlin", "json_schema", "shape"])
                 .help("What to output.")
                 .takes_value(true)
         )

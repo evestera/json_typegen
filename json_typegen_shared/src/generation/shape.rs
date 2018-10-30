@@ -100,9 +100,10 @@ fn collapse_option(typ: &Shape) -> (bool, &Shape) {
 }
 
 fn generate_struct_from_field_shapes(
-        ctxt: &mut Ctxt,
-        _path: &str,
-        map: &LinkedHashMap<String, Shape>) -> Value {
+    ctxt: &mut Ctxt,
+    _path: &str,
+    map: &LinkedHashMap<String, Shape>,
+) -> Value {
 
     let mut properties = json!({});
 

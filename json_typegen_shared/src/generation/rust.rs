@@ -137,11 +137,12 @@ lazy_static! {
     };
 }
 
-fn type_or_field_name(name: &str,
-                      used_names: &HashSet<String>,
-                      default_name: &str,
-                      case_fn: fn(&str) -> String)
-                      -> Ident {
+fn type_or_field_name(
+    name: &str,
+    used_names: &HashSet<String>,
+    default_name: &str,
+    case_fn: fn(&str) -> String,
+) -> Ident {
     let name = name.trim();
     let mut output_name = if let Some(c) = name.chars().next() {
         if c.is_ascii() && c.is_numeric() {
@@ -183,9 +184,10 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt, typ: &'a Shape) -> (bool, &'a Shape)
 }
 
 fn generate_struct_from_field_shapes(
-        ctxt: &mut Ctxt,
-        path: &str,
-        map: &LinkedHashMap<String, Shape>) -> (Ident, Option<Code>) {
+    ctxt: &mut Ctxt,
+    path: &str,
+    map: &LinkedHashMap<String, Shape>,
+) -> (Ident, Option<Code>) {
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
     let visibility = ctxt.options.type_visibility.clone();
