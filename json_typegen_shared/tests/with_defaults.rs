@@ -1,5 +1,5 @@
-extern crate json_typegen_shared;
-extern crate syn;
+
+use syn;
 
 use json_typegen_shared::{codegen, Options};
 

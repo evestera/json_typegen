@@ -8,6 +8,7 @@ homepage = "https://github.com/evestera/json_typegen"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_shared"
 readme = "README.md"
+edition = "2018"
 
 [features]
 unstable = []

@@ -1,7 +1,6 @@
 use std::collections::{ HashSet };
 use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
-use regex::Regex;
 
 use crate::shape::{self, Shape};
 use crate::util::type_case;

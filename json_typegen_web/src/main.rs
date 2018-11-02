@@ -1,20 +1,11 @@
-extern crate iron;
-extern crate staticfile;
-extern crate mount;
-extern crate serde_json;
-#[macro_use]
-extern crate serde_derive;
-extern crate json_typegen_shared;
-extern crate error_chain;
-
-use std::path::Path;
-
+use serde_json;
+use serde_derive::{Serialize, Deserialize};
+use std::{env, path::Path};
 use iron::prelude::*;
 use iron::status;
 use staticfile::Static;
 use mount::Mount;
 use error_chain::ChainedError;
-use std::env;
 
 use json_typegen_shared::{codegen, Options};
 

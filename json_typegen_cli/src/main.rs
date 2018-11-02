@@ -1,12 +1,9 @@
-extern crate json_typegen_shared;
-extern crate clap;
-
 use json_typegen_shared::{codegen, codegen_from_macro, Options, parse, OutputMode};
 use clap::{Arg, App};
 use std::io::{self, Read, Write};
 use std::fs::OpenOptions;
 
-fn main_with_result() -> Result<(), Box<std::error::Error>> {
+fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("json_typegen CLI")
         .version(env!("CARGO_PKG_VERSION"))
         .about("Generate Rust types from JSON samples")

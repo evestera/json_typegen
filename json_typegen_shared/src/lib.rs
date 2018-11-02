@@ -8,13 +8,8 @@ extern crate serde_json;
 extern crate error_chain;
 #[macro_use]
 extern crate lazy_static;
-extern crate linked_hash_map;
-extern crate inflector;
-extern crate regex;
-extern crate syn;
 #[macro_use]
 extern crate synom;
-extern crate unindent;
 
 #[cfg(feature = "remote-samples")]
 extern crate reqwest;
