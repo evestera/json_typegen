@@ -10,6 +10,7 @@ homepage = "https://github.com/evestera/json_typegen"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_cli"
 readme = "README.md"
+edition = "2018"
 
 [dependencies]
 clap = "~2.19.0"

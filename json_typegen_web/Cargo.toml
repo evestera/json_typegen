@@ -4,6 +4,7 @@ version = "0.2.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 publish = false
+edition = "2018"
 
 [dependencies]
 iron = "0.5.1"
