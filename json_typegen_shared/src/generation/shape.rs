@@ -2,8 +2,8 @@ use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use serde_json::Value;
 
-use shape::{self, Shape};
-use options::Options;
+use crate::shape::{self, Shape};
+use crate::options::Options;
 
 #[allow(dead_code)]
 pub struct Ctxt {
@@ -27,7 +27,7 @@ pub fn shape_string(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    use shape::Shape::*;
+    use crate::shape::Shape::*;
     match *shape {
         Null => Value::Null,
         Any => json!("any"),

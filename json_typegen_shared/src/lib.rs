@@ -33,9 +33,9 @@ pub mod parse;
 mod shape;
 mod util;
 
-use hints::Hints;
-pub use options::Options;
-pub use options::OutputMode;
+use crate::hints::Hints;
+pub use crate::options::Options;
+pub use crate::options::OutputMode;
 
 mod errors {
     error_chain! {
@@ -63,7 +63,7 @@ mod errors {
     }
 }
 
-pub use errors::*;
+pub use crate::errors::*;
 
 enum SampleSource<'a> {
     Url(&'a str),

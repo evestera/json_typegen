@@ -1,4 +1,4 @@
-use hints::{Hint};
+use crate::hints::{Hint};
 
 /// Options for the code generation
 #[derive(Debug, PartialEq, Clone)]

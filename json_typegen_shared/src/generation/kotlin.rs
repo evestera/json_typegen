@@ -3,10 +3,10 @@ use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use regex::Regex;
 
-use shape::{self, Shape};
-use util::type_case;
-use util::lower_camel_case;
-use options::Options;
+use crate::shape::{self, Shape};
+use crate::util::type_case;
+use crate::util::lower_camel_case;
+use crate::options::Options;
 
 pub struct Ctxt {
     options: Options,
@@ -26,7 +26,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    use shape::Shape::*;
+    use crate::shape::Shape::*;
     match *shape {
         Null | Any | Bottom => ("Any".into(), None),
         Bool => ("Boolean".into(), None),

@@ -3,9 +3,9 @@ use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
 use unindent::unindent;
 
-use shape::{self, Shape};
-use util::{snake_case, type_case};
-use options::Options;
+use crate::shape::{self, Shape};
+use crate::util::{snake_case, type_case};
+use crate::options::Options;
 
 pub struct Ctxt {
     options: Options,
@@ -51,7 +51,7 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    use shape::Shape::*;
+    use crate::shape::Shape::*;
     match shape {
         Null | Any | Bottom => ("::serde_json::Value".into(), None),
         Bool => ("bool".into(), None),

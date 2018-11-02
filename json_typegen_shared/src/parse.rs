@@ -4,9 +4,9 @@ use synom::IResult;
 use syn;
 use syn::parse::{ident, string, boolean};
 
-use hints::Hint;
-use options::Options;
-use options::OutputMode;
+use crate::hints::Hint;
+use crate::options::Options;
+use crate::options::OutputMode;
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {

@@ -1,7 +1,7 @@
 use serde_json::{ Value, Map };
 
-use hints::{Hints, HintType};
-use shape::{Shape, common_shape};
+use crate::hints::{Hints, HintType};
+use crate::shape::{Shape, common_shape};
 
 pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
     for hint in hints.applicable.iter() {
