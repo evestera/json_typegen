@@ -21,9 +21,8 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
     let var_name = snake_case(&type_name);
 
     let crates = unindent(r#"
-        #[macro_use]
-        extern crate serde_derive;
-        extern crate serde_json;"#);
+        use serde_derive::{Serialize, Deserialize};
+        "#);
 
     let main = unindent(&format!(r#"
         fn main() {{

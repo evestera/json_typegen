@@ -16,9 +16,12 @@ edition = "2018"
 travis-ci = { repository = "evestera/json_typegen" }
 
 [dependencies]
-serde = "0.9"
-serde_derive = "0.9"
-json_typegen_derive = { path = "../json_typegen_derive", version = "0.2" }
+json_typegen_shared = { path = "../json_typegen_shared", version = "0.2" }
 
 [dev-dependencies]
-serde_json = "0.9"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+
+[lib]
+proc-macro = true

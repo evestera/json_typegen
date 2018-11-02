@@ -1,6 +1,5 @@
-#[macro_use]
-extern crate json_typegen;
-use serde_json;
+use json_typegen::json_typegen;
+use serde_derive::{Serialize, Deserialize};
 
 json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 

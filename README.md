@@ -23,9 +23,8 @@ There are three interfaces to this code generation logic:
 The first interface to the code generation tools is a procedural macro `json_typegen!`. As an example, the below code generates code for the type `Point`.
 
 ```rust
-#[macro_use]
-extern crate json_typegen;
-extern crate serde_json;
+use json_typegen::json_typegen;
+use serde_derive::{Serialize, Deserialize};
 
 json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 
@@ -41,6 +40,7 @@ fn main() {
 ```toml
 [dependencies]
 serde = "1.0"
+serde_derive = "1.0"
 serde_json = "1.0"
 json_typegen = "0.2"
 ```

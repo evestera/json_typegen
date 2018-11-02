@@ -1,5 +1,5 @@
 use serde_json;
-use serde_derive::{Serialize, Deserialize};
+use serde_derive::Deserialize;
 use std::{env, path::Path};
 use iron::prelude::*;
 use iron::status;

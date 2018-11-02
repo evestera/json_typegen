@@ -4,9 +4,8 @@
 //! (using [serde_derive](https://crates.io/crates/serde_derive)).
 //!
 //! ```rust
-//! #[macro_use]
-//! extern crate json_typegen;
-//! extern crate serde_json;
+//! use json_typegen::json_typegen;
+//! use serde_derive::{Serialize, Deserialize};
 //!
 //! json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 //!
@@ -21,9 +20,10 @@
 //!
 //! ```toml
 //! [dependencies]
-//! serde = "0.9"
-//! serde_json = "0.9"
-//! json_typegen = "0.1"
+//! serde = "1.0"
+//! serde_derive = "1.0"
+//! serde_json = "1.0"
+//! json_typegen = "0.2"
 //! ```
 //!
 //! The sample json can also come from local or remote files, like so:
@@ -60,25 +60,13 @@
 //! cargo check --features "online-samples"
 //! ```
 
-#[allow(unused_imports)]
-#[macro_use]
-extern crate json_typegen_derive;
-#[allow(unused_imports)]
-#[macro_use]
-extern crate serde_derive;
+extern crate proc_macro;
 
-pub use json_typegen_derive::*;
-pub use serde_derive::*;
+use json_typegen_shared::{codegen_from_macro_input};
 
 /// The main point of this crate
 /// See root documentation
-#[macro_export]
-macro_rules! json_typegen {
-    ($($input:tt)*) => {
-        #[derive(json_types)]
-        #[allow(unused)]
-        enum JsonTypegenPlaceholder {
-            Input = (stringify!($($input)*), 0).1
-        }
-    };
+#[proc_macro]
+pub fn json_typegen(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    codegen_from_macro_input(&input.to_string()).unwrap().parse().unwrap()
 }
