@@ -24,7 +24,6 @@ The first interface to the code generation tools is a procedural macro `json_typ
 
 ```rust
 use json_typegen::json_typegen;
-use serde_derive::{Serialize, Deserialize};
 
 json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 

@@ -24,7 +24,7 @@ impl Default for Options {
             allow_option_vec: false,
             type_visibility: "".into(),
             field_visibility: None,
-            derives: "Default, Debug, Clone, PartialEq, Serialize, Deserialize".into(),
+            derives: "Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize".into(),
             hints: Vec::new(),
         }
     }

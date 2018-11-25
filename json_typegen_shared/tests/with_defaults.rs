@@ -1,3 +1,8 @@
+#![cfg(ignore_while_syn_version_is_outdated)]
+// TODO:
+// I'm using syn 0.11 for parsing, but 0.11 does not support parsing things like
+// #[derive(serde_derive::Serialize)]
+// I need to rewrite my parsing either without syn or with a newer version of syn
 
 use syn;
 
