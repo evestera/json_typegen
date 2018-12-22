@@ -29,3 +29,6 @@ regex = "0.2"
 syn = { version = "0.11", features = ["full", "parsing"] }
 synom = "0.11.3"
 unindent = "0.1.2"
+
+[dev-dependencies]
+testsyn = { package = "syn", version = "0.15", features = ["full", "parsing", "extra-traits"] }

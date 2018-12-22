@@ -1,9 +1,9 @@
-use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
+use linked_hash_map::LinkedHashMap;
 use serde_json::Value;
 
-use crate::shape::{self, Shape};
 use crate::options::Options;
+use crate::shape::{self, Shape};
 
 #[allow(dead_code)]
 pub struct Ctxt {
@@ -14,9 +14,7 @@ pub type Ident = String;
 pub type Code = String;
 
 pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
-    let mut ctxt = Ctxt {
-        options,
-    };
+    let mut ctxt = Ctxt { options };
 
     let ident = "".to_string();
     let value = type_from_shape(&mut ctxt, name, shape);
@@ -53,19 +51,11 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: e } => {
-            generate_vec_type(ctxt, path, &e)
-        }
-        Struct { fields: map } => {
-            generate_struct_from_field_shapes(ctxt, path, &map)
-        }
-        MapT { val_type: v } => {
-            generate_map_type(ctxt, path, &v)
-        }
+        VecT { elem_type: e } => generate_vec_type(ctxt, path, &e),
+        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, &map),
+        MapT { val_type: v } => generate_map_type(ctxt, path, &v),
         Opaque(t) => json!({ "type": t }),
-        Optional(e) => {
-            type_from_shape(ctxt, path, &e)
-        }
+        Optional(e) => type_from_shape(ctxt, path, &e),
     }
 }
 
@@ -87,7 +77,7 @@ fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     })
 }
 
-fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> Value {
+fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> Value {
     let mut types = Vec::new();
 
     for shape in shapes {
@@ -114,7 +104,6 @@ fn generate_struct_from_field_shapes(
     _path: &str,
     map: &LinkedHashMap<String, Shape>,
 ) -> Value {
-
     let mut required: Vec<String> = Vec::new();
     let mut properties = json!({});
 

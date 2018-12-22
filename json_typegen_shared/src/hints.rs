@@ -28,11 +28,11 @@ impl Hint {
         Hint::new(HintType::MapType("::std::collections::HashMap".into()))
     }
 
-    pub fn opaque_type<T: Into<String>>(name: T) -> Self {
+    pub fn opaque_type(name: impl Into<String>) -> Self {
         Hint::new(HintType::OpaqueType(name.into()))
     }
 
-    pub fn type_name<T: Into<String>>(name: T) -> Self {
+    pub fn type_name(name: impl Into<String>) -> Self {
         Hint::new(HintType::TypeName(name.into()))
     }
 }
@@ -61,8 +61,7 @@ impl<'a> Hints<'a> {
             if !pointer.starts_with('/') {
                 panic!(
                     "Invalid JSON pointer: {:?}\n{}",
-                    pointer,
-                    "A pointer not referring to the root has to start with '/'",
+                    pointer, "A pointer not referring to the root has to start with '/'",
                 );
             }
             let tokens: Vec<_> = pointer.split('/').skip(1).collect();

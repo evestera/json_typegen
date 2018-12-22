@@ -1,7 +1,7 @@
-use json_typegen_shared::{codegen, codegen_from_macro, Options, parse, OutputMode};
-use clap::{Arg, App};
-use std::io::{self, Read, Write};
+use clap::{App, Arg};
+use json_typegen_shared::{codegen, codegen_from_macro, parse, Options, OutputMode};
 use std::fs::OpenOptions;
+use std::io::{self, Read, Write};
 
 fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("json_typegen CLI")
@@ -11,7 +11,8 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
             Arg::with_name("input")
                 .help(concat!(
                     "The input to generate types from. A sample, file, URL, or macro. To read ",
-                    "from standard input, a dash, '-', can be used as the input argument."))
+                    "from standard input, a dash, '-', can be used as the input argument."
+                ))
                 .takes_value(true)
                 .required(true),
         )
@@ -34,8 +35,9 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
                 .long("options")
                 .help(concat!(
                     "Options for code generation, in the form of an options block. If input is a ",
-                    "macro, this option is ignored."))
-                .takes_value(true)
+                    "macro, this option is ignored."
+                ))
+                .takes_value(true),
         )
         .arg(
             Arg::with_name("output-mode")
@@ -43,11 +45,13 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
                 .short("-O")
                 .possible_values(&["rust", "typescript", "kotlin", "json_schema", "shape"])
                 .help("What to output.")
-                .takes_value(true)
+                .takes_value(true),
         )
         .get_matches();
 
-    let source = matches.value_of("input").ok_or("Input argument is required")?;
+    let source = matches
+        .value_of("input")
+        .ok_or("Input argument is required")?;
 
     let input = if source == "-" {
         let mut buffer = String::new();
@@ -66,7 +70,7 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
             None => Options::default(),
         };
         if let Some(output_mode) = matches.value_of("output-mode") {
-            options.output_mode = OutputMode::from_str(output_mode).ok_or("Invalid output mode")?;
+            options.output_mode = OutputMode::parse(output_mode).ok_or("Invalid output mode")?;
         }
         codegen(&name, &input, options)
     };

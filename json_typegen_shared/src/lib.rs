@@ -17,8 +17,8 @@ extern crate reqwest;
 #[cfg(feature = "local-samples")]
 use std::fs::File;
 
-use serde_json::Value;
 use regex::Regex;
+use serde_json::Value;
 
 mod generation;
 mod hints;
@@ -112,9 +112,11 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
             OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
             OutputMode::Kotlin => generation::kotlin::kotlin_types(name, &shape, options),
             OutputMode::Shape => generation::shape::shape_string(name, &shape, options),
-            OutputMode::Typescript => generation::typescript::typescript_types(name, &shape, options),
+            OutputMode::Typescript => {
+                generation::typescript::typescript_types(name, &shape, options)
+            }
         };
-        defs.ok_or(JTError::from(ErrorKind::ExistingType(name.to_string())))?
+        defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
 
     Ok(generated_code)
@@ -123,12 +125,14 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
 /// Parse "names" like `pub(crate) Foo` into a name and a visibility option
 fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
     lazy_static! {
-        static ref PUB_RE: Regex =
-            Regex::new(r"(?x)
+        static ref PUB_RE: Regex = Regex::new(
+            r"(?x)
                 pub ( \( (?P<restriction> [^)]+ ) \) )?
                 \s+
                 (?P<name> .+ )
-            ").unwrap();
+            "
+        )
+        .unwrap();
     }
     match PUB_RE.captures(name) {
         Some(captures) => {
@@ -161,12 +165,16 @@ fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
         #[cfg(feature = "remote-samples")]
         SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
         #[cfg(not(feature = "remote-samples"))]
-        SampleSource::Url(_) => { return Err("Remote samples disabled".into()); },
+        SampleSource::Url(_) => {
+            return Err("Remote samples disabled".into());
+        }
 
         #[cfg(feature = "local-samples")]
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
         #[cfg(not(feature = "local-samples"))]
-        SampleSource::File(_) => { return Err("Local samples disabled".into()); },
+        SampleSource::File(_) => {
+            return Err("Local samples disabled".into());
+        }
 
         SampleSource::Text(text) => serde_json::from_str(text),
     };

@@ -1,7 +1,7 @@
-use serde_json::{ Value, Map };
+use serde_json::{Map, Value};
 
-use crate::hints::{Hints, HintType};
-use crate::shape::{Shape, common_shape};
+use crate::hints::{HintType, Hints};
+use crate::shape::{common_shape, Shape};
 
 pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
     for hint in hints.applicable.iter() {
@@ -30,7 +30,7 @@ pub fn value_to_shape(value: &Value, hints: &Hints) -> Shape {
             } else {
                 Shape::Floating
             }
-        },
+        }
         Value::String(_) => Shape::StringT,
         Value::Array(ref values) => array_to_shape(values, hints),
         Value::Object(ref map) => object_to_struct_shape(map, hints),
@@ -50,13 +50,19 @@ fn array_to_shape(values: &[Value], hints: &Hints) -> Shape {
         let shape2 = value_to_shape(val, &hints.step_array());
         common_shape(shape, shape2)
     });
-    Shape::VecT { elem_type: Box::new(inner) }
+    Shape::VecT {
+        elem_type: Box::new(inner),
+    }
 }
 
 fn object_to_struct_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
-    let inner = map.iter()
+    let inner = map
+        .iter()
         .map(|(name, value)| {
-            (name.clone(), value_to_shape(value, &hints.step_field(&name)))
+            (
+                name.clone(),
+                value_to_shape(value, &hints.step_field(&name)),
+            )
         })
         .collect();
     Shape::Struct { fields: inner }
@@ -67,6 +73,7 @@ fn object_to_map_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
         let shape2 = value_to_shape(val, &hints.step_any());
         common_shape(shape, shape2)
     });
-    Shape::MapT { val_type: Box::new(inner) }
+    Shape::MapT {
+        val_type: Box::new(inner),
+    }
 }
-

@@ -1,11 +1,11 @@
-use std::collections::{ HashSet };
-use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
+use linked_hash_map::LinkedHashMap;
+use std::collections::HashSet;
 use unindent::unindent;
 
+use crate::options::Options;
 use crate::shape::{self, Shape};
 use crate::util::{snake_case, type_case};
-use crate::options::Options;
 
 pub struct Ctxt {
     options: Options,
@@ -20,11 +20,14 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
 
     let var_name = snake_case(&type_name);
 
-    let crates = unindent(r#"
+    let crates = unindent(
+        r#"
         use serde_derive::{Serialize, Deserialize};
-        "#);
+        "#,
+    );
 
-    let main = unindent(&format!(r#"
+    let main = unindent(&format!(
+        r#"
         fn main() {{
             let {var_name} = {type_name}::default();
             let serialized = serde_json::to_string(&{var_name}).unwrap();
@@ -32,7 +35,10 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
             let deserialized: {type_name} = serde_json::from_str(&serialized).unwrap();
             println!("deserialized = {{:?}}", deserialized);
         }}
-        "#, var_name = var_name, type_name = type_name));
+        "#,
+        var_name = var_name,
+        type_name = type_name
+    ));
 
     match defs {
         Some(code) => crates + "\n\n" + &code + "\n\n" + &main,
@@ -65,18 +71,10 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: e } => {
-            generate_vec_type(ctxt, path, &e)
-        }
-        Struct { fields: map } => {
-            generate_struct_from_field_shapes(ctxt, path, &map)
-        }
-        MapT { val_type: v } => {
-            generate_map_type(ctxt, path, &v)
-        }
-        Opaque(t) => {
-            (t.clone(), None)
-        }
+        VecT { elem_type: e } => generate_vec_type(ctxt, path, &e),
+        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, &map),
+        MapT { val_type: v } => generate_map_type(ctxt, path, &v),
+        Opaque(t) => (t.clone(), None),
         Optional(e) => {
             let (inner, defs) = type_from_shape(ctxt, path, &e);
             if ctxt.options.use_default_for_missing_fields {
@@ -97,10 +95,13 @@ fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Opti
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
     let singular = path.to_singular();
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
-    (format!("::std::collections::HashMap<String, {}>", inner), defs)
+    (
+        format!("::std::collections::HashMap<String, {}>", inner),
+        defs,
+    )
 }
 
-fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> (Ident, Option<Code>) {
+fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> (Ident, Option<Code>) {
     let mut types = Vec::new();
     let mut defs = Vec::new();
 
@@ -123,17 +124,17 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     type_or_field_name(name, used_names, "GeneratedType", type_case)
 }
 
-const RUST_KEYWORDS_ARR: &'static [&'static str] = &["abstract", "alignof", "as", "become", "box",
-    "break", "const", "continue", "crate", "do", "else", "enum", "extern", "false", "final", "fn",
-    "for", "if", "impl", "in", "let", "loop", "macro", "match", "mod", "move", "mut", "offsetof",
-    "override", "priv", "proc", "pub", "pure", "ref", "return", "Self", "self", "sizeof", "static",
-    "struct", "super", "trait", "true", "type", "typeof", "unsafe", "unsized", "use", "virtual",
-    "where", "while", "yield"];
+const RUST_KEYWORDS_ARR: &[&str] = &[
+    "abstract", "alignof", "as", "become", "box", "break", "const", "continue", "crate", "do",
+    "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in", "let", "loop",
+    "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub", "pure",
+    "ref", "return", "Self", "self", "sizeof", "static", "struct", "super", "trait", "true",
+    "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield",
+];
 
 lazy_static! {
-    static ref RUST_KEYWORDS: HashSet<&'static str> = {
-        RUST_KEYWORDS_ARR.iter().cloned().collect()
-    };
+    static ref RUST_KEYWORDS: HashSet<&'static str> =
+        { RUST_KEYWORDS_ARR.iter().cloned().collect() };
 }
 
 fn type_or_field_name(
@@ -198,7 +199,8 @@ fn generate_struct_from_field_shapes(
     let mut field_names = HashSet::new();
     let mut defs = Vec::new();
 
-    let fields: Vec<Code> = map.iter()
+    let fields: Vec<Code> = map
+        .iter()
         .map(|(name, typ)| {
             let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());

@@ -11,14 +11,12 @@ use json_typegen_shared::{codegen, Options};
 use test::Bencher;
 
 macro_rules! file_bench {
-    ($name:ident, $file_path:expr) => (
+    ($name:ident, $file_path:expr) => {
         #[bench]
         fn $name(b: &mut Bencher) {
-            b.iter(|| {
-                codegen("Article", include_str!($file_path), Options::default())
-            });
+            b.iter(|| codegen("Article", include_str!($file_path), Options::default()));
         }
-    )
+    };
 }
 
 file_bench!(magic_card_list, "fixtures/magic_card_list.json");

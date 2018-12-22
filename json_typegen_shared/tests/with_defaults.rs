@@ -1,10 +1,4 @@
-#![cfg(ignore_while_syn_version_is_outdated)]
-// TODO:
-// I'm using syn 0.11 for parsing, but 0.11 does not support parsing things like
-// #[derive(serde_derive::Serialize)]
-// I need to rewrite my parsing either without syn or with a newer version of syn
-
-use syn;
+use testsyn::{parse_str, Item};
 
 use json_typegen_shared::{codegen, Options};
 
@@ -13,10 +7,14 @@ fn code_output_test(name: &str, input: &str, expected: &str) {
     let res = codegen(name, input, Options::default());
     let output = res.unwrap();
     assert_eq!(
-        syn::parse_items(&output),
-        syn::parse_items(expected),
+        // Wrapping in mod Foo { } since there is no impl Parse for Vec<Item>
+        parse_str::<Item>(&format!("mod Foo {{ {} }}", &output)).unwrap(),
+        parse_str::<Item>(&format!("mod Foo {{ {} }}", expected)).unwrap(),
         "\n\nUnexpected output code:\n  input: {}\n  output:\n{}\n  expected: {}",
-        input, output, expected);
+        input,
+        output,
+        expected
+    );
 }
 
 #[test]
@@ -27,9 +25,9 @@ fn empty_object() {
             {}
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Root {}
-        "##
+        "##,
     );
 }
 
@@ -44,12 +42,12 @@ fn point() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Point {
                 x: i64,
                 y: i64,
             }
-        "##
+        "##,
     );
 }
 
@@ -64,12 +62,12 @@ fn pub_point() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Point {
                 pub x: i64,
                 pub y: i64,
             }
-        "##
+        "##,
     );
 }
 
@@ -92,14 +90,14 @@ fn optionals() {
             ]
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Optional {
                 in_both: i64,
                 missing: Option<i64>,
                 has_null: Option<i64>,
                 added: Option<i64>,
             }
-        "##
+        "##,
     );
 }
 
@@ -122,13 +120,13 @@ fn fallback() {
             ]
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Fallback {
                 only_null: ::serde_json::Value,
                 conflicting: ::serde_json::Value,
                 empty_array: Vec<::serde_json::Value>,
             }
-        "##
+        "##,
     );
 }
 
@@ -148,28 +146,28 @@ fn nesting() {
             ]
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Root {
                 nested: Nested,
                 in_array: Vec<InArray>,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Nested {
                 a: i64,
                 doubly_nested: DoublyNested,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct DoublyNested {
                 c: i64,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct InArray {
                 b: i64,
             }
-        "##
+        "##,
     );
 }
 
@@ -197,17 +195,17 @@ fn tuple() {
             ]
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Pagination {
-                pages: i64 ,
-                items: i64
+                pages: i64,
+                items: i64,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Pagination2 {
-                name : String
+                name : String,
             }
-        "##
+        "##,
     );
 }
 
@@ -221,11 +219,11 @@ fn rename() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             struct Renamed {
                 #[serde(rename = "type")]
-                type_field: i64
+                type_field: i64,
             }
-        "##
+        "##,
     );
 }

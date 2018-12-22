@@ -1,7 +1,10 @@
 pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';
-    for c in name.chars().skip_while(|c| !(c.is_alphanumeric() && c.is_ascii())) {
+    for c in name
+        .chars()
+        .skip_while(|c| !(c.is_alphanumeric() && c.is_ascii()))
+    {
         if !c.is_alphanumeric() {
             last = c;
             continue;
@@ -10,7 +13,8 @@ pub fn camel_case(name: &str) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase()) {
+        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase())
+        {
             s.push(c.to_ascii_uppercase());
         } else {
             s.push(c.to_ascii_lowercase());
@@ -23,7 +27,10 @@ pub fn camel_case(name: &str) -> String {
 pub fn snake_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = 'A';
-    for c in name.chars().skip_while(|c| !(c.is_alphanumeric() && c.is_ascii())) {
+    for c in name
+        .chars()
+        .skip_while(|c| !(c.is_alphanumeric() && c.is_ascii()))
+    {
         if !c.is_alphanumeric() {
             last = c;
             continue;
@@ -32,7 +39,8 @@ pub fn snake_case(name: &str) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase()) {
+        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase())
+        {
             s.push('_');
         }
         s.push(c.to_ascii_lowercase());

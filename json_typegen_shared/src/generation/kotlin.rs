@@ -1,11 +1,11 @@
-use std::collections::{ HashSet };
-use linked_hash_map::LinkedHashMap;
 use inflector::Inflector;
+use linked_hash_map::LinkedHashMap;
+use std::collections::HashSet;
 
-use crate::shape::{self, Shape};
-use crate::util::type_case;
-use crate::util::lower_camel_case;
 use crate::options::Options;
+use crate::shape::{self, Shape};
+use crate::util::lower_camel_case;
+use crate::util::type_case;
 
 pub struct Ctxt {
     options: Options,
@@ -40,18 +40,10 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: ref e } => {
-            generate_vec_type(ctxt, path, e)
-        }
-        Struct { fields: ref map } => {
-            generate_struct_from_field_shapes(ctxt, path, map)
-        }
-        MapT { val_type: ref v } => {
-            generate_map_type(ctxt, path, v)
-        }
-        Opaque(ref t) => {
-            (t.clone(), None)
-        }
+        VecT { elem_type: ref e } => generate_vec_type(ctxt, path, e),
+        Struct { fields: ref map } => generate_struct_from_field_shapes(ctxt, path, map),
+        MapT { val_type: ref v } => generate_map_type(ctxt, path, v),
+        Opaque(ref t) => (t.clone(), None),
         Optional(ref e) => {
             let (inner, defs) = type_from_shape(ctxt, path, e);
             if ctxt.options.use_default_for_missing_fields {
@@ -75,7 +67,7 @@ fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Opti
     (format!("Map<String, {}>", inner), defs)
 }
 
-fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> (Ident, Option<Code>) {
+fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> (Ident, Option<Code>) {
     let mut types = Vec::new();
     let mut defs = Vec::new();
 
@@ -87,11 +79,18 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &Vec<Shape>) -> (Ide
         }
     }
 
-    (format!("{}<{}>", match types.len() {
-        2 => "Pair",
-        3 => "Triple",
-        _ => panic!("No n-tuple type exists for n of {}", types.len()),
-    }, types.join(", ")), Some(defs.join("\n\n")))
+    (
+        format!(
+            "{}<{}>",
+            match types.len() {
+                2 => "Pair",
+                3 => "Triple",
+                _ => panic!("No n-tuple type exists for n of {}", types.len()),
+            },
+            types.join(", ")
+        ),
+        Some(defs.join("\n\n")),
+    )
 }
 
 fn field_name(name: &str, used_names: &HashSet<String>) -> Ident {
@@ -103,7 +102,7 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 }
 
 // https://kotlinlang.org/docs/reference/keyword-reference.html
-const KOTLIN_KEYWORDS_ARR: &'static [&'static str] = &[
+const KOTLIN_KEYWORDS_ARR: &[&str] = &[
     // Hard
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in",
     "interface", "is", "null", "object", "package", "return", "super", "this", "throw", "true",
@@ -124,9 +123,8 @@ const KOTLIN_KEYWORDS_ARR: &'static [&'static str] = &[
 ];
 
 lazy_static! {
-    static ref KOTLIN_KEYWORDS: HashSet<&'static str> = {
-        KOTLIN_KEYWORDS_ARR.iter().cloned().collect()
-    };
+    static ref KOTLIN_KEYWORDS: HashSet<&'static str> =
+        { KOTLIN_KEYWORDS_ARR.iter().cloned().collect() };
 }
 
 fn type_or_field_name(
@@ -165,9 +163,9 @@ fn type_or_field_name(
 }
 
 fn generate_struct_from_field_shapes(
-        ctxt: &mut Ctxt,
-        path: &str,
-        map: &LinkedHashMap<String, Shape>
+    ctxt: &mut Ctxt,
+    path: &str,
+    map: &LinkedHashMap<String, Shape>,
 ) -> (Ident, Option<Code>) {
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
@@ -175,7 +173,8 @@ fn generate_struct_from_field_shapes(
     let mut field_names = HashSet::new();
     let mut defs = Vec::new();
 
-    let fields: Vec<Code> = map.iter()
+    let fields: Vec<Code> = map
+        .iter()
         .map(|(name, typ)| {
             let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());

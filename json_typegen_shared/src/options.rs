@@ -1,4 +1,4 @@
-use crate::hints::{Hint};
+use crate::hints::Hint;
 
 /// Options for the code generation
 #[derive(Debug, PartialEq, Clone)]
@@ -40,7 +40,7 @@ pub enum OutputMode {
 }
 
 impl OutputMode {
-    pub fn from_str(s: &str) -> Option<Self> {
+    pub fn parse(s: &str) -> Option<Self> {
         match s {
             "rust" => Some(OutputMode::Rust),
             "typescript" => Some(OutputMode::Typescript),
