@@ -3,20 +3,12 @@
 //! [open an issue](https://github.com/evestera/json_typegen/issues/new) to let me know.
 
 #[macro_use]
-extern crate serde_json;
-#[macro_use]
 extern crate error_chain;
-#[macro_use]
-extern crate lazy_static;
-#[macro_use]
-extern crate synom;
-
-#[cfg(feature = "remote-samples")]
-extern crate reqwest;
 
 #[cfg(feature = "local-samples")]
 use std::fs::File;
 
+use lazy_static::lazy_static;
 use regex::Regex;
 use serde_json::Value;
 

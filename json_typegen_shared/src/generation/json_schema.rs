@@ -1,6 +1,6 @@
 use inflector::Inflector;
 use linked_hash_map::LinkedHashMap;
-use serde_json::Value;
+use serde_json::{json, Value};
 
 use crate::options::Options;
 use crate::shape::{self, Shape};
