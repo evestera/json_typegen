@@ -131,6 +131,7 @@ const RUST_KEYWORDS_ARR: &[&str] = &[
     "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub", "pure",
     "ref", "return", "Self", "self", "sizeof", "static", "struct", "super", "trait", "true",
     "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield",
+    "async", "await", "try"
 ];
 
 lazy_static! {
