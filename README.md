@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
 [![docs.rs](https://docs.rs/json_typegen/badge.svg)](https://docs.rs/json_typegen/)
 
-*json_typegen* is a collection of tools for generating Rust types from JSON samples, built on top of [serde]. I.e. you give it some JSON, and it gives you the type definitions necessary to use that JSON in a Rust program. If you are familiar with [F#], the procedural macro `json_typegen!` works as a [type provider] for JSON in Rust. It was inspired by and uses the same kind of inference algorithm as [F# Data].
+*json_typegen* is a collection of tools for generating Rust types (++) from JSON samples, built on top of [serde]. I.e. you give it some JSON, and it gives you the type definitions necessary to use that JSON in a Rust program. If you are familiar with [F#], the procedural macro `json_typegen!` works as a [type provider] for JSON in Rust. It was inspired by and uses the same kind of inference algorithm as [F# Data].
 
 [serde]: https://serde.rs/
 [F# Data]: http://fsharp.github.io/FSharp.Data/
