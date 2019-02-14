@@ -182,7 +182,7 @@ fn generate_struct_from_field_shapes(
 
             let mut field_code = String::new();
             if &field_name != name {
-                field_code += &format!("    @field:JsonProperty(\"{}\")]\n", name)
+                field_code += &format!("    @field:JsonProperty(\"{}\")\n", name)
             }
 
             let (field_type, child_defs) = type_from_shape(ctxt, name, typ);
