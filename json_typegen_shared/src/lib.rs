@@ -96,7 +96,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
 
     let shape = inference::value_to_shape(&sample, &hints);
 
-    let generated_code = if options.runnable {
+    let mut generated_code = if options.runnable {
         generation::rust::rust_program(name, &shape, options)
     } else {
         let (name, defs) = match options.output_mode {
@@ -110,6 +110,10 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         };
         defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
+
+    if !generated_code.ends_with("\n") {
+        generated_code.push('\n');
+    }
 
     Ok(generated_code)
 }
