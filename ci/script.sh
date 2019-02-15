@@ -2,7 +2,7 @@
 
 set -ex
 
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DIR="$(cd "$(dirname $0)/.." && pwd)"
 
 cd "$DIR/json_typegen_shared"
 cargo build --verbose
