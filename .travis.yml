@@ -7,12 +7,13 @@ matrix:
   include:
   - os: linux
     rust: stable
-    env: TARGET=x86_64-unknown-linux-musl
+    env: TARGET=x86_64-unknown-linux-gnu
     before_script: rustup target add $TARGET
     addons:
       apt:
         packages:
         - musl-tools
+        - libssl-dev
   - os: osx
     rust: stable
     env: TARGET=x86_64-apple-darwin
