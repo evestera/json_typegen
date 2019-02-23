@@ -1,7 +1,7 @@
 # json_typegen - Rust types from JSON samples
 
 [![Travis Build Status](https://api.travis-ci.org/evestera/json_typegen.svg?branch=master)](https://travis-ci.org/evestera/json_typegen)
-[![Appveyor build status](https://ci.appveyor.com/api/projects/status/github/evestera/json_typegen?svg=true)](https://ci.appveyor.com/project/BurntSushi/ripgrep)
+[![Appveyor build status](https://ci.appveyor.com/api/projects/status/github/evestera/json_typegen?svg=true)](https://ci.appveyor.com/project/evestera/json_typegen)
 [![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
 [![docs.rs](https://docs.rs/json_typegen/badge.svg)](https://docs.rs/json_typegen/)
 
