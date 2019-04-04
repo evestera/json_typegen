@@ -99,7 +99,7 @@ For details on usage see [its readme](json_typegen_cli/README.md).
 
 ## Web interface
 
-For simple testing and one-time use there is also a web interface (in `json_typegen_web`). An instance of this interface is currently hosted at <http://vestera.as/json_typegen>
+For simple testing and one-time use there is also a web interface (in `json_typegen_web`). An instance of this interface is currently hosted at <https://typegen.vestera.as/>
 
 ## Creating your own type provider crate
 
