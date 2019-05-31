@@ -11,7 +11,10 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
       "output_mode": document.getElementById('outputmode').value,
     });
     const result = module.run(typename, input, JSON.stringify(options));
-    document.getElementById('target').innerHTML = result;
+    document.getElementById('target').innerHTML = result
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
   };
 
   document.getElementById('typename').onkeyup = render;
