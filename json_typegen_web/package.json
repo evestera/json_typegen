@@ -1,7 +1,7 @@
 {
   "author": "Erik Vesteraas <erik@vestera.as>",
   "name": "json_typegen_web",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "repository": "https://github.com/evestera/json_typegen",
   "license": "MIT",
   "scripts": {

@@ -1,6 +1,6 @@
 [package]
 name = "json_typegen_shared"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 description = "Codegen from JSON samples. Not intended to be used directly. See repository for the intended crates."

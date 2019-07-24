@@ -1,6 +1,6 @@
 [package]
 name = "json_typegen_wasm"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 edition = "2018"
 description = "WASM wrapper for json_typegen. Codegen from JSON samples."
