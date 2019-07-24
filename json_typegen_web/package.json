@@ -1,8 +1,8 @@
 {
   "author": "Erik Vesteraas <erik@vestera.as>",
-  "name": "svg-halftone-web",
-  "version": "0.1.0",
-  "repository": "https://github.com/evestera/svg-halftone",
+  "name": "json_typegen_web",
+  "version": "0.3.2",
+  "repository": "https://github.com/evestera/json_typegen",
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server -d",

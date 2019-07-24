@@ -1,10 +1,10 @@
 [package]
 name = "json_typegen_wasm"
-version = "0.1.0"
+version = "0.3.2"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 edition = "2018"
-description = "WASM wrapper for svg-halftone. Creating SVG halftone patterns from raster images."
-repository = "https://github.com/evestera/svg-halftone"
+description = "WASM wrapper for json_typegen. Codegen from JSON samples."
+repository = "https://github.com/evestera/json_typegen"
 license = "MIT"
 
 [lib]
