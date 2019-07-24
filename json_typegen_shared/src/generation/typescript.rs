@@ -131,7 +131,7 @@ lazy_static! {
 
 fn is_ts_identifier(s: &str) -> bool {
     lazy_static! {
-        static ref JS_IDENTIFIER_RE: Regex = Regex::new(r"[a-zA-Z_$][a-zA-Z_$0-9]*").unwrap();
+        static ref JS_IDENTIFIER_RE: Regex = Regex::new(r"^[a-zA-Z_$][a-zA-Z_$0-9]*$").unwrap();
     }
     JS_IDENTIFIER_RE.is_match(s) && !RESERVED_WORDS.contains(s)
 }
@@ -184,4 +184,29 @@ fn generate_struct_from_field_shapes(
     }
 
     (type_name, Some(code))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_ts_identifier() {
+        // Valid:
+        assert!(is_ts_identifier("foobar"));
+        assert!(is_ts_identifier("FOOBAR"));
+        assert!(is_ts_identifier("foo_bar"));
+        assert!(is_ts_identifier("$"));
+        assert!(is_ts_identifier("foobar1"));
+
+        // Invalid:
+        assert!(!is_ts_identifier("1foobar"));
+        assert!(!is_ts_identifier(""));
+        assert!(!is_ts_identifier(" "));
+        assert!(!is_ts_identifier(" foobar"));
+        assert!(!is_ts_identifier("foobar "));
+        assert!(!is_ts_identifier("foo bar"));
+        assert!(!is_ts_identifier("foo.bar"));
+        assert!(!is_ts_identifier("true"));
+    }
 }
