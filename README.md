@@ -74,7 +74,7 @@ To avoid incurring the cost of a HTTP request per sample used for every build yo
 #[cfg(not(feature = "online-samples"))]
 json_typegen!("pub Point", r#"{ "x": 1, "y": 2 }"#);
 #[cfg(feature = "online-samples")]
-json_typegen!("pub Point", "http://vestera.as/json_typegen/examples/point.json");
+json_typegen!("pub Point", "https://typegen.vestera.as/examples/point.json");
 ```
 
 And in Cargo.toml:

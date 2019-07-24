@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server -d",
-    "build": "rm -rf dist && webpack && cp favicon.ico dist",
+    "build": "rm -rf dist && webpack && cp -a static/. dist",
     "deploy": "npm run build && firebase deploy"
   },
   "devDependencies": {

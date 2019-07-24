@@ -43,7 +43,7 @@
 //! #[cfg(not(feature = "online-samples"))]
 //! json_typegen!("Point", r#"{ "x": 1, "y": 2 }"#);
 //! #[cfg(feature = "online-samples")]
-//! json_typegen!("Point", "http://vestera.as/json_typegen/examples/point.json");
+//! json_typegen!("Point", "https://typegen.vestera.as/examples/point.json");
 //! ```
 //!
 //! And in Cargo.toml:

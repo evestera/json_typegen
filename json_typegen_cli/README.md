@@ -26,7 +26,7 @@ json_typegen json_samples/point.json -o src/point.rs -n 'pub Point'
 For an online sample, run:
 
 ```sh
-json_typegen 'http://vestera.as/json_typegen/examples/point.json' -o src/point.rs -n 'pub Point'
+json_typegen 'https://typegen.vestera.as/examples/point.json' -o src/point.rs -n 'pub Point'
 ```
 
 The generated code assumes the availability of `serde` and `serde_derive`, so
