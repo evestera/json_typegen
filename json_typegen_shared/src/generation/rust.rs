@@ -4,9 +4,10 @@ use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 use unindent::unindent;
 
-use crate::options::Options;
+use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
 use crate::util::{snake_case, type_case};
+use crate::generation::serde_case::RenameRule;
 
 pub struct Ctxt {
     options: Options,
@@ -207,8 +208,13 @@ fn generate_struct_from_field_shapes(
             let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());
 
+            let needs_rename = if let Some(ref transform) = ctxt.options.property_name_format {
+                &to_rename_rule(transform).apply_to_field(&field_name) != name
+            } else {
+                &field_name != name
+            };
             let mut field_code = String::new();
-            if &field_name != name {
+            if needs_rename {
                 field_code += &format!("    #[serde(rename = \"{}\")]\n", name)
             }
 
@@ -243,6 +249,12 @@ fn generate_struct_from_field_shapes(
         code += "#[serde(default)]\n";
     }
 
+    if let Some(ref transform) = ctxt.options.property_name_format {
+        if *transform != StringTransform::SnakeCase {
+            code += &format!("#[serde(rename_all = \"{}\")]\n", serde_name(transform))
+        }
+    }
+
     if visibility != "" {
         code += &visibility;
         code += " ";
@@ -262,4 +274,30 @@ fn generate_struct_from_field_shapes(
     }
 
     (type_name, Some(code))
+}
+
+fn to_rename_rule(transform: &StringTransform) -> RenameRule {
+    match transform {
+        StringTransform::LowerCase => RenameRule::LowerCase,
+        StringTransform::UpperCase => RenameRule::UPPERCASE,
+        StringTransform::PascalCase => RenameRule::PascalCase,
+        StringTransform::CamelCase => RenameRule::CamelCase,
+        StringTransform::SnakeCase => RenameRule::SnakeCase,
+        StringTransform::ScreamingSnakeCase => RenameRule::ScreamingSnakeCase,
+        StringTransform::KebabCase => RenameRule::KebabCase,
+        StringTransform::ScreamingKebabCase => RenameRule::ScreamingKebabCase,
+    }
+}
+
+fn serde_name(transform: &StringTransform) -> &'static str {
+    match transform {
+        StringTransform::LowerCase => "lowercase",
+        StringTransform::UpperCase => "UPPERCASE",
+        StringTransform::PascalCase => "PascalCase",
+        StringTransform::CamelCase => "camelCase",
+        StringTransform::SnakeCase => "snake_case",
+        StringTransform::ScreamingSnakeCase => "SCREAMING_SNAKE_CASE",
+        StringTransform::KebabCase => "kebab-case",
+        StringTransform::ScreamingKebabCase => "SCREAMING-KEBAB-CASE",
+    }
 }

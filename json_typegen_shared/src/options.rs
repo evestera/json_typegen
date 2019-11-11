@@ -11,7 +11,7 @@ pub struct Options {
     pub type_visibility: String,
     pub field_visibility: Option<String>,
     pub derives: String,
-    pub rename_all: Option<StringTransform>,
+    pub property_name_format: Option<StringTransform>,
     pub(crate) hints: Vec<(String, Hint)>,
 }
 
@@ -26,7 +26,7 @@ impl Default for Options {
             type_visibility: "pub".into(),
             field_visibility: Some("pub".into()),
             derives: "Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize".into(),
-            rename_all: None,
+            property_name_format: None,
             hints: Vec::new(),
         }
     }
@@ -76,13 +76,13 @@ impl StringTransform {
     pub fn parse(s: &str) -> Option<Self> {
         match s {
             "lowercase" => Some(StringTransform::LowerCase),
-            "uppercase" => Some(StringTransform::UpperCase),
-            "pascalcase" | "uppercamelcase" => Some(StringTransform::PascalCase),
-            "camelcase" => Some(StringTransform::CamelCase),
-            "snakecase" => Some(StringTransform::SnakeCase),
-            "screamingsnakecase" => Some(StringTransform::ScreamingSnakeCase),
-            "kebabcase" => Some(StringTransform::KebabCase),
-            "screamingkebabcase" => Some(StringTransform::ScreamingKebabCase),
+            "uppercase" | "UPPERCASE" => Some(StringTransform::UpperCase),
+            "pascalcase" | "uppercamelcase" | "PascalCase" => Some(StringTransform::PascalCase),
+            "camelcase" | "camelCase" => Some(StringTransform::CamelCase),
+            "snakecase" | "snake_case" => Some(StringTransform::SnakeCase),
+            "screamingsnakecase" | "SCREAMING_SNAKE_CASE" => Some(StringTransform::ScreamingSnakeCase),
+            "kebabcase" | "kebab-case" => Some(StringTransform::KebabCase),
+            "screamingkebabcase" | "SCREAMING-KEBAB-CASE" => Some(StringTransform::ScreamingKebabCase),
             _ => None,
         }
     }

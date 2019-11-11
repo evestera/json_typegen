@@ -1,25 +1,29 @@
 import { polyfill } from './polyfill';
 
+const $ = (id) => document.getElementById(id);
+
 polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
   const render = () => {
-    const typename = document.getElementById('typename').value;
-    let input = document.getElementById('input').value;
+    const typename = $('typename').value;
+    let input = $('input').value;
     if (input === '') {
       input = '{}';
     }
     const options = ({
-      "output_mode": document.getElementById('outputmode').value,
+      "output_mode": $('outputmode').value,
+      "property_name_format": $('propertynameformat').value,
     });
     const result = module.run(typename, input, JSON.stringify(options));
-    document.getElementById('target').innerHTML = result
+    $('target').innerHTML = result
         .replace(/&/g,'&amp;')
         .replace(/</g,'&lt;')
         .replace(/>/g,'&gt;');
   };
 
-  document.getElementById('typename').onkeyup = render;
-  document.getElementById('input').onkeyup = render;
-  document.getElementById('outputmode').onchange = render;
+  $('typename').onkeyup = render;
+  $('input').onkeyup = render;
+  $('outputmode').onchange = render;
+  $('propertynameformat').onchange = render;
 
   render();
 });

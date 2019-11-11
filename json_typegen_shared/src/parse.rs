@@ -109,8 +109,8 @@ pub fn options(input: &str) -> Result<Options, String> {
         "derives" => string_option(remaining, "derives", |val| {
             options.derives = val;
         }),
-        "rename_all" => string_option(remaining, "rename_all", |val| {
-            options.rename_all = StringTransform::parse(&val)
+        "property_name_format" => string_option(remaining, "rename_all", |val| {
+            options.property_name_format = StringTransform::parse(&val)
         }),
         "field_visibility" => string_option(remaining, "field_visibility", |val| {
             options.field_visibility = Some(val);
