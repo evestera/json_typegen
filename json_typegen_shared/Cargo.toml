@@ -21,7 +21,7 @@ serde = "1.0"
 serde_derive = "1.0"
 serde_json = { version = "1.0", features = ["preserve_order"] }
 reqwest = { version = "0.9", optional = true }
-error-chain = "0.10"
+error-chain = "0.12.1"
 lazy_static = "1.2"
 linked-hash-map = "0.5.1"
 Inflector = "0.11"
