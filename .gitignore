@@ -3,6 +3,7 @@ Cargo.lock
 *.rs.bk
 
 json_typegen_wasm/pkg
+json_typegen_web/pkg
 json_typegen_web/dist
 json_typegen_web/.firebase
 json_typegen_web/node_modules

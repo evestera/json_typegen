@@ -26,7 +26,7 @@ fn empty_object() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Root {}
+            pub struct Root {}
         "##,
     );
 }
@@ -43,18 +43,18 @@ fn point() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Point {
-                x: i64,
-                y: i64,
+            pub struct Point {
+                pub x: i64,
+                pub y: i64,
             }
         "##,
     );
 }
 
 #[test]
-fn pub_point() {
+fn pub_crate_point() {
     code_output_test(
-        "pub Point",
+        "pub(crate) Point",
         r##"
             {
                 "x": 2,
@@ -63,7 +63,7 @@ fn pub_point() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            pub struct Point {
+            pub(crate) struct Point {
                 pub x: i64,
                 pub y: i64,
             }
@@ -91,11 +91,11 @@ fn optionals() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Optional {
-                in_both: i64,
-                missing: Option<i64>,
-                has_null: Option<i64>,
-                added: Option<i64>,
+            pub struct Optional {
+                pub in_both: i64,
+                pub missing: Option<i64>,
+                pub has_null: Option<i64>,
+                pub added: Option<i64>,
             }
         "##,
     );
@@ -121,10 +121,10 @@ fn fallback() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Fallback {
-                only_null: ::serde_json::Value,
-                conflicting: ::serde_json::Value,
-                empty_array: Vec<::serde_json::Value>,
+            pub struct Fallback {
+                pub only_null: ::serde_json::Value,
+                pub conflicting: ::serde_json::Value,
+                pub empty_array: Vec<::serde_json::Value>,
             }
         "##,
     );
@@ -147,25 +147,25 @@ fn nesting() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Root {
-                nested: Nested,
-                in_array: Vec<InArray>,
+            pub struct Root {
+                pub nested: Nested,
+                pub in_array: Vec<InArray>,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Nested {
-                a: i64,
-                doubly_nested: DoublyNested,
+            pub struct Nested {
+                pub a: i64,
+                pub doubly_nested: DoublyNested,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct DoublyNested {
-                c: i64,
+            pub struct DoublyNested {
+                pub c: i64,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct InArray {
-                b: i64,
+            pub struct InArray {
+                pub b: i64,
             }
         "##,
     );
@@ -196,14 +196,14 @@ fn tuple() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Pagination {
-                pages: i64,
-                items: i64,
+            pub struct Pagination {
+                pub pages: i64,
+                pub items: i64,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Pagination2 {
-                name : String,
+            pub struct Pagination2 {
+                pub name : String,
             }
         "##,
     );
@@ -220,9 +220,9 @@ fn rename() {
         "##,
         r##"
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            struct Renamed {
+            pub struct Renamed {
                 #[serde(rename = "type")]
-                type_field: i64,
+                pub type_field: i64,
             }
         "##,
     );

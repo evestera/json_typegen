@@ -22,8 +22,8 @@ impl Default for Options {
             use_default_for_missing_fields: false,
             deny_unknown_fields: false,
             allow_option_vec: false,
-            type_visibility: "".into(),
-            field_visibility: None,
+            type_visibility: "pub".into(),
+            field_visibility: Some("pub".into()),
             derives: "Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize".into(),
             hints: Vec::new(),
         }

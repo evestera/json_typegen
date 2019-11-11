@@ -195,7 +195,7 @@ fn generate_struct_from_field_shapes(
         })
         .collect();
 
-    let mut code = format!("class {}(\n", type_name);
+    let mut code = format!("data class {}(\n", type_name);
 
     if !fields.is_empty() {
         code += &fields.join(",\n");
