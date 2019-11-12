@@ -3,7 +3,8 @@
 ```bash
 VERSION=v0.3.3
 git checkout master
-# update Cargo.toml files with $VERSION
+# update Cargo.toml and README files with $VERSION
+# in json_typegen_web: npm version <major|minor|patch>
 git commit -am "Release $VERSION"
 git tag $VERSION
 cd json_typegen_shared
