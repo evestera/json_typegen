@@ -3,9 +3,9 @@ use lazy_static::lazy_static;
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 
-use crate::options::Options;
+use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::util::lower_camel_case;
+use crate::util::{lower_camel_case, snake_case, kebab_case};
 use crate::util::type_case;
 
 pub struct Ctxt {
@@ -180,8 +180,13 @@ fn generate_struct_from_field_shapes(
             let field_name = field_name(name, &field_names);
             field_names.insert(field_name.clone());
 
+            let needs_rename = if let Some(ref transform) = ctxt.options.property_name_format {
+                &apply_transform(transform, &field_name) != name
+            } else {
+                &field_name != name
+            };
             let mut field_code = String::new();
-            if &field_name != name {
+            if needs_rename {
                 field_code += &format!("    @field:JsonProperty(\"{}\")\n", name)
             }
 
@@ -195,7 +200,19 @@ fn generate_struct_from_field_shapes(
         })
         .collect();
 
-    let mut code = format!("data class {}(\n", type_name);
+    let mut code = String::new();
+
+    if let Some(ref transform) = ctxt.options.property_name_format {
+         code += match transform {
+             StringTransform::LowerCase => "@JsonNaming(PropertyNamingStrategy.LowerCaseStrategy.class)\n",
+             StringTransform::PascalCase => "@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy.class)\n",
+             StringTransform::SnakeCase => "@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)\n",
+             StringTransform::KebabCase => "@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)\n",
+             _ => "",
+         };
+    }
+
+    code += &format!("data class {}(\n", type_name);
 
     if !fields.is_empty() {
         code += &fields.join(",\n");
@@ -209,4 +226,14 @@ fn generate_struct_from_field_shapes(
     }
 
     (type_name, Some(code))
+}
+
+fn apply_transform(transform: &StringTransform, field_name: &str) -> String {
+    match transform {
+        StringTransform::LowerCase => field_name.to_ascii_lowercase(),
+        StringTransform::PascalCase => type_case(field_name),
+        StringTransform::SnakeCase => snake_case(field_name),
+        StringTransform::KebabCase => kebab_case(field_name),
+        _ => field_name.to_string(),
+    }
 }

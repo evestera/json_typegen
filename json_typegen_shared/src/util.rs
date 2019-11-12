@@ -25,6 +25,14 @@ pub fn camel_case(name: &str) -> String {
 }
 
 pub fn snake_case(name: &str) -> String {
+    sep_case(name, '_')
+}
+
+pub fn kebab_case(name: &str) -> String {
+    sep_case(name, '-')
+}
+
+fn sep_case(name: &str, separator: char) -> String {
     let mut s = String::new();
     let mut last = 'A';
     for c in name
@@ -41,7 +49,7 @@ pub fn snake_case(name: &str) -> String {
         }
         if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase())
         {
-            s.push('_');
+            s.push(separator);
         }
         s.push(c.to_ascii_lowercase());
         last = c;
