@@ -2,7 +2,7 @@
 
 use syn;
 use syn::parse::{boolean, ident, string};
-use synom::{alt, punct, named, call, IResult};
+use synom::{alt, call, named, punct, IResult};
 
 use crate::hints::Hint;
 use crate::options::{Options, OutputMode, StringTransform};

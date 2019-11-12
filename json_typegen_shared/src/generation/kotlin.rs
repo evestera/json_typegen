@@ -5,8 +5,8 @@ use std::collections::HashSet;
 
 use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::util::{lower_camel_case, snake_case, kebab_case};
 use crate::util::type_case;
+use crate::util::{kebab_case, lower_camel_case, snake_case};
 
 pub struct Ctxt {
     options: Options,
@@ -203,13 +203,21 @@ fn generate_struct_from_field_shapes(
     let mut code = String::new();
 
     if let Some(ref transform) = ctxt.options.property_name_format {
-         code += match transform {
-             StringTransform::LowerCase => "@JsonNaming(PropertyNamingStrategy.LowerCaseStrategy.class)\n",
-             StringTransform::PascalCase => "@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy.class)\n",
-             StringTransform::SnakeCase => "@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)\n",
-             StringTransform::KebabCase => "@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)\n",
-             _ => "",
-         };
+        code += match transform {
+            StringTransform::LowerCase => {
+                "@JsonNaming(PropertyNamingStrategy.LowerCaseStrategy.class)\n"
+            }
+            StringTransform::PascalCase => {
+                "@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy.class)\n"
+            }
+            StringTransform::SnakeCase => {
+                "@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)\n"
+            }
+            StringTransform::KebabCase => {
+                "@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)\n"
+            }
+            _ => "",
+        };
     }
 
     code += &format!("data class {}(\n", type_name);

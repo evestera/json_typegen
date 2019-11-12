@@ -80,9 +80,13 @@ impl StringTransform {
             "pascalcase" | "uppercamelcase" | "PascalCase" => Some(StringTransform::PascalCase),
             "camelcase" | "camelCase" => Some(StringTransform::CamelCase),
             "snakecase" | "snake_case" => Some(StringTransform::SnakeCase),
-            "screamingsnakecase" | "SCREAMING_SNAKE_CASE" => Some(StringTransform::ScreamingSnakeCase),
+            "screamingsnakecase" | "SCREAMING_SNAKE_CASE" => {
+                Some(StringTransform::ScreamingSnakeCase)
+            }
             "kebabcase" | "kebab-case" => Some(StringTransform::KebabCase),
-            "screamingkebabcase" | "SCREAMING-KEBAB-CASE" => Some(StringTransform::ScreamingKebabCase),
+            "screamingkebabcase" | "SCREAMING-KEBAB-CASE" => {
+                Some(StringTransform::ScreamingKebabCase)
+            }
             _ => None,
         }
     }

@@ -4,10 +4,10 @@ use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 use unindent::unindent;
 
+use crate::generation::serde_case::RenameRule;
 use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
 use crate::util::{snake_case, type_case};
-use crate::generation::serde_case::RenameRule;
 
 pub struct Ctxt {
     options: Options,
@@ -131,8 +131,8 @@ const RUST_KEYWORDS_ARR: &[&str] = &[
     "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in", "let", "loop",
     "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub", "pure",
     "ref", "return", "Self", "self", "sizeof", "static", "struct", "super", "trait", "true",
-    "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield",
-    "async", "await", "try"
+    "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield", "async",
+    "await", "try",
 ];
 
 lazy_static! {
