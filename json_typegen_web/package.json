@@ -10,13 +10,13 @@
     "deploy": "npm run build && firebase deploy"
   },
   "devDependencies": {
-    "@wasm-tool/wasm-pack-plugin": "1.0.1",
-    "html-webpack-plugin": "^3.2.0",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3",
-    "webpack-dev-server": "^3.2.1"
+    "@wasm-tool/wasm-pack-plugin": "1.3.1",
+    "html-webpack-plugin": "4.4.1",
+    "webpack": "4.44.1",
+    "webpack-cli": "3.3.12",
+    "webpack-dev-server": "3.11.0"
   },
   "dependencies": {
-    "text-encoding-utf-8": "^1.0.2"
+    "text-encoding-utf-8": "1.0.2"
   }
 }
