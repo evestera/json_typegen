@@ -137,7 +137,7 @@ const RUST_KEYWORDS_ARR: &[&str] = &[
 
 lazy_static! {
     static ref RUST_KEYWORDS: HashSet<&'static str> =
-        { RUST_KEYWORDS_ARR.iter().cloned().collect() };
+        RUST_KEYWORDS_ARR.iter().cloned().collect();
 }
 
 fn type_or_field_name(

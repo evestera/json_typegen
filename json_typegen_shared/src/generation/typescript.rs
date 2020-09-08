@@ -126,7 +126,7 @@ const RESERVED_WORDS_ARR: &[&str] = &["break", "case", "catch", "class", "const"
 
 lazy_static! {
     static ref RESERVED_WORDS: HashSet<&'static str> =
-        { RESERVED_WORDS_ARR.iter().cloned().collect() };
+        RESERVED_WORDS_ARR.iter().cloned().collect();
 }
 
 fn is_ts_identifier(s: &str) -> bool {

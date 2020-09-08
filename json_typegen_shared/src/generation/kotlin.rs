@@ -125,7 +125,7 @@ const KOTLIN_KEYWORDS_ARR: &[&str] = &[
 
 lazy_static! {
     static ref KOTLIN_KEYWORDS: HashSet<&'static str> =
-        { KOTLIN_KEYWORDS_ARR.iter().cloned().collect() };
+        KOTLIN_KEYWORDS_ARR.iter().cloned().collect();
 }
 
 fn type_or_field_name(
