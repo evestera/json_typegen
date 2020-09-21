@@ -13,6 +13,7 @@ pub struct Options {
     pub derives: String,
     pub property_name_format: Option<StringTransform>,
     pub(crate) hints: Vec<(String, Hint)>,
+    pub type_alias_extant_types: bool,
 }
 
 impl Default for Options {
@@ -28,6 +29,7 @@ impl Default for Options {
             derives: "Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize".into(),
             property_name_format: None,
             hints: Vec::new(),
+            type_alias_extant_types: false,
         }
     }
 }
