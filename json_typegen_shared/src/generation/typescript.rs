@@ -6,7 +6,7 @@ use std::collections::HashSet;
 
 use crate::options::Options;
 use crate::shape::{self, Shape};
-use crate::util::type_case;
+use crate::util::{alias, type_case};
 
 pub struct Ctxt {
     options: Options,
@@ -22,7 +22,8 @@ pub fn typescript_types(name: &str, shape: &Shape, options: Options) -> (Ident, 
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    alias(ident, name, code, &ctxt.options)
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
@@ -117,16 +118,56 @@ fn collapse_option(typ: &Shape) -> (bool, &Shape) {
     (false, typ)
 }
 
-const RESERVED_WORDS_ARR: &[&str] = &["break", "case", "catch", "class", "const",
-    "continue", "debugger", "default", "delete", "do", "else", "enum", "export", "extends", "false",
-    "finally", "for", "function", "if", "import", "in", "instanceof", "new", "null", "return",
-    "super", "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while", "with",
-    "implements", "interface", "let", "package", "private", "protected", "public", "static",
-    "yield"];
+const RESERVED_WORDS_ARR: &[&str] = &[
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "enum",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceof",
+    "new",
+    "null",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeof",
+    "var",
+    "void",
+    "while",
+    "with",
+    "implements",
+    "interface",
+    "let",
+    "package",
+    "private",
+    "protected",
+    "public",
+    "static",
+    "yield",
+];
 
 lazy_static! {
-    static ref RESERVED_WORDS: HashSet<&'static str> =
-        RESERVED_WORDS_ARR.iter().cloned().collect();
+    static ref RESERVED_WORDS: HashSet<&'static str> = RESERVED_WORDS_ARR.iter().cloned().collect();
 }
 
 fn is_ts_identifier(s: &str) -> bool {

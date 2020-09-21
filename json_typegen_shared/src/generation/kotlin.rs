@@ -5,8 +5,7 @@ use std::collections::HashSet;
 
 use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::util::type_case;
-use crate::util::{kebab_case, lower_camel_case, snake_case};
+use crate::util::{alias, kebab_case, lower_camel_case, snake_case, type_case};
 
 pub struct Ctxt {
     options: Options,
@@ -22,7 +21,8 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    alias(ident, name, code, &ctxt.options)
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
@@ -105,22 +105,84 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 // https://kotlinlang.org/docs/reference/keyword-reference.html
 const KOTLIN_KEYWORDS_ARR: &[&str] = &[
     // Hard
-    "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in",
-    "interface", "is", "null", "object", "package", "return", "super", "this", "throw", "true",
-    "try", "typealias", "val", "var", "when", "while",
-
+    "as",
+    "break",
+    "class",
+    "continue",
+    "do",
+    "else",
+    "false",
+    "for",
+    "fun",
+    "if",
+    "in",
+    "interface",
+    "is",
+    "null",
+    "object",
+    "package",
+    "return",
+    "super",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typealias",
+    "val",
+    "var",
+    "when",
+    "while",
     // Soft
-    "by", "catch", "constructor", "delegate", "dynamic", "field", "file", "finally", "get",
-    "import", "init", "param", "property", "receiver", "set", "setparam", "where",
-
+    "by",
+    "catch",
+    "constructor",
+    "delegate",
+    "dynamic",
+    "field",
+    "file",
+    "finally",
+    "get",
+    "import",
+    "init",
+    "param",
+    "property",
+    "receiver",
+    "set",
+    "setparam",
+    "where",
     // Modifier
-    "actual", "abstract", "annotation", "companion", "const", "crossinline", "data", "enum",
-    "expect", "external", "final", "infix", "inline", "inner", "internal", "lateinit", "noinline",
-    "open", "operator", "out", "override", "private", "protected", "public", "reified", "sealed",
-    "suspend", "tailrec", "vararg",
-
+    "actual",
+    "abstract",
+    "annotation",
+    "companion",
+    "const",
+    "crossinline",
+    "data",
+    "enum",
+    "expect",
+    "external",
+    "final",
+    "infix",
+    "inline",
+    "inner",
+    "internal",
+    "lateinit",
+    "noinline",
+    "open",
+    "operator",
+    "out",
+    "override",
+    "private",
+    "protected",
+    "public",
+    "reified",
+    "sealed",
+    "suspend",
+    "tailrec",
+    "vararg",
     // Special
-    "field", "it"
+    "field",
+    "it",
 ];
 
 lazy_static! {

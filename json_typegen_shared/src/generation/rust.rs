@@ -7,7 +7,7 @@ use unindent::unindent;
 use crate::generation::serde_case::RenameRule;
 use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::util::{snake_case, type_case};
+use crate::util::{alias, snake_case, type_case};
 
 pub struct Ctxt {
     options: Options,
@@ -54,7 +54,8 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    alias(ident, name, code, &ctxt.options)
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

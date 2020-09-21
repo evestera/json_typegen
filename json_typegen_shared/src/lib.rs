@@ -96,14 +96,10 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
 
     let shape = inference::value_to_shape(&sample, &hints);
 
-    let visibility = options.type_visibility.clone();
-    let aliased = options.type_alias_extant_types;
-    let lang = options.output_mode.clone();
-
     let mut generated_code = if options.runnable {
         generation::rust::rust_program(name, &shape, options)
     } else {
-        let (ident, mut defs) = match options.output_mode {
+        let (name, defs) = match options.output_mode {
             OutputMode::Rust => generation::rust::rust_types(name, &shape, options),
             OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
             OutputMode::Kotlin => generation::kotlin::kotlin_types(name, &shape, options),
@@ -112,12 +108,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
                 generation::typescript::typescript_types(name, &shape, options)
             }
         };
-        if aliased {
-            if defs == None {
-                defs = type_alias(&ident, name, &visibility, lang);
-            }
-        }
-        defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(ident.to_string())))?
+        defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
 
     if !generated_code.ends_with("\n") {
@@ -125,16 +116,6 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     }
 
     Ok(generated_code)
-}
-
-fn type_alias(ident: &str, name: &str, visibility: &str, mode: OutputMode) -> Option<String> {
-    match mode {
-        OutputMode::Rust | OutputMode::Typescript => {
-            Some(format!("{} type {} = {};", visibility, name, ident))
-        }
-        OutputMode::Kotlin => Some(format!("{} typealias {} = {};", visibility, name, ident)),
-        _ => None,
-    }
 }
 
 /// Parse "names" like `pub(crate) Foo` into a name and a visibility option
