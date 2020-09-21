@@ -98,6 +98,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
 
     let visibility = options.type_visibility.clone();
     let aliased = options.type_alias_extant_types;
+    let lang = options.output_mode.clone();
 
     let mut generated_code = if options.runnable {
         generation::rust::rust_program(name, &shape, options)
@@ -113,7 +114,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         };
         if aliased {
             if defs == None {
-                defs = type_alias(&ident, name, &visibility);
+                defs = type_alias(&ident, name, &visibility, lang);
             }
         }
         defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(ident.to_string())))?
@@ -126,8 +127,14 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
     Ok(generated_code)
 }
 
-fn type_alias(ident: &str, name: &str, visibility: &str) -> Option<String> {
-    Some(format!("{} type {} = {};", visibility, name, ident))
+fn type_alias(ident: &str, name: &str, visibility: &str, mode: OutputMode) -> Option<String> {
+    match mode {
+        OutputMode::Rust | OutputMode::Typescript => {
+            Some(format!("{} type {} = {};", visibility, name, ident))
+        }
+        OutputMode::Kotlin => Some(format!("{} typealias {} = {};", visibility, name, ident)),
+        _ => None,
+    }
 }
 
 /// Parse "names" like `pub(crate) Foo` into a name and a visibility option
