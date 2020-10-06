@@ -5,8 +5,7 @@ use std::collections::HashSet;
 
 use crate::options::{Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::util::type_case;
-use crate::util::{kebab_case, lower_camel_case, snake_case};
+use crate::util::{kebab_case, lower_camel_case, snake_case, type_case};
 
 pub struct Ctxt {
     options: Options,
@@ -22,7 +21,15 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    match &code {
+        None => {
+            let alias_ident = type_name(name, &ctxt.type_names);
+            let alias_code = format!("type {} = {}", alias_ident, ident);
+            (alias_ident, Some(alias_code))
+        },
+        Some(_) => (ident, code),
+    }
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

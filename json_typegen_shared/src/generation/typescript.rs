@@ -22,7 +22,15 @@ pub fn typescript_types(name: &str, shape: &Shape, options: Options) -> (Ident, 
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    match &code {
+        None => {
+            let alias_ident = type_name(name, &ctxt.type_names);
+            let alias_code = format!("export type {} = {};", alias_ident, ident);
+            (alias_ident, Some(alias_code))
+        },
+        Some(_) => (ident, code),
+    }
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

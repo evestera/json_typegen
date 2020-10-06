@@ -54,7 +54,15 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
         type_names: HashSet::new(),
     };
 
-    type_from_shape(&mut ctxt, name, shape)
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    match &code {
+        None => {
+            let alias_ident = type_name(name, &ctxt.type_names);
+            let alias_code = format!("{} type {} = {};", ctxt.options.type_visibility, alias_ident, ident);
+            (alias_ident, Some(alias_code))
+        },
+        Some(_) => (ident, code),
+    }
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
@@ -136,8 +144,7 @@ const RUST_KEYWORDS_ARR: &[&str] = &[
 ];
 
 lazy_static! {
-    static ref RUST_KEYWORDS: HashSet<&'static str> =
-        RUST_KEYWORDS_ARR.iter().cloned().collect();
+    static ref RUST_KEYWORDS: HashSet<&'static str> = RUST_KEYWORDS_ARR.iter().cloned().collect();
 }
 
 fn type_or_field_name(

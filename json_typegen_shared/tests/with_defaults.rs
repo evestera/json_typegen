@@ -32,6 +32,19 @@ fn empty_object() {
 }
 
 #[test]
+fn list_of_numbers() {
+    code_output_test(
+        "Numbers",
+        r##"
+            [1, 2, 3]
+        "##,
+        r##"
+            pub type Numbers = Vec<i64>;
+        "##,
+    );
+}
+
+#[test]
 fn point() {
     code_output_test(
         "Point",
