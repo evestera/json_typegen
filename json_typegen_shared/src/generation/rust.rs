@@ -54,15 +54,18 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
         type_names: HashSet::new(),
     };
 
-    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
-    match &code {
-        None => {
-            let alias_ident = type_name(name, &ctxt.type_names);
-            let alias_code = format!("{} type {} = {};", ctxt.options.type_visibility, alias_ident, ident);
-            (alias_ident, Some(alias_code))
-        },
-        Some(_) => (ident, code),
+    if !matches!(shape, Shape::Struct { .. }) {
+        // reserve the requested name
+        ctxt.type_names.insert(name.to_string());
     }
+
+    let (ident, code) = type_from_shape(&mut ctxt, name, shape);
+    let mut code = code.unwrap_or(String::new());
+
+    if ident != name {
+        code = format!("{} type {} = {};\n\n", ctxt.options.type_visibility, name, ident) + &code;
+    }
+    (name.to_string(), Some(code))
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

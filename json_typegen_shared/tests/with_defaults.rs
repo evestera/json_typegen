@@ -87,7 +87,7 @@ fn pub_crate_point() {
 #[test]
 fn optionals() {
     code_output_test(
-        "Optional",
+        "Optionals",
         r##"
             [
                 {
@@ -103,6 +103,8 @@ fn optionals() {
             ]
         "##,
         r##"
+            pub type Optionals = Vec<Optional>;
+
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
             pub struct Optional {
                 pub in_both: i64,
@@ -117,7 +119,7 @@ fn optionals() {
 #[test]
 fn fallback() {
     code_output_test(
-        "Fallback",
+        "FallbackExamples",
         r##"
             [
                 {
@@ -133,8 +135,10 @@ fn fallback() {
             ]
         "##,
         r##"
+            pub type FallbackExamples = Vec<FallbackExample>;
+
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            pub struct Fallback {
+            pub struct FallbackExample {
                 pub only_null: ::serde_json::Value,
                 pub conflicting: ::serde_json::Value,
                 pub empty_array: Vec<::serde_json::Value>,
@@ -146,7 +150,7 @@ fn fallback() {
 #[test]
 fn nesting() {
     code_output_test(
-        "Root",
+        "NestedTypes",
         r##"
             [
                 {
@@ -159,8 +163,10 @@ fn nesting() {
             ]
         "##,
         r##"
+            pub type NestedTypes = Vec<NestedType>;
+
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            pub struct Root {
+            pub struct NestedType {
                 pub nested: Nested,
                 pub in_array: Vec<InArray>,
             }
@@ -208,14 +214,16 @@ fn tuple() {
             ]
         "##,
         r##"
+            pub type Pagination = (Pagination2, Vec<Pagination3>);
+
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            pub struct Pagination {
+            pub struct Pagination2 {
                 pub pages: i64,
                 pub items: i64,
             }
 
             #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
-            pub struct Pagination2 {
+            pub struct Pagination3 {
                 pub name : String,
             }
         "##,
