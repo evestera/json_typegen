@@ -22,7 +22,7 @@
 //! serde = "1.0"
 //! serde_derive = "1.0"
 //! serde_json = "1.0"
-//! json_typegen = "0.4"
+//! json_typegen = "0.5"
 //! ```
 //!
 //! The sample json can also come from local or remote files, like so:

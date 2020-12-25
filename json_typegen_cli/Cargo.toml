@@ -1,6 +1,6 @@
 [package]
 name = "json_typegen_cli"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
 license = "MIT/Apache-2.0"
 description = "Command line utility for generating Rust types from JSON samples"
@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.3"
-json_typegen_shared = { path = "../json_typegen_shared", version = "0.4" }
+json_typegen_shared = { path = "../json_typegen_shared", version = "0.5" }
 
 [[bin]]
 name = "json_typegen"
