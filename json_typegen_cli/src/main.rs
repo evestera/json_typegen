@@ -43,7 +43,7 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
             Arg::with_name("output-mode")
                 .long("output-mode")
                 .short("-O")
-                .possible_values(&["rust", "typescript", "kotlin", "json_schema", "shape"])
+                .possible_values(&["rust", "typescript", "kotlin", "kotlin/jackson", "kotlin/kotlinx", "json_schema", "shape"])
                 .help("What to output.")
                 .takes_value(true),
         )

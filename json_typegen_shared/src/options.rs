@@ -36,7 +36,8 @@ impl Default for Options {
 pub enum OutputMode {
     Rust,
     Typescript,
-    Kotlin,
+    KotlinJackson,
+    KotlinKotlinx,
     JsonSchema,
     Shape,
 }
@@ -46,7 +47,9 @@ impl OutputMode {
         match s {
             "rust" => Some(OutputMode::Rust),
             "typescript" => Some(OutputMode::Typescript),
-            "kotlin" => Some(OutputMode::Kotlin),
+            "kotlin" => Some(OutputMode::KotlinJackson),
+            "kotlin/jackson" => Some(OutputMode::KotlinJackson),
+            "kotlin/kotlinx" => Some(OutputMode::KotlinKotlinx),
             "json_schema" => Some(OutputMode::JsonSchema),
             "shape" => Some(OutputMode::Shape),
             _ => None,

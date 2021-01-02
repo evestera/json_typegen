@@ -102,7 +102,8 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         let (name, defs) = match options.output_mode {
             OutputMode::Rust => generation::rust::rust_types(name, &shape, options),
             OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
-            OutputMode::Kotlin => generation::kotlin::kotlin_types(name, &shape, options),
+            OutputMode::KotlinJackson |
+            OutputMode::KotlinKotlinx => generation::kotlin::kotlin_types(name, &shape, options),
             OutputMode::Shape => generation::shape::shape_string(name, &shape, options),
             OutputMode::Typescript => {
                 generation::typescript::typescript_types(name, &shape, options)
