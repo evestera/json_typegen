@@ -194,7 +194,7 @@ fn generate_struct_from_field_shapes(
             let mut field_code = String::new();
             if &apply_transform(ctxt, &field_name) != name {
                 if ctxt.options.output_mode == OutputMode::KotlinJackson {
-                    field_code += &format!("    @field:JsonProperty(\"{}\")\n", name)
+                    field_code += &format!("    @JsonProperty(\"{}\")\n", name)
                 } else if ctxt.options.output_mode == OutputMode::KotlinKotlinx {
                     field_code += &format!("    @SerialName(\"{}\")\n", name)
                 }
@@ -245,10 +245,10 @@ fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
 
 fn transform_annotation(ctxt: &Ctxt) -> &'static str {
     match (&ctxt.options.property_name_format, &ctxt.options.output_mode) {
-        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategy.LowerCaseStrategy.class)\n",
-        (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategy.UpperCamelCaseStrategy.class)\n",
-        (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)\n",
-        (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategy.KebabCaseStrategy.class)\n",
+        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.LowerCaseStrategy::class)\n",
+        (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)\n",
+        (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)\n",
+        (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy::class)\n",
         _ => "",
     }
 }
