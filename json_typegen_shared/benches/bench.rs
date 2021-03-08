@@ -3,6 +3,8 @@
 
 // Benchmark currently only works on nightly Rust due to extern crate test
 // Tracking issue: https://github.com/rust-lang/rust/issues/29553
+// Running:
+// cargo +nightly bench --features unstable
 
 extern crate json_typegen_shared;
 extern crate test;
