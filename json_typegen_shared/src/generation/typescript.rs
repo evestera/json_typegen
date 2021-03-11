@@ -121,7 +121,7 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     unreachable!()
 }
 
-fn collapse_option(typ: &Shape) -> (bool, &Shape) {
+pub fn collapse_option(typ: &Shape) -> (bool, &Shape) {
     if let Shape::Optional(inner) = typ {
         return (true, &**inner);
     }
@@ -140,7 +140,7 @@ lazy_static! {
         RESERVED_WORDS_ARR.iter().cloned().collect();
 }
 
-fn is_ts_identifier(s: &str) -> bool {
+pub fn is_ts_identifier(s: &str) -> bool {
     lazy_static! {
         static ref JS_IDENTIFIER_RE: Regex = Regex::new(r"^[a-zA-Z_$][a-zA-Z_$0-9]*$").unwrap();
     }

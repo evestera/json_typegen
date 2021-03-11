@@ -108,6 +108,9 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
             OutputMode::Typescript => {
                 generation::typescript::typescript_types(name, &shape, options)
             }
+            OutputMode::TypescriptTypeAlias => {
+                generation::typescript_type_alias::typescript_type_alias(name, &shape, options)
+            }
         };
         defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
