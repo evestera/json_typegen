@@ -12,6 +12,7 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
     const options = ({
       "output_mode": $('outputmode').value,
       "property_name_format": $('propertynameformat').value,
+      "unwrap": $('unwrap').value,
     });
     const result = module.run(typename, input, JSON.stringify(options));
     $('target').innerHTML = result
@@ -24,6 +25,7 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
   $('input').onkeyup = render;
   $('outputmode').onchange = render;
   $('propertynameformat').onchange = render;
+  $('unwrap').onkeyup = render;
 
   render();
 });

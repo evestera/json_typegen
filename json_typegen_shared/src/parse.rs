@@ -126,6 +126,9 @@ pub fn options(input: &str) -> Result<Options, String> {
         "allow_option_vec" => boolean_option(remaining, "allow_option_vec", |val| {
             options.allow_option_vec = val;
         }),
+        "unwrap" => string_option(remaining, "unwrap", |val| {
+            options.unwrap = val;
+        }),
         key if key.is_empty() || key.starts_with('/') => {
             let (rem, hints) = pointer_block(remaining)?;
             for hint in hints {

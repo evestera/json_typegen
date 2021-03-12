@@ -18,11 +18,13 @@ mod inference;
 mod options;
 pub mod parse;
 mod shape;
+mod unwrap;
 mod util;
 
 use crate::hints::Hints;
 pub use crate::options::Options;
 pub use crate::options::OutputMode;
+use crate::shape::{Shape, fold_shapes};
 
 mod errors {
     error_chain! {
@@ -94,7 +96,10 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         hints.add(pointer, hint);
     }
 
-    let shape = inference::value_to_shape(&sample, &hints);
+    let inferred: Vec<Shape> = crate::unwrap::unwrap(&options.unwrap, sample).iter()
+        .map(|val| inference::value_to_shape(val, &hints))
+        .collect();
+    let shape = fold_shapes(inferred);
 
     let mut generated_code = if options.runnable {
         generation::rust::rust_program(name, &shape, options)

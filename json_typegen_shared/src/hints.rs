@@ -43,7 +43,7 @@ pub struct Hints<'a> {
 }
 
 fn is_index(s: &str) -> bool {
-    s == "-" || s.as_bytes().iter().all(|&b| b >= 48 && b <= 57)
+    s == "-" || s.bytes().all(|b| b >= b'0' && b <= b'9')
 }
 
 impl<'a> Hints<'a> {
