@@ -88,7 +88,7 @@ impl<'a> Hints<'a> {
     /// ([/2/b, /a/c, /-/e, /3/d], 3) -> [/e, /d]
     pub fn step_index(&self, index: usize) -> Hints {
         let i_str = &index.to_string();
-        self.step(|first| first == i_str)
+        self.step(|first| first == "-" || first == i_str)
     }
 
     fn step<F: Fn(&str) -> bool>(&self, pred: F) -> Hints {
