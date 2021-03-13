@@ -1,9 +1,9 @@
-import { polyfill } from './polyfill';
+import {polyfill} from './polyfill';
 
 const $ = (id) => document.getElementById(id);
 
 function storeParams(params) {
-    localStorage.setItem("json_typegen_params", JSON.stringify(params));
+  localStorage.setItem("json_typegen_params", JSON.stringify(params));
 }
 
 polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
@@ -31,16 +31,16 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
       Object.assign(options, extraoptions);
     }
     storeParams({
-        typename,
-        input: (input.length < 1000000) ? input : "",
-        options,
-        extraoptions: extraoptions_json
+      typename,
+      input: (input.length < 1000000) ? input : "",
+      options,
+      extraoptions: extraoptions_json
     })
     const result = module.run(typename, input, JSON.stringify(options));
     $('target').innerHTML = result
-        .replace(/&/g,'&amp;')
-        .replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   };
 
   $('typename').onkeyup = render;
@@ -55,26 +55,26 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
 
 let params;
 try {
-    let params_json = localStorage.getItem("json_typegen_params");
-    params = params_json && JSON.parse(params_json);
+  let params_json = localStorage.getItem("json_typegen_params");
+  params = params_json && JSON.parse(params_json);
 } catch (e) {
-    console.error(e);
+  console.error(e);
 }
 if (params) {
-    if (params.typename) {
-        $('typename').value = params.typename;
-    }
-    if (params.input) {
-        $('input').value = params.input;
-    }
+  if (params.typename) {
+    $('typename').value = params.typename;
+  }
+  if (params.input) {
+    $('input').value = params.input;
+  }
 
-    if (params.options) {
-        $('outputmode').value = params.options.output_mode;
-        $('propertynameformat').value = params.options.property_name_format;
-        $('unwrap').value = params.options.unwrap;
-    }
+  if (params.options) {
+    $('outputmode').value = params.options.output_mode;
+    $('propertynameformat').value = params.options.property_name_format;
+    $('unwrap').value = params.options.unwrap;
+  }
 
-    if (params.extraoptions) {
-        $('extraoptions').value = params.extraoptions;
-    }
+  if (params.extraoptions) {
+    $('extraoptions').value = params.extraoptions;
+  }
 }
