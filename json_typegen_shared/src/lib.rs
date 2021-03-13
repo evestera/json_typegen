@@ -120,9 +120,9 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         defs.ok_or_else(|| JTError::from(ErrorKind::ExistingType(name.to_string())))?
     };
 
-    if !generated_code.ends_with("\n") {
-        generated_code.push('\n');
-    }
+    // Ensure generated code ends with exactly one newline
+    generated_code.truncate(generated_code.trim_end().len());
+    generated_code.push('\n');
 
     Ok(generated_code)
 }
