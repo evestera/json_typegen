@@ -20,8 +20,8 @@ pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Optio
     let value = type_from_shape(&mut ctxt, name, shape);
 
     let mut schema = json!({
-        "$schema": "http://json-schema.org/schema#",
-        "title": name
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": format!("Generated schema for {}", name)
     });
 
     if let Value::Object(map) = value {
