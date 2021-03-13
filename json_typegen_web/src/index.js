@@ -1,37 +1,11 @@
 import {polyfill} from './polyfill';
+import {$} from "./util";
+import {updateDownloadLink} from "./download";
+import {restoreParams, storeParams} from "./localstorage";
 
-const $ = (id) => document.getElementById(id);
+restoreParams();
 
-function storeParams(params) {
-  localStorage.setItem("json_typegen_params", JSON.stringify(params));
-}
-
-function createFilename(typename, output_mode) {
-  const extensions = {
-    "rust": "rs",
-    "typescript": "ts",
-    "typescript/typealias": "ts",
-    "kotlin/jackson": "kt",
-    "kotlin/kotlinx": "kt",
-    "json_schema": "json",
-    "shape": "json",
-  }
-  return typename + "." + extensions[output_mode];
-}
-
-let objectUrl;
-function updateDownloadLink(result, typename, options) {
-  if (objectUrl) {
-    URL.revokeObjectURL(objectUrl);
-  }
-  const blob = new Blob([result], {type: "text/plain"});
-  objectUrl = URL.createObjectURL(blob);
-  const a = $('filedownload');
-  a.href = objectUrl;
-  a.download = createFilename(typename, options.output_mode);
-}
-
-polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
+polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(typegen_wasm => {
   const render = () => {
     const typename = $('typename').value;
     let input = $('input').value;
@@ -53,9 +27,6 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
     } catch (e) {
       extraoptions_elem.classList.add("is-danger")
     }
-    if (extraoptions) {
-      Object.assign(options, extraoptions);
-    }
 
     storeParams({
       typename,
@@ -64,12 +35,14 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
       extraoptions: extraoptions_json
     })
 
-    const result = module.run(typename, input, JSON.stringify(options));
+    const combinedOptions = Object.assign({}, options, extraoptions || {});
 
-    $('target').innerHTML = result
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    const result = typegen_wasm.run(typename, input, JSON.stringify(combinedOptions));
+
+    const target = $('target');
+    target.value = result.trim();
+    target.style.height = "10px";
+    target.style.height = (target.scrollHeight + 5) + "px";
 
     updateDownloadLink(result, typename, options);
   };
@@ -83,29 +56,3 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
 
   render();
 });
-
-let params;
-try {
-  let params_json = localStorage.getItem("json_typegen_params");
-  params = params_json && JSON.parse(params_json);
-} catch (e) {
-  console.error(e);
-}
-if (params) {
-  if (params.typename) {
-    $('typename').value = params.typename;
-  }
-  if (params.input) {
-    $('input').value = params.input;
-  }
-
-  if (params.options) {
-    $('outputmode').value = params.options.output_mode;
-    $('propertynameformat').value = params.options.property_name_format;
-    $('unwrap').value = params.options.unwrap;
-  }
-
-  if (params.extraoptions) {
-    $('extraoptions').value = params.extraoptions;
-  }
-}
