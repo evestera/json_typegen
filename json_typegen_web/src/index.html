@@ -174,11 +174,23 @@
 
         </div>
         <div class="column">
-          <label class="label">Output</label>
-          <div class="box overlay-container">
-            <div id="target">
-              <p>No code generated yet</p>
+          <div class="level">
+            <div class="level-left">
+              <div class="level-item">
+                <label class="label" for="target">Output</label>
+              </div>
             </div>
+            <div class="level-right">
+              <div class="level-item">
+                <a href="" class="button is-small" id="filedownload">Download as file</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="overlay-container">
+            <textarea class="textarea" rows="30" id="target" readonly>
+              No code generated yet
+            </textarea>
             <div id="spinner-overlay" class="is-invisible">
               <div class="spinner"></div>
             </div>
