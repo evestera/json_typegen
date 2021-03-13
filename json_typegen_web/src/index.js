@@ -18,10 +18,23 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
       property_name_format: $('propertynameformat').value,
       unwrap: $('unwrap').value,
     });
+    const extraoptions_elem = $('extraoptions');
+    const extraoptions_json = extraoptions_elem.value;
+    let extraoptions;
+    try {
+      extraoptions = extraoptions_json && JSON.parse(extraoptions_json);
+      extraoptions_elem.classList.remove("is-danger")
+    } catch (e) {
+      extraoptions_elem.classList.add("is-danger")
+    }
+    if (extraoptions) {
+      Object.assign(options, extraoptions);
+    }
     storeParams({
         typename,
         input: (input.length < 1000000) ? input : "",
-        options
+        options,
+        extraoptions: extraoptions_json
     })
     const result = module.run(typename, input, JSON.stringify(options));
     $('target').innerHTML = result
@@ -35,6 +48,7 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(module => {
   $('outputmode').onchange = render;
   $('propertynameformat').onchange = render;
   $('unwrap').onkeyup = render;
+  $('extraoptions').onkeyup = render;
 
   render();
 });
@@ -58,5 +72,9 @@ if (params) {
         $('outputmode').value = params.options.output_mode;
         $('propertynameformat').value = params.options.property_name_format;
         $('unwrap').value = params.options.unwrap;
+    }
+
+    if (params.extraoptions) {
+        $('extraoptions').value = params.extraoptions;
     }
 }
