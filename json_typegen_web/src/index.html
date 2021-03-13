@@ -5,7 +5,8 @@
   <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>json_typegen</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.css">
   <style>
     html {
       background: linear-gradient(121deg, rgba(243, 246, 255, 1) 0%, rgba(200, 232, 255, 1) 100%);
@@ -98,6 +99,10 @@
         animation: octocat-wave 560ms ease-in-out
       }
     }
+
+    .field .level:not(:last-child) {
+      margin-bottom: .5em;
+    }
   </style>
 </head>
 
@@ -121,7 +126,28 @@
           </div>
 
           <div class="field">
-            <label class="label" for="input">Input</label>
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <label class="label" for="input">Input</label>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <div class="file is-small is-white">
+                    <label class="file-label">
+                      <input class="file-input" type="file" name="loadfile" id="loadfile" accept="application/json">
+                      <span class="file-cta">
+                        <span class="file-icon">
+                          <i class="fas fa-upload"></i>
+                        </span>
+                        <span class="file-label">Load from file...</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
             <textarea class="textarea" placeholder="JSON sample here" id="input" rows="15"></textarea>
           </div>
 
@@ -174,25 +200,32 @@
 
         </div>
         <div class="column">
-          <div class="level">
-            <div class="level-left">
-              <div class="level-item">
-                <label class="label" for="target">Output</label>
+          <div class="field">
+            <div class="level">
+              <div class="level-left">
+                <div class="level-item">
+                  <label class="label" for="target">Output</label>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="level-item">
+                  <a href="" class="button is-small is-white" id="filedownload">
+                    <span class="icon is-small">
+                      <i class="fas fa-download"></i>
+                    </span>
+                    <span>Download as file</span>
+                  </a>
+                </div>
               </div>
             </div>
-            <div class="level-right">
-              <div class="level-item">
-                <a href="" class="button is-small" id="filedownload">Download as file</a>
-              </div>
-            </div>
-          </div>
 
-          <div class="overlay-container">
-            <textarea class="textarea" rows="30" id="target" readonly>
-              No code generated yet
-            </textarea>
-            <div id="spinner-overlay" class="is-invisible">
-              <div class="spinner"></div>
+            <div class="overlay-container">
+              <textarea class="textarea" rows="30" id="target" readonly>
+                No code generated yet
+              </textarea>
+              <div id="spinner-overlay" class="is-invisible">
+                <div class="spinner"></div>
+              </div>
             </div>
           </div>
         </div>

@@ -54,5 +54,17 @@ polyfill().then(() => import("../../json_typegen_wasm/pkg")).then(typegen_wasm =
   $('unwrap').onkeyup = render;
   $('extraoptions').onkeyup = render;
 
+  $('loadfile').onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (fileEvent) => {
+        $('input').value = fileEvent.target.result;
+        render();
+      }
+      reader.readAsText(file);
+    }
+  }
+
   render();
 });
