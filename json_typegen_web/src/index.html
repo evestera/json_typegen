@@ -31,7 +31,7 @@
       min-height: 150px;
     }
 
-    #spinner-overlay {
+    #spinner-overlay, #large-file-overlay {
       background-color: #fffc;
       width: 99%;
       height: 99%;
@@ -148,7 +148,14 @@
                 </div>
               </div>
             </div>
-            <textarea class="textarea" placeholder="JSON sample here" id="input" rows="15"></textarea>
+            <div class="overlay-container">
+              <textarea class="textarea" placeholder="JSON sample here" id="input" rows="15"></textarea>
+              <div id="large-file-overlay" class="is-invisible">
+                <p>Large input file not shown</p>
+                <p id="large-file-message"></p>
+                <button class="button mt-2" id="clear-input-button">Clear input file</button>
+              </div>
+            </div>
           </div>
 
           <div class="field">
@@ -220,7 +227,7 @@
             </div>
 
             <div class="overlay-container">
-              <textarea class="textarea" rows="30" id="target" readonly>
+              <textarea class="textarea" rows="5" id="target" readonly>
                 No code generated yet
               </textarea>
               <div id="spinner-overlay" class="is-invisible">
