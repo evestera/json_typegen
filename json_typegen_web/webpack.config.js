@@ -22,5 +22,8 @@ module.exports = {
       crateDirectory: path.resolve(__dirname, "../json_typegen_wasm"),
       forceMode: 'release'
     }),
-  ]
+  ],
+  experiments: {
+    syncWebAssembly: true
+  }
 };

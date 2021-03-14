@@ -1,4 +1,4 @@
-use serde_json::{Value, json};
+use serde_json::Value;
 
 /// "Unwrap" JSON nodes so that the node(s) specified by the pointer is the new root(s)
 pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
@@ -54,6 +54,7 @@ pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn test_unwrap() {
