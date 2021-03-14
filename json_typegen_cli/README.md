@@ -1,6 +1,7 @@
 # CLI for generation of type definitions for Rust, Kotlin, TypeScript and JSON Schema from JSON
 
-**Note**: For Rust types there is also a procedural macro interface to this code, which uses
+**Note**: There is also a web interface, and for Rust types there is also a
+procedural macro interface to this code, which uses
 the same underlying algorithm and code generation. See
 [the repository](https://github.com/evestera/json_typegen) for details.
 
