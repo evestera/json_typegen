@@ -153,7 +153,8 @@
               <div id="large-file-overlay" class="is-invisible">
                 <p>Large input file not shown</p>
                 <p id="large-file-message"></p>
-                <button class="button mt-2" id="clear-input-button">Clear input file</button>
+                <button class="button mt-2" id="clear-input-button">Clear input file</button><br />
+                <div class="spinner mt-2" id="large-file-spinner"></div>
               </div>
             </div>
           </div>
@@ -226,13 +227,8 @@
               </div>
             </div>
 
-            <div class="overlay-container">
-              <textarea class="textarea" rows="5" id="target" readonly>
-                No code generated yet
-              </textarea>
-              <div id="spinner-overlay" class="is-invisible">
-                <div class="spinner"></div>
-              </div>
+            <div class="control" id="target-wrapper">
+              <textarea class="textarea" rows="3" id="target" readonly></textarea>
             </div>
           </div>
         </div>
