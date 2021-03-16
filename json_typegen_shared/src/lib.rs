@@ -24,7 +24,7 @@ mod util;
 use crate::hints::Hints;
 pub use crate::options::Options;
 pub use crate::options::OutputMode;
-use crate::shape::{Shape, fold_shapes};
+use crate::shape::{fold_shapes, Shape};
 
 mod errors {
     error_chain! {
@@ -96,7 +96,8 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         hints.add(pointer, hint);
     }
 
-    let inferred: Vec<Shape> = crate::unwrap::unwrap(&options.unwrap, sample).iter()
+    let inferred: Vec<Shape> = crate::unwrap::unwrap(&options.unwrap, sample)
+        .iter()
         .map(|val| inference::value_to_shape(val, &hints))
         .collect();
     let shape = fold_shapes(inferred);
@@ -107,8 +108,9 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         let (name, defs) = match options.output_mode {
             OutputMode::Rust => generation::rust::rust_types(name, &shape, options),
             OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
-            OutputMode::KotlinJackson |
-            OutputMode::KotlinKotlinx => generation::kotlin::kotlin_types(name, &shape, options),
+            OutputMode::KotlinJackson | OutputMode::KotlinKotlinx => {
+                generation::kotlin::kotlin_types(name, &shape, options)
+            }
             OutputMode::Shape => generation::shape::shape_string(name, &shape, options),
             OutputMode::Typescript => {
                 generation::typescript::typescript_types(name, &shape, options)

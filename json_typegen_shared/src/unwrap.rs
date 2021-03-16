@@ -50,7 +50,6 @@ pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
     return next;
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -61,13 +60,19 @@ mod tests {
         assert_eq!(unwrap("", json!(true)), vec![json!(true)]);
         assert_eq!(unwrap("/", json!(true)), vec![json!(true)]);
         assert_eq!(unwrap("/foo", json!({ "foo": true })), vec![json!(true)]);
-        assert_eq!(unwrap("/foo/-/bar", json!({
-            "foo": [
-                { "bar": 1 },
-                { "bar": 2 },
-                { "nope": "hello" },
-                { "bar": 3 },
-            ]
-        })), vec![json!(1), json!(2), json!(3)]);
+        assert_eq!(
+            unwrap(
+                "/foo/-/bar",
+                json!({
+                    "foo": [
+                        { "bar": 1 },
+                        { "bar": 2 },
+                        { "nope": "hello" },
+                        { "bar": 3 },
+                    ]
+                })
+            ),
+            vec![json!(1), json!(2), json!(3)]
+        );
     }
 }

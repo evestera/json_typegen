@@ -1,8 +1,8 @@
 use linked_hash_map::LinkedHashMap;
 
+use crate::generation::typescript::{collapse_option, is_ts_identifier};
 use crate::options::Options;
 use crate::shape::{self, Shape};
-use crate::generation::typescript::{is_ts_identifier, collapse_option};
 
 pub struct Ctxt {
     options: Options,
@@ -15,7 +15,7 @@ pub type Code = String;
 pub fn typescript_type_alias(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
     let mut ctxt = Ctxt {
         options,
-        indent_level: 1
+        indent_level: 1,
     };
 
     let mut code = type_from_shape(&mut ctxt, shape);
@@ -37,15 +37,15 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
             if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, shapes)
             } else {
-                generate_vec_type(ctxt,  &folded)
+                generate_vec_type(ctxt, &folded)
             }
         }
-        VecT { elem_type: ref e } => generate_vec_type(ctxt,e),
+        VecT { elem_type: ref e } => generate_vec_type(ctxt, e),
         Struct { fields: ref map } => generate_struct_from_field_shapes(ctxt, map),
-        MapT { val_type: ref v } => generate_map_type(ctxt,v),
+        MapT { val_type: ref v } => generate_map_type(ctxt, v),
         Opaque(ref t) => t.clone(),
         Optional(ref e) => {
-            let inner = type_from_shape(ctxt,e);
+            let inner = type_from_shape(ctxt, e);
             if ctxt.options.use_default_for_missing_fields {
                 inner
             } else {
@@ -76,17 +76,14 @@ fn generate_tuple_type(ctxt: &mut Ctxt, shapes: &[Shape]) -> Code {
     format!("[{}]", types.join(", "))
 }
 
-fn generate_struct_from_field_shapes(
-    ctxt: &mut Ctxt,
-    map: &LinkedHashMap<String, Shape>,
-) -> Code {
+fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String, Shape>) -> Code {
     let fields: Vec<Code> = map
         .iter()
         .map(|(name, typ)| {
             let (was_optional, collapsed) = collapse_option(typ);
 
             ctxt.indent_level += 1;
-            let field_type = type_from_shape(ctxt,collapsed);
+            let field_type = type_from_shape(ctxt, collapsed);
             ctxt.indent_level -= 1;
 
             let escape_name = !is_ts_identifier(name);

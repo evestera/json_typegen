@@ -114,6 +114,7 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 }
 
 // https://kotlinlang.org/docs/reference/keyword-reference.html
+#[rustfmt::skip]
 const KOTLIN_KEYWORDS_ARR: &[&str] = &[
     // Hard
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in",
@@ -234,8 +235,13 @@ fn generate_struct_from_field_shapes(
 }
 
 fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
-    match (&ctxt.options.property_name_format, &ctxt.options.output_mode) {
-        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => field_name.to_ascii_lowercase(),
+    match (
+        &ctxt.options.property_name_format,
+        &ctxt.options.output_mode,
+    ) {
+        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => {
+            field_name.to_ascii_lowercase()
+        }
         (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => type_case(field_name),
         (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => snake_case(field_name),
         (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => kebab_case(field_name),
@@ -244,11 +250,22 @@ fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
 }
 
 fn transform_annotation(ctxt: &Ctxt) -> &'static str {
-    match (&ctxt.options.property_name_format, &ctxt.options.output_mode) {
-        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.LowerCaseStrategy::class)\n",
-        (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)\n",
-        (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)\n",
-        (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => "@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy::class)\n",
+    match (
+        &ctxt.options.property_name_format,
+        &ctxt.options.output_mode,
+    ) {
+        (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => {
+            "@JsonNaming(PropertyNamingStrategies.LowerCaseStrategy::class)\n"
+        }
+        (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => {
+            "@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)\n"
+        }
+        (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => {
+            "@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)\n"
+        }
+        (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => {
+            "@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy::class)\n"
+        }
         _ => "",
     }
 }

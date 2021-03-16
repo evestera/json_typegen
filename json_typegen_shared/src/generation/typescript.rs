@@ -128,6 +128,7 @@ pub fn collapse_option(typ: &Shape) -> (bool, &Shape) {
     (false, typ)
 }
 
+#[rustfmt::skip]
 const RESERVED_WORDS_ARR: &[&str] = &["break", "case", "catch", "class", "const",
     "continue", "debugger", "default", "delete", "do", "else", "enum", "export", "extends", "false",
     "finally", "for", "function", "if", "import", "in", "instanceof", "new", "null", "return",
@@ -136,8 +137,7 @@ const RESERVED_WORDS_ARR: &[&str] = &["break", "case", "catch", "class", "const"
     "yield"];
 
 lazy_static! {
-    static ref RESERVED_WORDS: HashSet<&'static str> =
-        RESERVED_WORDS_ARR.iter().cloned().collect();
+    static ref RESERVED_WORDS: HashSet<&'static str> = RESERVED_WORDS_ARR.iter().cloned().collect();
 }
 
 pub fn is_ts_identifier(s: &str) -> bool {

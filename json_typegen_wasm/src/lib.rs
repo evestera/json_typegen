@@ -22,11 +22,7 @@ cfg_if! {
 }
 
 #[wasm_bindgen]
-pub fn run(
-    name: &str,
-    input: &str,
-    options: &str
-) -> String {
+pub fn run(name: &str, input: &str, options: &str) -> String {
     set_panic_hook();
 
     let opts = match json_typegen_shared::parse::options(options) {
@@ -36,6 +32,6 @@ pub fn run(
 
     match json_typegen_shared::codegen(name, input, opts) {
         Ok(res) => res,
-        Err(err) => format!("{}", err)
+        Err(err) => format!("{}", err),
     }
 }

@@ -63,7 +63,10 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
     let mut code = code.unwrap_or(String::new());
 
     if ident != name {
-        code = format!("{} type {} = {};\n\n", ctxt.options.type_visibility, name, ident) + &code;
+        code = format!(
+            "{} type {} = {};\n\n{}",
+            ctxt.options.type_visibility, name, ident, code
+        );
     }
     (name.to_string(), Some(code))
 }
