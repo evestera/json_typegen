@@ -14,6 +14,7 @@ pub struct Options {
     pub property_name_format: Option<StringTransform>,
     pub(crate) hints: Vec<(String, Hint)>,
     pub unwrap: String,
+    pub import_style: ImportStyle,
 }
 
 impl Default for Options {
@@ -30,6 +31,25 @@ impl Default for Options {
             property_name_format: None,
             hints: Vec::new(),
             unwrap: "".into(),
+            import_style: ImportStyle::AddImports
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ImportStyle {
+    AddImports,
+    AssumeExisting,
+    QualifiedPaths,
+}
+
+impl ImportStyle {
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "add_imports" => Some(ImportStyle::AddImports),
+            "assume_existing" => Some(ImportStyle::AssumeExisting),
+            "qualified_paths" => Some(ImportStyle::QualifiedPaths),
+            _ => None,
         }
     }
 }

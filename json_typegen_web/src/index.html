@@ -195,6 +195,19 @@
           </div>
 
           <div class="field">
+            <label class="label" for="importstyle">Import style</label>
+            <div class="control">
+              <div class="select">
+                <select id="importstyle">
+                  <option value="assume_existing">Assume existing imports</option>
+                  <option value="add_imports">Add needed imports</option>
+                  <option value="qualified_paths">Use fully qualified paths</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
             <label class="label" for="unwrap">Unwrap path (JSON pointer, - is wildcard)</label>
             <p class="control">
               <input class="input" type="text" value="" id="unwrap" placeholder="/foo/-/bar">

@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 
-use crate::options::{Options, StringTransform};
+use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
 use crate::util::{kebab_case, lower_camel_case, snake_case, type_case};
 use crate::OutputMode;
@@ -11,6 +11,7 @@ use crate::OutputMode;
 struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
+    imports: HashSet<String>,
 }
 
 pub type Ident = String;
@@ -20,6 +21,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
+        imports: HashSet::new(),
     };
 
     if !matches!(shape, Shape::Struct { .. }) {
@@ -33,6 +35,20 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
     if ident != name {
         code = format!("type {} = {};\n\n", name, ident) + &code;
     }
+
+    if !ctxt.imports.is_empty() {
+        let mut imports: Vec<_> = ctxt.imports.drain().collect();
+        imports.sort();
+        let mut import_code = String::new();
+        for import in imports {
+            import_code += "import ";
+            import_code += &import;
+            import_code += "\n";
+        }
+        import_code += "\n";
+        code = import_code + &code;
+    }
+
     (name.to_string(), Some(code))
 }
 
@@ -175,6 +191,17 @@ fn type_or_field_name(
     unreachable!()
 }
 
+fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
+    match ctxt.options.import_style {
+        ImportStyle::AddImports => {
+            ctxt.imports.insert(qualified.into());
+            qualified.rsplit('.').next().unwrap().into()
+        }
+        ImportStyle::AssumeExisting => qualified.rsplit('.').next().unwrap().into(),
+        ImportStyle::QualifiedPaths => qualified.into(),
+    }
+}
+
 fn generate_struct_from_field_shapes(
     ctxt: &mut Ctxt,
     path: &str,
@@ -195,9 +222,17 @@ fn generate_struct_from_field_shapes(
             let mut field_code = String::new();
             if &apply_transform(ctxt, &field_name) != name {
                 if ctxt.options.output_mode == OutputMode::KotlinJackson {
-                    field_code += &format!("    @JsonProperty(\"{}\")\n", name)
+                    field_code += &format!(
+                        "    @{}(\"{}\")\n",
+                        import(ctxt, "com.fasterxml.jackson.annotation.JsonProperty"),
+                        name
+                    )
                 } else if ctxt.options.output_mode == OutputMode::KotlinKotlinx {
-                    field_code += &format!("    @SerialName(\"{}\")\n", name)
+                    field_code += &format!(
+                        "    @{}(\"{}\")\n",
+                        import(ctxt, "kotlinx.serialization.SerialName"),
+                        name
+                    )
                 }
             }
 
@@ -213,10 +248,10 @@ fn generate_struct_from_field_shapes(
 
     let mut code = String::new();
 
-    code += transform_annotation(ctxt);
+    code += &transform_annotation(ctxt);
 
     if ctxt.options.output_mode == OutputMode::KotlinKotlinx {
-        code += "@Serializable\n";
+        code += &format!("@{}\n", import(ctxt, "kotlinx.serialization.Serializable"));
     }
     code += &format!("data class {}(\n", type_name);
 
@@ -249,23 +284,35 @@ fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
     }
 }
 
-fn transform_annotation(ctxt: &Ctxt) -> &'static str {
+fn jackson_naming_annotation(ctxt: &mut Ctxt, strategy: &str) -> String {
+    format!(
+        "@{}({}.{}::class)\n",
+        import(ctxt, "com.fasterxml.jackson.databind.annotation.JsonNaming"),
+        import(
+            ctxt,
+            "com.fasterxml.jackson.databind.PropertyNamingStrategies"
+        ),
+        strategy
+    )
+}
+
+fn transform_annotation(ctxt: &mut Ctxt) -> String {
     match (
         &ctxt.options.property_name_format,
         &ctxt.options.output_mode,
     ) {
         (Some(StringTransform::LowerCase), OutputMode::KotlinJackson) => {
-            "@JsonNaming(PropertyNamingStrategies.LowerCaseStrategy::class)\n"
+            jackson_naming_annotation(ctxt, "LowerCaseStrategy")
         }
         (Some(StringTransform::PascalCase), OutputMode::KotlinJackson) => {
-            "@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)\n"
+            jackson_naming_annotation(ctxt, "UpperCamelCaseStrategy")
         }
         (Some(StringTransform::SnakeCase), OutputMode::KotlinJackson) => {
-            "@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)\n"
+            jackson_naming_annotation(ctxt, "SnakeCaseStrategy")
         }
         (Some(StringTransform::KebabCase), OutputMode::KotlinJackson) => {
-            "@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy::class)\n"
+            jackson_naming_annotation(ctxt, "KebabCaseStrategy::class)")
         }
-        _ => "",
+        _ => "".into(),
     }
 }

@@ -5,7 +5,7 @@ use syn::parse::{boolean, ident, string};
 use synom::{alt, call, named, punct, IResult};
 
 use crate::hints::Hint;
-use crate::options::{Options, OutputMode, StringTransform};
+use crate::options::{Options, OutputMode, StringTransform, ImportStyle};
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {
@@ -109,8 +109,11 @@ pub fn options(input: &str) -> Result<Options, String> {
         "derives" => string_option(remaining, "derives", |val| {
             options.derives = val;
         }),
-        "property_name_format" => string_option(remaining, "rename_all", |val| {
+        "property_name_format" => string_option(remaining, "property_name_format", |val| {
             options.property_name_format = StringTransform::parse(&val)
+        }),
+        "import_style" => string_option(remaining, "import_style", |val| {
+            options.import_style = ImportStyle::parse(&val).unwrap_or(ImportStyle::QualifiedPaths);
         }),
         "field_visibility" => string_option(remaining, "field_visibility", |val| {
             options.field_visibility = Some(val);

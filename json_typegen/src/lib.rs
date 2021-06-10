@@ -63,8 +63,9 @@ extern crate proc_macro;
 
 use json_typegen_shared::codegen_from_macro_input;
 
-/// The main point of this crate
-/// See root documentation
+/// Generate serde-compatible types from JSON
+///
+/// `json_typegen!(<type name>, <sample source>, <options?>)`
 #[proc_macro]
 pub fn json_typegen(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     codegen_from_macro_input(&input.to_string())

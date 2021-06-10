@@ -15,6 +15,7 @@ const render = () => {
   const options = ({
     output_mode: $('outputmode').value,
     property_name_format: $('propertynameformat').value,
+    import_style: $('importstyle').value,
     unwrap: $('unwrap').value,
   });
 
@@ -86,6 +87,7 @@ $('typename').onkeyup = render;
 $('input').onkeyup = render;
 $('outputmode').onchange = render;
 $('propertynameformat').onchange = render;
+$('importstyle').onchange = render;
 $('unwrap').onkeyup = render;
 $('extraoptions').onkeyup = render;
 
