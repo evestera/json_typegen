@@ -83,9 +83,27 @@ worker.onmessage = messageEvent => {
   }
 }
 
+function toggleOptions() {
+  const conditionalOptions = ({
+    propertynameformat: ['rust', 'kotlin/jackson'],
+    importstyle: ['kotlin/jackson', 'kotlin/kotlinx'],
+  });
+  const currentOutputmode = $('outputmode').value;
+  for (let option in conditionalOptions) {
+    if (conditionalOptions[option].includes(currentOutputmode)) {
+      $(option + '-wrapper').style.display = 'block'
+    } else {
+      $(option + '-wrapper').style.display = 'none';
+    }
+  }
+}
+
 $('typename').onkeyup = render;
 $('input').onkeyup = render;
-$('outputmode').onchange = render;
+$('outputmode').onchange = () => {
+  toggleOptions();
+  render();
+};
 $('propertynameformat').onchange = render;
 $('importstyle').onchange = render;
 $('unwrap').onkeyup = render;
@@ -127,4 +145,5 @@ $('clear-input-button').onclick = () => {
   render();
 }
 
+toggleOptions();
 render();
