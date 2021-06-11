@@ -13,11 +13,13 @@ pub fn camel_case(name: &str) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_alphanumeric() && c.is_alphanumeric()) || (last.is_lowercase() && c.is_uppercase())
         {
             s.push(c.to_ascii_uppercase());
-        } else {
+        } else if last.is_alphabetic() {
             s.push(c.to_ascii_lowercase());
+        } else {
+            s.push(c);
         }
         last = c;
     }
@@ -47,7 +49,7 @@ fn sep_case(name: &str, separator: char) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphabetic() && c.is_alphabetic()) || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_alphanumeric() && c.is_alphanumeric()) || (last.is_lowercase() && c.is_uppercase())
         {
             s.push(separator);
         }
@@ -98,6 +100,13 @@ mod tests {
         assert_eq!("FooBar", &camel_case("åfoo_bar"));
         assert_eq!("FooBar", &camel_case("foåo_bar"));
         assert_eq!("FooBar", &camel_case("FOO_BAR"));
+
+        assert_eq!("Foo1bar", &camel_case("Foo1bar"));
+        assert_eq!("Foo2bar", &camel_case("foo_2bar"));
+        assert_eq!("Foo3Bar", &camel_case("Foo3Bar"));
+        assert_eq!("Foo4Bar", &camel_case("foo4_bar"));
+        assert_eq!("1920x1080", &camel_case("1920x1080"));
+        assert_eq!("19201080", &camel_case("1920*1080"));
     }
 
     #[test]
@@ -110,5 +119,10 @@ mod tests {
         assert_eq!("foo_bar", &snake_case("åfoo_bar"));
         assert_eq!("foo_bar", &snake_case("foåo_bar"));
         assert_eq!("foo_bar", &snake_case("FOO_BAR"));
+
+        assert_eq!("foo_5bar", &snake_case("foo_5bar"));
+        assert_eq!("foo6_bar", &snake_case("foo6_bar"));
+        assert_eq!("1920x1080", &snake_case("1920x1080"));
+        assert_eq!("1920_1080", &snake_case("1920*1080"));
     }
 }

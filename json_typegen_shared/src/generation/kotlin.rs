@@ -163,21 +163,17 @@ fn type_or_field_name(
     case_fn: fn(&str) -> String,
 ) -> Ident {
     let name = name.trim();
-    let mut output_name = if let Some(c) = name.chars().next() {
-        if c.is_ascii() && c.is_numeric() {
-            let temp = String::from("n") + name;
-            case_fn(&temp)
-        } else {
-            case_fn(name)
-        }
-    } else {
-        case_fn(name)
-    };
+    let mut output_name = case_fn(name);
     if KOTLIN_KEYWORDS.contains::<str>(&output_name) {
         output_name.push_str("_field");
     }
     if output_name == "" {
         output_name.push_str(default_name);
+    }
+    if let Some(c) = output_name.chars().next() {
+        if c.is_ascii() && c.is_numeric() {
+            output_name = String::from("n") + &output_name;
+        }
     }
     if !used_names.contains(&output_name) {
         return output_name;
@@ -320,5 +316,29 @@ fn transform_annotation(ctxt: &mut Ctxt) -> String {
             jackson_naming_annotation(ctxt, "KebabCaseStrategy::class)")
         }
         _ => "".into(),
+    }
+}
+
+#[cfg(test)]
+mod kotlin_codegen_tests {
+    use super::*;
+
+    #[test]
+    fn field_names_test() {
+        fn field_name_test(from: &str, to: &str) {
+            assert_eq!(
+                field_name(from, &HashSet::new()),
+                to.to_string(),
+                r#"From "{}" to "{}""#,
+                from,
+                to
+            );
+        }
+
+        field_name_test("valid", "valid");
+        field_name_test("1", "n1");
+        field_name_test("+1", "n1");
+        field_name_test("", "field");
+        field_name_test("object", "object_field");
     }
 }

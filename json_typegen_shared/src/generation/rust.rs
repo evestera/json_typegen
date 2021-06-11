@@ -160,21 +160,17 @@ fn type_or_field_name(
     case_fn: fn(&str) -> String,
 ) -> Ident {
     let name = name.trim();
-    let mut output_name = if let Some(c) = name.chars().next() {
-        if c.is_ascii() && c.is_numeric() {
-            let temp = String::from("n") + name;
-            case_fn(&temp)
-        } else {
-            case_fn(name)
-        }
-    } else {
-        case_fn(name)
-    };
+    let mut output_name = case_fn(name);
     if RUST_KEYWORDS.contains::<str>(&output_name) {
         output_name.push_str("_field");
     }
     if output_name == "" {
         output_name.push_str(default_name);
+    }
+    if let Some(c) = output_name.chars().next() {
+        if c.is_ascii() && c.is_numeric() {
+            output_name = String::from("n") + &output_name;
+        }
     }
     if !used_names.contains(&output_name) {
         return output_name;
