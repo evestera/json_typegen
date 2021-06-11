@@ -69,7 +69,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             }
         }
         VecT { elem_type: ref e } => generate_vec_type(ctxt, path, e),
-        Struct { fields: ref map } => generate_struct_from_field_shapes(ctxt, path, map),
+        Struct { fields: ref map } => generate_data_class(ctxt, path, map),
         MapT { val_type: ref v } => generate_map_type(ctxt, path, v),
         Opaque(ref t) => (t.clone(), None),
         Optional(ref e) => {
@@ -202,11 +202,17 @@ fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
     }
 }
 
-fn generate_struct_from_field_shapes(
+fn generate_data_class(
     ctxt: &mut Ctxt,
     path: &str,
     map: &LinkedHashMap<String, Shape>,
 ) -> (Ident, Option<Code>) {
+    if map.is_empty() {
+        // Kotlin does not allow empty data classes, so use type for general unknown object
+        // Once #30 is implemented: && !options.collect_unknown_properties
+        return ("Map<String, Any>".into(), None)
+    }
+
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
 
