@@ -130,25 +130,12 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 }
 
 // https://kotlinlang.org/docs/reference/keyword-reference.html
+// Only hard keywords are restricted. Others don't cause any problems I know of.
 #[rustfmt::skip]
 const KOTLIN_KEYWORDS_ARR: &[&str] = &[
-    // Hard
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in",
     "interface", "is", "null", "object", "package", "return", "super", "this", "throw", "true",
     "try", "typealias", "val", "var", "when", "while",
-
-    // Soft
-    "by", "catch", "constructor", "delegate", "dynamic", "field", "file", "finally", "get",
-    "import", "init", "param", "property", "receiver", "set", "setparam", "where",
-
-    // Modifier
-    "actual", "abstract", "annotation", "companion", "const", "crossinline", "data", "enum",
-    "expect", "external", "final", "infix", "inline", "inner", "internal", "lateinit", "noinline",
-    "open", "operator", "out", "override", "private", "protected", "public", "reified", "sealed",
-    "suspend", "tailrec", "vararg",
-
-    // Special
-    "field", "it"
 ];
 
 lazy_static! {
