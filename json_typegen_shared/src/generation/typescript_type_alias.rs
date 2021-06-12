@@ -105,8 +105,8 @@ fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String
     if !fields.is_empty() {
         code += &fields.join("\n");
         code += "\n";
-        code += &"    ".repeat(ctxt.indent_level - 1);
     }
+    code += &"    ".repeat(ctxt.indent_level - 1);
     code += "}";
 
     code
