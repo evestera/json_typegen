@@ -5,7 +5,7 @@ use syn::parse::{boolean, ident, string};
 use synom::{alt, call, named, punct, IResult};
 
 use crate::hints::Hint;
-use crate::options::{Options, OutputMode, StringTransform, ImportStyle};
+use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {

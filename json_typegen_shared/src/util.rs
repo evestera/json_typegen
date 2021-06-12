@@ -13,7 +13,8 @@ pub fn camel_case(name: &str) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphanumeric() && c.is_alphanumeric()) || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_alphanumeric() && c.is_alphanumeric())
+            || (last.is_lowercase() && c.is_uppercase())
         {
             s.push(c.to_ascii_uppercase());
         } else if last.is_alphabetic() {
@@ -49,7 +50,8 @@ fn sep_case(name: &str, separator: char) -> String {
             last = c;
             continue;
         }
-        if (!last.is_alphanumeric() && c.is_alphanumeric()) || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_alphanumeric() && c.is_alphanumeric())
+            || (last.is_lowercase() && c.is_uppercase())
         {
             s.push(separator);
         }

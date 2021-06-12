@@ -193,7 +193,7 @@ fn generate_data_class(
     if map.is_empty() {
         // Kotlin does not allow empty data classes, so use type for general unknown object
         // Once #30 is implemented: && !options.collect_unknown_properties
-        return ("Map<String, Any>".into(), None)
+        return ("Map<String, Any>".into(), None);
     }
 
     let type_name = type_name(path, &ctxt.type_names);
