@@ -1,5 +1,11 @@
 use linked_hash_map::LinkedHashMap;
 
+/// The type representing the inferred structure
+///
+/// A word of caution: Everything in this crate is "internal API", but for this type in particular,
+/// since it is very central to how json_typegen works,
+/// be prepared that major breaking changes may need to be made to this in the future.
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Clone)]
 pub enum Shape {
     /// `Bottom` represents the absence of any inference information

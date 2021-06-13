@@ -1,6 +1,9 @@
 //! Note: This crate is considered internal API of the `json_typegen` tools. If you want to use this
-//! crate directly, and thus care about its stability, please
-//! [open an issue](https://github.com/evestera/json_typegen/issues/new) to let me know.
+//! crate directly, be prepared for breaking changes to happen, and consider
+//! [opening an issue](https://github.com/evestera/json_typegen/issues/new)
+//! to let me know what you are using.
+//! (Breaking changes will still happen,
+//! but then I'll at least try to keep your use-case in mind if possible.)
 
 #[macro_use]
 extern crate error_chain;
@@ -22,9 +25,9 @@ mod unwrap;
 mod util;
 
 use crate::hints::Hints;
-pub use crate::options::Options;
-pub use crate::options::OutputMode;
-use crate::shape::{fold_shapes, Shape};
+pub use crate::options::{ImportStyle, Options, OutputMode};
+pub use crate::shape::Shape;
+use crate::shape::fold_shapes;
 
 mod errors {
     error_chain! {
@@ -102,6 +105,11 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         .collect();
     let shape = fold_shapes(inferred);
 
+    codegen_from_shape(name, &shape, options)
+}
+
+/// Just code generation, no inference
+pub fn codegen_from_shape(name: &str, shape: &Shape, options: Options) -> Result<String, JTError> {
     let mut generated_code = if options.runnable {
         generation::rust::rust_program(name, &shape, options)
     } else {

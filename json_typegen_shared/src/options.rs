@@ -1,6 +1,9 @@
 use crate::hints::Hint;
 
 /// Options for the code generation
+///
+/// Construct with `Options::default()`, and change any settings you care about.
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Options {
     pub output_mode: OutputMode,
@@ -36,10 +39,15 @@ impl Default for Options {
     }
 }
 
+/// How imports/external types should be handled by code generation
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Clone)]
 pub enum ImportStyle {
+    /// Add import/use statements for any external types used
     AddImports,
+    /// Assume import/use statements already exist where the generated code will be inserted
     AssumeExisting,
+    /// Use fully qualified paths for any external type used
     QualifiedPaths,
 }
 
@@ -54,6 +62,7 @@ impl ImportStyle {
     }
 }
 
+#[non_exhaustive]
 #[derive(Debug, PartialEq, Clone)]
 pub enum OutputMode {
     Rust,
