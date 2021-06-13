@@ -2,7 +2,6 @@ use serde_json::Value;
 
 /// "Unwrap" JSON nodes so that the node(s) specified by the pointer is the new root(s)
 pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
-    dbg!(pointer);
     let pointer_tokens: Vec<&str> = if pointer.is_empty() || pointer == "/" {
         return vec![value];
     } else {
@@ -18,7 +17,7 @@ pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
     }
 
     let mut next: Vec<Value> = vec![value];
-    for pointer_token in dbg!(pointer_tokens) {
+    for pointer_token in pointer_tokens {
         let mut work = Vec::new();
         std::mem::swap(&mut work, &mut next);
         for val in work {
