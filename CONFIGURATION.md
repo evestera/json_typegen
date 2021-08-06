@@ -23,6 +23,7 @@ The options that can be set in this manner are:
       Combined with inference hints specifying an opaque type this allows
       creating types for wrappers and actual content separately.
       Takes a [JSON Pointer], with `-` functioning as a wildcard.
+      See the [separate section below](#unwrap--wrapper-types)
 - Rust-specific options:
     - `derives`: Which traits the type should derive
     - `field_visiblity`: Visibility specifier for fields
@@ -32,6 +33,8 @@ The options that can be set in this manner are:
     - `allow_option_vec`: Whether the inference should allow the type
         `Option<Vec<...>>` to be inferred, or if it should be collapsed to just
         `Vec<...>`
+
+### Field options / inference hints
 
 In addition to these options, specific fields can be configured with their own
 options block using a [JSON Pointer], with `-` functioning as a wildcard.
@@ -54,3 +57,16 @@ The options that can be set in this manner are:
   }
 }
 ```
+
+## Unwrap / wrapper types
+
+Often an API can have a stable wrapper type with a varying inner type,
+so that it makes sense to generate/write the type for the wrapper once,
+and reuse that type.
+In these cases you then mostly want to only generate a type for the inner type.
+To do this you can use the `unwrap` option.
+
+To generate the outer type you can use an inference hint with an opaque type
+filling in for a type parameter.
+The code generation will not actually create generic types at the moment,
+so you may have to manually edit the generated code afterwards.
