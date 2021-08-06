@@ -145,5 +145,16 @@ $('clear-input-button').onclick = () => {
   render();
 }
 
+$('format-json-button').onclick = () => {
+  try {
+    const input = $('input');
+    input.value = JSON.stringify(JSON.parse(input.value), undefined, 2)
+  } catch (e) {
+    alert("Unable to parse input as JSON");
+    return;
+  }
+  render();
+}
+
 toggleOptions();
 render();
