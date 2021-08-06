@@ -33,7 +33,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
     let mut code = code.unwrap_or(String::new());
 
     if ident != name {
-        code = format!("type {} = {};\n\n", name, ident) + &code;
+        code = format!("typealias {} = {};\n\n", name, ident) + &code;
     }
 
     if !ctxt.imports.is_empty() {
