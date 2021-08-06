@@ -55,7 +55,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
     use crate::shape::Shape::*;
     match *shape {
-        Null | Any | Bottom => ("Any".into(), None),
+        Null | Any | Bottom => ("Any?".into(), None),
         Bool => ("Boolean".into(), None),
         StringT => ("String".into(), None),
         Integer => ("Long".into(), None),
