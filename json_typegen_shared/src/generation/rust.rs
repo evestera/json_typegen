@@ -5,13 +5,14 @@ use std::collections::HashSet;
 use unindent::unindent;
 
 use crate::generation::serde_case::RenameRule;
-use crate::options::{Options, StringTransform};
+use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
 use crate::util::{snake_case, type_case};
 
 pub struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
+    imports: HashSet<String>,
 }
 
 pub type Ident = String;
@@ -21,12 +22,6 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
     let (type_name, defs) = rust_types(name, &shape, options);
 
     let var_name = snake_case(&type_name);
-
-    let crates = unindent(
-        r#"
-        use serde_derive::{Serialize, Deserialize};
-        "#,
-    );
 
     let main = unindent(&format!(
         r#"
@@ -43,8 +38,8 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
     ));
 
     match defs {
-        Some(code) => crates + "\n\n" + &code + "\n\n" + &main,
-        None => crates + "\n\n" + &main,
+        Some(code) => code + "\n\n" + &main,
+        None => main,
     }
 }
 
@@ -52,6 +47,16 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
+        imports: HashSet::new(),
+    };
+
+    if ctxt.options.import_style != ImportStyle::QualifiedPaths {
+        ctxt.options.derives = ctxt.options.derives
+            .clone()
+            .split(',')
+            .map(|s| import(&mut ctxt, s.trim()))
+            .collect::<Vec<_>>()
+            .join(", ");
     };
 
     if !matches!(shape, Shape::Struct { .. }) {
@@ -68,13 +73,27 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
             ctxt.options.type_visibility, name, ident, code
         );
     }
+
+    if !ctxt.imports.is_empty() {
+        let mut imports: Vec<_> = ctxt.imports.drain().collect();
+        imports.sort();
+        let mut import_code = String::new();
+        for import in imports {
+            import_code += "use ";
+            import_code += &import;
+            import_code += ";\n";
+        }
+        import_code += "\n";
+        code = import_code + &code;
+    }
+
     (name.to_string(), Some(code))
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
     use crate::shape::Shape::*;
     match shape {
-        Null | Any | Bottom => ("::serde_json::Value".into(), None),
+        Null | Any | Bottom => (import(ctxt, "serde_json::Value"), None),
         Bool => ("bool".into(), None),
         StringT => ("String".into(), None),
         Integer => ("i64".into(), None),
@@ -112,7 +131,7 @@ fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Opti
     let singular = path.to_singular();
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (
-        format!("::std::collections::HashMap<String, {}>", inner),
+        format!("{}<String, {}>", import(ctxt, "std::collections::HashMap"), inner),
         defs,
     )
 }
@@ -193,6 +212,20 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt, typ: &'a Shape) -> (bool, &'a Shape)
         }
     }
     (false, typ)
+}
+
+fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
+    if !qualified.contains("::") {
+        return qualified.into()
+    }
+    match ctxt.options.import_style {
+        ImportStyle::AddImports => {
+            ctxt.imports.insert(qualified.into());
+            qualified.rsplit("::").next().unwrap().into()
+        }
+        ImportStyle::AssumeExisting => qualified.rsplit("::").next().unwrap().into(),
+        ImportStyle::QualifiedPaths => qualified.into(),
+    }
 }
 
 fn generate_struct_from_field_shapes(

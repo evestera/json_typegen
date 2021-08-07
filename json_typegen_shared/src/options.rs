@@ -39,6 +39,14 @@ impl Default for Options {
     }
 }
 
+impl Options {
+    pub(crate) fn macro_default() -> Options {
+        let mut options = Options::default();
+        options.import_style = ImportStyle::QualifiedPaths;
+        options
+    }
+}
+
 /// How imports/external types should be handled by code generation
 #[non_exhaustive]
 #[derive(Debug, PartialEq, Clone)]

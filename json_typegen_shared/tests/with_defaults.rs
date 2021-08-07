@@ -1,10 +1,12 @@
 use testsyn::{parse_str, Item};
 
-use json_typegen_shared::{codegen, Options};
+use json_typegen_shared::{codegen, Options, ImportStyle};
 
 /// Function to test AST equality, not string equality
 fn code_output_test(name: &str, input: &str, expected: &str) {
-    let res = codegen(name, input, Options::default());
+    let mut options = Options::default();
+    options.import_style = ImportStyle::AssumeExisting;
+    let res = codegen(name, input, options);
     let output = res.unwrap();
     assert_eq!(
         // Wrapping in mod Foo { } since there is no impl Parse for Vec<Item>
@@ -25,7 +27,7 @@ fn empty_object() {
             {}
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Root {}
         "##,
     );
@@ -55,7 +57,7 @@ fn point() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Point {
                 pub x: i64,
                 pub y: i64,
@@ -75,7 +77,7 @@ fn pub_crate_point() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub(crate) struct Point {
                 pub x: i64,
                 pub y: i64,
@@ -105,7 +107,7 @@ fn optionals() {
         r##"
             pub type Optionals = Vec<Optional>;
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Optional {
                 pub in_both: i64,
                 pub missing: Option<i64>,
@@ -137,11 +139,11 @@ fn fallback() {
         r##"
             pub type FallbackExamples = Vec<FallbackExample>;
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct FallbackExample {
-                pub only_null: ::serde_json::Value,
-                pub conflicting: ::serde_json::Value,
-                pub empty_array: Vec<::serde_json::Value>,
+                pub only_null: Value,
+                pub conflicting: Value,
+                pub empty_array: Vec<Value>,
             }
         "##,
     );
@@ -165,24 +167,24 @@ fn nesting() {
         r##"
             pub type NestedTypes = Vec<NestedType>;
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct NestedType {
                 pub nested: Nested,
                 pub in_array: Vec<InArray>,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Nested {
                 pub a: i64,
                 pub doubly_nested: DoublyNested,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct DoublyNested {
                 pub c: i64,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct InArray {
                 pub b: i64,
             }
@@ -216,13 +218,13 @@ fn tuple() {
         r##"
             pub type Pagination = (Pagination2, Vec<Pagination3>);
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Pagination2 {
                 pub pages: i64,
                 pub items: i64,
             }
 
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Pagination3 {
                 pub name : String,
             }
@@ -240,7 +242,7 @@ fn rename() {
             }
         "##,
         r##"
-            #[derive(Default, Debug, Clone, PartialEq, serde_derive::Serialize, serde_derive::Deserialize)]
+            #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Renamed {
                 #[serde(rename = "type")]
                 pub type_field: i64,

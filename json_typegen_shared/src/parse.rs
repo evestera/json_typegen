@@ -71,11 +71,13 @@ pub fn macro_input(input: &str) -> Result<MacroInput, String> {
         IResult::Error => fail!("Second argument must be a string literal", input),
     };
 
+    let default_options = Options::macro_default();
+
     if input.trim().is_empty() {
         return Ok(MacroInput {
             name,
             sample_source,
-            options: Options::default(),
+            options: default_options,
         });
     }
 
@@ -86,8 +88,8 @@ pub fn macro_input(input: &str) -> Result<MacroInput, String> {
     )?;
 
     let options = match string(input) {
-        IResult::Done(_, lit) => options(&lit.value)?,
-        IResult::Error => options(input)?,
+        IResult::Done(_, lit) => options_with_defaults(&lit.value, default_options)?,
+        IResult::Error => options_with_defaults(input, default_options)?,
     };
 
     Ok(MacroInput {
@@ -100,7 +102,11 @@ pub fn macro_input(input: &str) -> Result<MacroInput, String> {
 /// Parses the options block of a `json_typegen` macro invocation. E.g. something like:
 /// `{ deny_unknown_fields }`
 pub fn options(input: &str) -> Result<Options, String> {
-    let mut options = Options::default();
+    options_with_defaults(input, Options::default())
+}
+
+fn options_with_defaults(input: &str, default_options: Options) -> Result<Options, String> {
+    let mut options = default_options;
 
     let input_after_block = block(input, |remaining, option_name| match option_name.as_ref() {
         "output_mode" => string_option(remaining, "output_mode", |val| {
@@ -263,7 +269,7 @@ mod macro_input_tests {
             Ok(MacroInput {
                 name: "Bob".to_string(),
                 sample_source: "{}".to_string(),
-                options: Options::default(),
+                options: Options::macro_default(),
             })
         );
     }
@@ -275,7 +281,7 @@ mod macro_input_tests {
             Ok(MacroInput {
                 name: "Bob".to_string(),
                 sample_source: "{}".to_string(),
-                options: Options::default(),
+                options: Options::macro_default(),
             })
         );
     }
@@ -287,7 +293,7 @@ mod macro_input_tests {
             Ok(MacroInput {
                 name: "Bob".to_string(),
                 sample_source: "{}".to_string(),
-                options: Options::default(),
+                options: Options::macro_default(),
             })
         );
     }
@@ -470,7 +476,7 @@ mod full_macro_tests {
             Ok(MacroInput {
                 name: "Bob".to_string(),
                 sample_source: "{}".to_string(),
-                options: Options::default(),
+                options: Options::macro_default(),
             })
         );
     }
@@ -482,7 +488,7 @@ mod full_macro_tests {
             Ok(MacroInput {
                 name: "Bob".to_string(),
                 sample_source: "{}".to_string(),
-                options: Options::default(),
+                options: Options::macro_default(),
             })
         );
     }
