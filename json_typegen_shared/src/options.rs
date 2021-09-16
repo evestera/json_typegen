@@ -41,6 +41,7 @@ impl Default for Options {
     }
 }
 
+#[cfg(feature = "option-parsing")]
 impl Options {
     pub(crate) fn macro_default() -> Options {
         let mut options = Options::default();

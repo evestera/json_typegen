@@ -1,4 +1,6 @@
 //! Functions for parsing `json_typegen` macro invocations and their arguments
+//!
+//! Requires the "option-parsing" feature
 
 use syn;
 use syn::parse::{boolean, ident, string};

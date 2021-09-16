@@ -12,9 +12,10 @@ edition = "2018"
 
 [features]
 unstable = []
-default = ["remote-samples", "local-samples"]
+default = ["remote-samples", "local-samples", "option-parsing"]
 remote-samples = ["reqwest"]
 local-samples = []
+option-parsing = ["syn", "synom"]
 
 [dependencies]
 serde = "1.0"
@@ -26,8 +27,8 @@ lazy_static = "1.2"
 linked-hash-map = "0.5.3"
 Inflector = "0.11"
 regex = "1.1"
-syn = { version = "0.11", features = ["full", "parsing"] }
-synom = "0.11.3"
+syn = { version = "0.11", features = ["full", "parsing"], optional = true }
+synom = { version = "0.11.3", optional = true }
 unindent = "0.1.2"
 
 [dev-dependencies]

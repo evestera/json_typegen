@@ -24,6 +24,7 @@ mod generation;
 mod hints;
 mod inference;
 mod options;
+#[cfg(feature = "option-parsing")]
 pub mod parse;
 mod shape;
 mod unwrap;
@@ -68,6 +69,7 @@ enum SampleSource<'a> {
     Text(&'a str),
 }
 
+#[cfg(feature = "option-parsing")]
 /// Generate code from a `json_typegen` macro invocation
 pub fn codegen_from_macro(input: &str) -> Result<String, JTError> {
     let macro_input = parse::full_macro(input)?;
@@ -79,6 +81,7 @@ pub fn codegen_from_macro(input: &str) -> Result<String, JTError> {
     )
 }
 
+#[cfg(feature = "option-parsing")]
 /// Generate code from the arguments to a `json_typegen` macro invocation
 pub fn codegen_from_macro_input(input: &str) -> Result<String, JTError> {
     let macro_input = parse::macro_input(input)?;
