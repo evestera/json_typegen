@@ -49,6 +49,7 @@ jobs:
         with:
           node-version: '14.x'
           cache: 'npm'
+          cache-dependency-path: json_typegen_web/package-lock.json
       - run: npm ci
         working-directory: json_typegen_web
       - run: npm run build
