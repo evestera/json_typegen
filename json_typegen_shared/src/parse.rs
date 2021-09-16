@@ -135,6 +135,9 @@ fn options_with_defaults(input: &str, default_options: Options) -> Result<Option
         "allow_option_vec" => boolean_option(remaining, "allow_option_vec", |val| {
             options.allow_option_vec = val;
         }),
+        "collect_additional" => boolean_option(remaining, "collect_additional", |val| {
+            options.collect_additional = val;
+        }),
         "unwrap" => string_option(remaining, "unwrap", |val| {
             options.unwrap = val;
         }),

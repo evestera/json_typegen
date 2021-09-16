@@ -18,6 +18,7 @@ pub struct Options {
     pub(crate) hints: Vec<(String, Hint)>,
     pub unwrap: String,
     pub import_style: ImportStyle,
+    pub collect_additional: bool,
 }
 
 impl Default for Options {
@@ -34,7 +35,8 @@ impl Default for Options {
             property_name_format: None,
             hints: Vec::new(),
             unwrap: "".into(),
-            import_style: ImportStyle::AddImports
+            import_style: ImportStyle::AddImports,
+            collect_additional: false,
         }
     }
 }

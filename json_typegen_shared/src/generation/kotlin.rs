@@ -246,7 +246,14 @@ fn generate_data_class(
 
     if !fields.is_empty() {
         code += &fields.join(",\n");
-        code += "\n";
+        code += ",\n";
+    }
+    if ctxt.options.collect_additional {
+        code += &format!(
+            "    @{}\n    @get:{}\n    val additionalFields: Map<String, Any> = mutableMapOf(),\n",
+            import(ctxt, "com.fasterxml.jackson.annotation.JsonAnySetter"),
+            import(ctxt, "com.fasterxml.jackson.annotation.JsonAnyGetter"),
+        )
     }
     code += ")";
 

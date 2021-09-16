@@ -25,6 +25,7 @@ export function restoreParams() {
       $('propertynameformat').value = params.options.property_name_format;
       $('unwrap').value = params.options.unwrap;
       params.options.import_style && ($('importstyle').value = params.options.import_style);
+      params.options.collect_additional && ($('collectadditional').checked = params.options.collect_additional);
     }
 
     if (params.extraoptions) {

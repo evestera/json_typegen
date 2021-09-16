@@ -308,6 +308,13 @@ fn generate_struct_from_field_shapes(
         code += &fields.join("\n");
         code += "\n";
     }
+    if ctxt.options.collect_additional {
+        code += &format!(
+            "    #[serde(flatten)]\n    additional_fields: {}<String, {}>,\n",
+            import(ctxt, "std::collections::HashMap"),
+            import(ctxt, "serde_json::Value"),
+        )
+    }
     code += "}";
 
     if !defs.is_empty() {

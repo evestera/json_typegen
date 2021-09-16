@@ -17,6 +17,7 @@ const render = () => {
     property_name_format: $('propertynameformat').value,
     import_style: $('importstyle').value,
     unwrap: $('unwrap').value,
+    collect_additional: $('collectadditional').checked,
   });
 
   const extraoptions_elem = $('extraoptions');
@@ -87,6 +88,7 @@ function toggleOptions() {
   const conditionalOptions = ({
     propertynameformat: ['rust', 'kotlin/jackson'],
     importstyle: ['rust', 'kotlin/jackson', 'kotlin/kotlinx'],
+    collectadditional: ['rust', 'kotlin/jackson'],
   });
   const currentOutputmode = $('outputmode').value;
   for (let option in conditionalOptions) {
@@ -106,6 +108,7 @@ $('outputmode').onchange = () => {
 };
 $('propertynameformat').onchange = render;
 $('importstyle').onchange = render;
+$('collectadditional').onchange = render;
 $('unwrap').onkeyup = render;
 $('extraoptions').onkeyup = render;
 
