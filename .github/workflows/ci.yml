@@ -1,0 +1,45 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  publish:
+    name: CI for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        name: [
+            linux,
+            windows,
+            macos
+        ]
+
+        include:
+          - name: linux
+            os: ubuntu-latest
+          - name: windows
+            os: windows-latest
+          - name: macos
+            os: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build
+        run: cargo build --all
+
+      - name: Build json_typegen_shared with no features
+        run: cargo build --no-default-features
+        working-directory: json_typegen_shared
+
+      - name: Test
+        run: cargo test --all
+
+      - name: Run proc_macro demo
+        run: cargo run
+        working-directory: json_typegen_demo

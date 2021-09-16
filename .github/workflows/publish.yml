@@ -1,0 +1,49 @@
+name: Publish
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  publish:
+    name: Publish for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        name: [
+            linux,
+            windows,
+            macos
+        ]
+
+        include:
+          - name: linux
+            os: ubuntu-latest
+            artifact_name: target/release/json_typegen
+            asset_name: json_typegen-linux
+          - name: windows
+            os: windows-latest
+            artifact_name: target/release/json_typegen.exe
+            asset_name: json_typegen-windows
+          - name: macos
+            os: macos-latest
+            artifact_name: target/release/json_typegen
+            asset_name: json_typegen-macos
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build
+        run: cargo build --release
+        working-directory: json_typegen_cli
+
+      - name: Upload binaries to release
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.artifact_name }}
