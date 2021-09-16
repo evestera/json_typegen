@@ -38,8 +38,7 @@ jobs:
           profile: minimal
           toolchain: stable
 
-      - name: Build
-        run: cargo build --release
+      - run: cargo build --release
         working-directory: json_typegen_cli
 
       - name: Upload binaries to release
