@@ -2,6 +2,9 @@ name: CI
 
 on: [push, pull_request]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
   publish:
     name: CI for ${{ matrix.os }}
@@ -30,22 +33,22 @@ jobs:
           profile: minimal
           toolchain: stable
 
-      - run: cargo build --all
+      - run: cargo build --all --verbose
 
       - name: (json_typegen_shared) cargo build --no-default-features
         run: cargo build --no-default-features
         working-directory: json_typegen_shared
 
-      - run: cargo test --all
+      - run: cargo test --all --verbose
 
       - name: (json_typegen_demo) cargo run
         run: cargo run
         working-directory: json_typegen_demo
 
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: '14.x'
-
+          cache: 'npm'
       - run: npm ci
         working-directory: json_typegen_web
       - run: npm run build
