@@ -53,4 +53,5 @@ jobs:
       - run: npm ci
         working-directory: json_typegen_web
       - run: npm run build
+        if: matrix.os != 'windows-latest'
         working-directory: json_typegen_web
