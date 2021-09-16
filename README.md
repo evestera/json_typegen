@@ -52,7 +52,7 @@ The following crate dependencies are necessary for this example to work:
 serde = "1.0"
 serde_derive = "1.0"
 serde_json = "1.0"
-json_typegen = "0.6"
+json_typegen = "0.7"
 ```
 
 The sample json can also come from local or remote files:
