@@ -186,7 +186,7 @@ fn infer_source_type(s: &str) -> SampleSource {
 fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
-        SampleSource::Url(url) => serde_json::de::from_reader(reqwest::get(url)?),
+        SampleSource::Url(url) => serde_json::de::from_reader(reqwest::blocking::get(url)?),
         #[cfg(not(feature = "remote-samples"))]
         SampleSource::Url(_) => {
             return Err("Remote samples disabled".into());
