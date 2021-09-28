@@ -10,13 +10,11 @@ pub struct Ctxt {
     options: Options,
 }
 
-pub type Ident = String;
 pub type Code = String;
 
-pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn json_schema(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt { options };
 
-    let ident = "".to_string();
     let value = type_from_shape(&mut ctxt, name, shape);
 
     let mut schema = json!({
@@ -30,9 +28,7 @@ pub fn json_schema(name: &str, shape: &Shape, options: Options) -> (Ident, Optio
         }
     }
 
-    let code = ::serde_json::to_string_pretty(&schema);
-
-    (ident, code.ok())
+    ::serde_json::to_string_pretty(&schema).unwrap()
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {

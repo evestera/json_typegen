@@ -104,7 +104,12 @@ fn main() {
     let result = main_with_result();
 
     if let Err(e) = result {
-        eprintln!("{}", e);
+        eprintln!("Error: {}", e);
+        let mut err = &*e;
+        while let Some(source) = err.source() {
+            println!("  Caused by: {}", source);
+            err = source;
+        }
         std::process::exit(1);
     }
 }

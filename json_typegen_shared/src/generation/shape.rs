@@ -10,18 +10,14 @@ pub struct Ctxt {
     options: Options,
 }
 
-pub type Ident = String;
 pub type Code = String;
 
-pub fn shape_string(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn shape_string(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt { options };
 
-    let ident = "".to_string();
     let value = type_from_shape(&mut ctxt, name, shape);
 
-    let code = ::serde_json::to_string_pretty(&value);
-
-    (ident, code.ok())
+    ::serde_json::to_string_pretty(&value).unwrap()
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {

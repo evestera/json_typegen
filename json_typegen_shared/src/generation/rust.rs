@@ -19,9 +19,9 @@ pub type Ident = String;
 pub type Code = String;
 
 pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
-    let (type_name, defs) = rust_types(name, &shape, options);
+    let defs = rust_types(name, &shape, options);
 
-    let var_name = snake_case(&type_name);
+    let var_name = snake_case(name);
 
     let main = unindent(&format!(
         r#"
@@ -34,16 +34,13 @@ pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
         }}
         "#,
         var_name = var_name,
-        type_name = type_name
+        type_name = name
     ));
 
-    match defs {
-        Some(code) => code + "\n\n" + &main,
-        None => main,
-    }
+    defs + "\n\n" + &main
 }
 
-pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn rust_types(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
@@ -87,7 +84,7 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option
         code = import_code + &code;
     }
 
-    (name.to_string(), Some(code))
+    code
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

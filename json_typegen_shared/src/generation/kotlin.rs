@@ -17,7 +17,7 @@ struct Ctxt {
 pub type Ident = String;
 pub type Code = String;
 
-pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt {
         options,
         type_names: HashSet::new(),
@@ -49,7 +49,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> (Ident, Opti
         code = import_code + &code;
     }
 
-    (name.to_string(), Some(code))
+    code
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {

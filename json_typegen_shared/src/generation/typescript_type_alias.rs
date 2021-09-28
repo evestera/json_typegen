@@ -9,19 +9,17 @@ pub struct Ctxt {
     indent_level: usize,
 }
 
-pub type Ident = String;
 pub type Code = String;
 
-pub fn typescript_type_alias(name: &str, shape: &Shape, options: Options) -> (Ident, Option<Code>) {
+pub fn typescript_type_alias(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt {
         options,
         indent_level: 1,
     };
 
-    let mut code = type_from_shape(&mut ctxt, shape);
+    let code = type_from_shape(&mut ctxt, shape);
 
-    code = format!("export type {} = {};\n\n", name, code);
-    (name.to_string(), Some(code))
+    format!("export type {} = {};\n\n", name, code)
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
