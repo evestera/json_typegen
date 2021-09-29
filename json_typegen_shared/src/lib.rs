@@ -16,8 +16,8 @@ use std::fs::File;
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde_json::Value;
-use thiserror::Error;
 
+mod error;
 mod generation;
 mod hints;
 mod inference;
@@ -28,29 +28,11 @@ mod shape;
 mod unwrap;
 mod util;
 
+pub use crate::error::JTError;
 use crate::hints::Hints;
 pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
 use crate::shape::fold_shapes;
 pub use crate::shape::Shape;
-
-/// The errors that json_typegen_shared may produce
-///
-/// No stability guarantees are made with for this type
-/// except that it is a type that implements `std::error::Error`
-#[non_exhaustive]
-#[derive(Error, Debug)]
-pub enum JTError {
-    #[cfg(feature = "remote-samples")]
-    #[error("An error occurred while fetching JSON")]
-    SampleFetchingError(#[from] ::reqwest::Error),
-    #[cfg(feature = "local-samples")]
-    #[error("An error occurred while reading JSON from file")]
-    SampleReadingError(#[from] ::std::io::Error),
-    #[error("An error occurred while parsing JSON")]
-    JsonParsingError(#[from] ::serde_json::Error),
-    #[error("An error occurred while parsing a macro or macro input {0}")]
-    MacroParsingError(String),
-}
 
 enum SampleSource<'a> {
     #[cfg(feature = "remote-samples")]
