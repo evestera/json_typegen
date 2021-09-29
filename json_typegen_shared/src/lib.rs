@@ -183,7 +183,7 @@ fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
         SampleSource::Url(url) => serde_json::de::from_reader(
-            reqwest::blocking::get(url)?.error_for_status()?
+            reqwest::get(url)?.error_for_status()?
         ),
 
         #[cfg(feature = "local-samples")]
