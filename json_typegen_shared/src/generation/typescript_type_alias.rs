@@ -54,12 +54,12 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
 }
 
 fn generate_vec_type(ctxt: &mut Ctxt, shape: &Shape) -> Code {
-    let inner = type_from_shape(ctxt, &shape);
+    let inner = type_from_shape(ctxt, shape);
     format!("Array<{}>", inner)
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, shape: &Shape) -> Code {
-    let inner = type_from_shape(ctxt, &shape);
+    let inner = type_from_shape(ctxt, shape);
     format!("{{ [key: string]: {} }}", inner)
 }
 
@@ -98,7 +98,7 @@ fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String
         })
         .collect();
 
-    let mut code = format!("{{\n");
+    let mut code = "{\n".to_string();
 
     if !fields.is_empty() {
         code += &fields.join("\n");

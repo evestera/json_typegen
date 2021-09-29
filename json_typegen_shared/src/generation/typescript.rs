@@ -28,7 +28,7 @@ pub fn typescript_types(name: &str, shape: &Shape, options: Options) -> Code {
     }
 
     let (ident, code) = type_from_shape(&mut ctxt, name, shape);
-    let mut code = code.unwrap_or(String::new());
+    let mut code = code.unwrap_or_default();
 
     if ident != name {
         code = format!("export type {} = {};\n\n", name, ident) + &code;
@@ -107,7 +107,7 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     } else {
         type_case(name)
     };
-    if output_name == "" {
+    if output_name.is_empty() {
         output_name.push_str("GeneratedType");
     }
     if !used_names.contains(&output_name) {

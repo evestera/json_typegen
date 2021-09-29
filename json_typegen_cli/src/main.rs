@@ -81,7 +81,7 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
         if let Some(output_mode) = matches.value_of("output-mode") {
             options.output_mode = OutputMode::parse(output_mode).ok_or("Invalid output mode")?;
         }
-        codegen(&name, &input, options)
+        codegen(name, &input, options)
     };
 
     if let Some(filename) = matches.value_of("output") {

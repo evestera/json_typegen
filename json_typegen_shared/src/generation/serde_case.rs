@@ -4,6 +4,7 @@
 //! Manually vendored from serde_derive/internals
 //! <https://github.com/serde-rs/serde/blob/4eb580790dd6c96089b92942a5f481b21df4feaf/serde_derive/src/internals/case.rs>
 #![allow(dead_code)]
+#![allow(clippy::upper_case_acronyms)]
 
 // See https://users.rust-lang.org/t/psa-dealing-with-warning-unused-import-std-ascii-asciiext-in-today-s-nightly/13726
 #[allow(deprecated, unused_imports)]

@@ -4,12 +4,10 @@ use serde_json::Value;
 pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
     let pointer_tokens: Vec<&str> = if pointer.is_empty() || pointer == "/" {
         return vec![value];
+    } else if pointer.starts_with('/') {
+        pointer.split('/').skip(1).collect()
     } else {
-        if pointer.starts_with('/') {
-            pointer.split('/').skip(1).collect()
-        } else {
-            pointer.split('/').collect()
-        }
+        pointer.split('/').collect()
     };
 
     if pointer_tokens.is_empty() {
@@ -46,7 +44,7 @@ pub fn unwrap(pointer: &str, value: Value) -> Vec<Value> {
         }
     }
 
-    return next;
+    next
 }
 
 #[cfg(test)]

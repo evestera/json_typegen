@@ -61,7 +61,7 @@ fn object_to_struct_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
         .map(|(name, value)| {
             (
                 name.clone(),
-                value_to_shape(value, &hints.step_field(&name)),
+                value_to_shape(value, &hints.step_field(name)),
             )
         })
         .collect();

@@ -42,16 +42,16 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
-                generate_tuple_type(ctxt, path, &shapes)
+                generate_tuple_type(ctxt, path, shapes)
             } else {
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: e } => generate_vec_type(ctxt, path, &e),
-        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, &map),
-        MapT { val_type: v } => generate_map_type(ctxt, path, &v),
+        VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
+        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, map),
+        MapT { val_type: v } => generate_map_type(ctxt, path, v),
         Opaque(t) => json!({ "type": t }),
-        Optional(e) => type_from_shape(ctxt, path, &e),
+        Optional(e) => type_from_shape(ctxt, path, e),
     }
 }
 

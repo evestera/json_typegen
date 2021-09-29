@@ -310,8 +310,10 @@ mod options_tests {
 
     #[test]
     fn parses_derives() {
-        let mut expected = Options::default();
-        expected.derives = "Foo, Bar".into();
+        let expected = Options {
+            derives: "Foo, Bar".into(),
+            ..Options::default()
+        };
 
         assert_eq!(
             options(
@@ -432,8 +434,10 @@ mod options_tests {
 
     #[test]
     fn parses_keys_given_as_bare_identifiers() {
-        let mut expected = Options::default();
-        expected.derives = "Foo, Bar".into();
+        let expected = Options {
+            derives: "Foo, Bar".into(),
+            ..Options::default()
+        };
 
         assert_eq!(
             options(
@@ -447,8 +451,10 @@ mod options_tests {
 
     #[test]
     fn trailing_comma_is_optional() {
-        let mut expected = Options::default();
-        expected.derives = "Foo, Bar".into();
+        let expected = Options {
+            derives: "Foo, Bar".into(),
+            ..Options::default()
+        };
 
         assert_eq!(
             options(

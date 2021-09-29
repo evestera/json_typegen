@@ -112,20 +112,20 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
 /// Just code generation, no inference
 pub fn codegen_from_shape(name: &str, shape: &Shape, options: Options) -> Result<String, JTError> {
     let mut generated_code = if options.runnable {
-        generation::rust::rust_program(name, &shape, options)
+        generation::rust::rust_program(name, shape, options)
     } else {
         match options.output_mode {
-            OutputMode::Rust => generation::rust::rust_types(name, &shape, options),
-            OutputMode::JsonSchema => generation::json_schema::json_schema(name, &shape, options),
+            OutputMode::Rust => generation::rust::rust_types(name, shape, options),
+            OutputMode::JsonSchema => generation::json_schema::json_schema(name, shape, options),
             OutputMode::KotlinJackson | OutputMode::KotlinKotlinx => {
-                generation::kotlin::kotlin_types(name, &shape, options)
+                generation::kotlin::kotlin_types(name, shape, options)
             }
-            OutputMode::Shape => generation::shape::shape_string(name, &shape, options),
+            OutputMode::Shape => generation::shape::shape_string(name, shape, options),
             OutputMode::Typescript => {
-                generation::typescript::typescript_types(name, &shape, options)
+                generation::typescript::typescript_types(name, shape, options)
             }
             OutputMode::TypescriptTypeAlias => {
-                generation::typescript_type_alias::typescript_type_alias(name, &shape, options)
+                generation::typescript_type_alias::typescript_type_alias(name, shape, options)
             }
         }
     };

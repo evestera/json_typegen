@@ -19,7 +19,7 @@ pub type Ident = String;
 pub type Code = String;
 
 pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
-    let defs = rust_types(name, &shape, options);
+    let defs = rust_types(name, shape, options);
 
     let var_name = snake_case(name);
 
@@ -62,7 +62,7 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> Code {
     }
 
     let (ident, code) = type_from_shape(&mut ctxt, name, shape);
-    let mut code = code.unwrap_or(String::new());
+    let mut code = code.unwrap_or_default();
 
     if ident != name {
         code = format!(
@@ -98,17 +98,17 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
-                generate_tuple_type(ctxt, path, &shapes)
+                generate_tuple_type(ctxt, path, shapes)
             } else {
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: e } => generate_vec_type(ctxt, path, &e),
-        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, &map),
-        MapT { val_type: v } => generate_map_type(ctxt, path, &v),
+        VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
+        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, map),
+        MapT { val_type: v } => generate_map_type(ctxt, path, v),
         Opaque(t) => (t.clone(), None),
         Optional(e) => {
-            let (inner, defs) = type_from_shape(ctxt, path, &e);
+            let (inner, defs) = type_from_shape(ctxt, path, e);
             if ctxt.options.use_default_for_missing_fields {
                 (inner, defs)
             } else {
@@ -180,7 +180,7 @@ fn type_or_field_name(
     if RUST_KEYWORDS.contains::<str>(&output_name) {
         output_name.push_str("_field");
     }
-    if output_name == "" {
+    if output_name.is_empty() {
         output_name.push_str(default_name);
     }
     if let Some(c) = output_name.chars().next() {
@@ -269,7 +269,7 @@ fn generate_struct_from_field_shapes(
             }
 
             field_code += "    ";
-            if field_visibility != "" {
+            if !field_visibility.is_empty() {
                 field_code += &field_visibility;
                 field_code += " ";
             }
@@ -294,7 +294,7 @@ fn generate_struct_from_field_shapes(
         }
     }
 
-    if visibility != "" {
+    if !visibility.is_empty() {
         code += &visibility;
         code += " ";
     }

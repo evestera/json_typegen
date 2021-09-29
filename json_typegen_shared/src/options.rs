@@ -44,9 +44,10 @@ impl Default for Options {
 #[cfg(feature = "option-parsing")]
 impl Options {
     pub(crate) fn macro_default() -> Options {
-        let mut options = Options::default();
-        options.import_style = ImportStyle::QualifiedPaths;
-        options
+        Options {
+            import_style: ImportStyle::QualifiedPaths,
+            ..Options::default()
+        }
     }
 }
 
@@ -107,6 +108,7 @@ impl OutputMode {
 
 // Jackson JsonNaming PropertyNamingStrategy:
 // KebabCaseStrategy, LowerCaseStrategy, SnakeCaseStrategy, UpperCamelCaseStrategy
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum StringTransform {
     LowerCase,

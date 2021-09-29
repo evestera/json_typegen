@@ -30,7 +30,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> Code {
     }
 
     let (ident, code) = type_from_shape(&mut ctxt, name, shape);
-    let mut code = code.unwrap_or(String::new());
+    let mut code = code.unwrap_or_default();
 
     if ident != name {
         code = format!("typealias {} = {};\n\n", name, ident) + &code;
@@ -154,7 +154,7 @@ fn type_or_field_name(
     if KOTLIN_KEYWORDS.contains::<str>(&output_name) {
         output_name.push_str("_field");
     }
-    if output_name == "" {
+    if output_name.is_empty() {
         output_name.push_str(default_name);
     }
     if let Some(c) = output_name.chars().next() {
