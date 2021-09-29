@@ -48,7 +48,9 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> Code {
     };
 
     if ctxt.options.import_style != ImportStyle::QualifiedPaths {
-        ctxt.options.derives = ctxt.options.derives
+        ctxt.options.derives = ctxt
+            .options
+            .derives
             .clone()
             .split(',')
             .map(|s| import(&mut ctxt, s.trim()))
@@ -128,7 +130,11 @@ fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Opti
     let singular = path.to_singular();
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (
-        format!("{}<String, {}>", import(ctxt, "std::collections::HashMap"), inner),
+        format!(
+            "{}<String, {}>",
+            import(ctxt, "std::collections::HashMap"),
+            inner
+        ),
         defs,
     )
 }
@@ -213,7 +219,7 @@ fn collapse_option_vec<'a>(ctxt: &mut Ctxt, typ: &'a Shape) -> (bool, &'a Shape)
 
 fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
     if !qualified.contains("::") {
-        return qualified.into()
+        return qualified.into();
     }
     match ctxt.options.import_style {
         ImportStyle::AddImports => {

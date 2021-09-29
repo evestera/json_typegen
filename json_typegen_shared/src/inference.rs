@@ -58,12 +58,7 @@ fn array_to_shape(values: &[Value], hints: &Hints) -> Shape {
 fn object_to_struct_shape(map: &Map<String, Value>, hints: &Hints) -> Shape {
     let inner = map
         .iter()
-        .map(|(name, value)| {
-            (
-                name.clone(),
-                value_to_shape(value, &hints.step_field(name)),
-            )
-        })
+        .map(|(name, value)| (name.clone(), value_to_shape(value, &hints.step_field(name))))
         .collect();
     Shape::Struct { fields: inner }
 }

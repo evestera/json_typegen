@@ -30,8 +30,8 @@ mod util;
 
 use crate::hints::Hints;
 pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
-pub use crate::shape::Shape;
 use crate::shape::fold_shapes;
+pub use crate::shape::Shape;
 
 /// The errors that json_typegen_shared may produce
 ///
@@ -63,8 +63,7 @@ enum SampleSource<'a> {
 #[cfg(feature = "option-parsing")]
 /// Generate code from a `json_typegen` macro invocation
 pub fn codegen_from_macro(input: &str) -> Result<String, JTError> {
-    let macro_input = parse::full_macro(input)
-        .map_err(JTError::MacroParsingError)?;
+    let macro_input = parse::full_macro(input).map_err(JTError::MacroParsingError)?;
 
     codegen(
         &macro_input.name,
@@ -76,8 +75,7 @@ pub fn codegen_from_macro(input: &str) -> Result<String, JTError> {
 #[cfg(feature = "option-parsing")]
 /// Generate code from the arguments to a `json_typegen` macro invocation
 pub fn codegen_from_macro_input(input: &str) -> Result<String, JTError> {
-    let macro_input = parse::macro_input(input)
-        .map_err(JTError::MacroParsingError)?;
+    let macro_input = parse::macro_input(input).map_err(JTError::MacroParsingError)?;
 
     codegen(
         &macro_input.name,
@@ -182,9 +180,9 @@ fn infer_source_type(s: &str) -> SampleSource {
 fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
-        SampleSource::Url(url) => serde_json::de::from_reader(
-            reqwest::get(url)?.error_for_status()?
-        ),
+        SampleSource::Url(url) => {
+            serde_json::de::from_reader(reqwest::get(url)?.error_for_status()?)
+        }
 
         #[cfg(feature = "local-samples")]
         SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
