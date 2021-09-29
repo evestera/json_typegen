@@ -29,7 +29,7 @@ mod unwrap;
 mod util;
 
 use crate::hints::Hints;
-pub use crate::options::{ImportStyle, Options, OutputMode};
+pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
 pub use crate::shape::Shape;
 use crate::shape::fold_shapes;
 
