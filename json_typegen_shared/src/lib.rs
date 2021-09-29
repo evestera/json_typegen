@@ -162,16 +162,21 @@ fn infer_source_type(s: &str) -> SampleSource {
 fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
-        SampleSource::Url(url) => {
-            serde_json::de::from_reader(reqwest::get(url)?.error_for_status()?)
-        }
+        SampleSource::Url(url) => serde_json::de::from_reader(
+            reqwest::get(url)
+                .map_err(JTError::SampleFetchingError)?
+                .error_for_status()
+                .map_err(JTError::SampleFetchingError)?,
+        ),
 
         #[cfg(feature = "local-samples")]
-        SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
+        SampleSource::File(path) => {
+            serde_json::de::from_reader(File::open(path).map_err(JTError::SampleReadingError)?)
+        }
 
         SampleSource::Text(text) => serde_json::from_str(text),
     };
-    Ok(parse_result?)
+    parse_result.map_err(JTError::JsonParsingError)
 }
 
 #[cfg(test)]

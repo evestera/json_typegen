@@ -52,23 +52,3 @@ impl std::error::Error for JTError {
         }
     }
 }
-
-#[cfg(feature = "remote-samples")]
-impl From<reqwest::Error> for JTError {
-    fn from(err: reqwest::Error) -> Self {
-        JTError::SampleFetchingError(err)
-    }
-}
-
-#[cfg(feature = "local-samples")]
-impl From<std::io::Error> for JTError {
-    fn from(err: std::io::Error) -> Self {
-        JTError::SampleReadingError(err)
-    }
-}
-
-impl From<serde_json::Error> for JTError {
-    fn from(err: serde_json::Error) -> Self {
-        JTError::JsonParsingError(err)
-    }
-}
