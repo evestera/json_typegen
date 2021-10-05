@@ -137,24 +137,10 @@ fn test_unify() {
     );
 }
 
-// based on hashmap! macro from maplit crate
-#[cfg(test)]
-macro_rules! string_hashmap {
-    ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
-    ($($key:expr => $value:expr),*) => {
-        {
-            let mut _map = ::linked_hash_map::LinkedHashMap::new();
-            $(
-                _map.insert($key.to_string(), $value);
-            )*
-            _map
-        }
-    };
-}
-
 #[test]
 fn test_common_field_shapes() {
     use self::Shape::*;
+    use crate::util::string_hashmap;
     {
         let f1 = string_hashmap! {
             "a" => Integer,

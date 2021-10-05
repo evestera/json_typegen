@@ -15,7 +15,6 @@ use std::fs::File;
 
 use lazy_static::lazy_static;
 use regex::Regex;
-use serde_json::Value;
 use thiserror::Error;
 
 mod generation;
@@ -25,12 +24,13 @@ mod options;
 #[cfg(feature = "option-parsing")]
 pub mod parse;
 mod shape;
-mod unwrap;
+// mod unwrap;
 mod util;
 
 use crate::hints::Hints;
+use crate::inference::FromJson;
 pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
-use crate::shape::fold_shapes;
+// use crate::shape::fold_shapes;
 pub use crate::shape::Shape;
 
 /// The errors that json_typegen_shared may produce
@@ -42,12 +42,12 @@ pub use crate::shape::Shape;
 pub enum JTError {
     #[cfg(feature = "remote-samples")]
     #[error("An error occurred while fetching JSON")]
-    SampleFetchingError(#[from] ::reqwest::Error),
+    SampleFetchingError(#[from] reqwest::Error),
     #[cfg(feature = "local-samples")]
     #[error("An error occurred while reading JSON from file")]
-    SampleReadingError(#[from] ::std::io::Error),
+    SampleReadingError(#[from] std::io::Error),
     #[error("An error occurred while parsing JSON")]
-    JsonParsingError(#[from] ::serde_json::Error),
+    JsonParsingError(#[from] inference::JsonInputErr),
     #[error("An error occurred while parsing a macro or macro input {0}")]
     MacroParsingError(String),
 }
@@ -87,7 +87,6 @@ pub fn codegen_from_macro_input(input: &str) -> Result<String, JTError> {
 /// The main code generation function for `json_typegen`
 pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, JTError> {
     let source = infer_source_type(input);
-    let sample = get_and_parse_sample(&source)?;
     let name = handle_pub_in_name(name, &mut options);
 
     let mut hints_vec = Vec::new();
@@ -98,11 +97,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         hints.add(pointer, hint);
     }
 
-    let inferred: Vec<Shape> = crate::unwrap::unwrap(&options.unwrap, sample)
-        .iter()
-        .map(|val| inference::value_to_shape(val, &hints))
-        .collect();
-    let shape = fold_shapes(inferred);
+    let shape = infer_from_sample(&source)?;
 
     codegen_from_shape(name, &shape, options)
 }
@@ -177,17 +172,15 @@ fn infer_source_type(s: &str) -> SampleSource {
     return SampleSource::Text(s);
 }
 
-fn get_and_parse_sample(source: &SampleSource) -> Result<Value, JTError> {
+fn infer_from_sample(source: &SampleSource) -> Result<Shape, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
-        SampleSource::Url(url) => {
-            serde_json::de::from_reader(reqwest::get(url)?.error_for_status()?)
-        }
+        SampleSource::Url(url) => Shape::from_json(reqwest::get(url)?.error_for_status()?),
 
         #[cfg(feature = "local-samples")]
-        SampleSource::File(path) => serde_json::de::from_reader(File::open(path)?),
+        SampleSource::File(path) => Shape::from_json(File::open(path)?),
 
-        SampleSource::Text(text) => serde_json::from_str(text),
+        SampleSource::Text(text) => Shape::from_json(text.as_bytes()),
     };
     Ok(parse_result?)
 }

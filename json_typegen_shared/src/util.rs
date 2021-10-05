@@ -88,6 +88,24 @@ fn lowercase_first_letter(s: &str) -> String {
     }
 }
 
+// based on hashmap! macro from maplit crate
+#[cfg(test)]
+macro_rules! string_hashmap {
+    ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
+    ($($key:expr => $value:expr),*) => {
+        {
+            let mut _map = ::linked_hash_map::LinkedHashMap::new();
+            $(
+                _map.insert($key.to_string(), $value);
+            )*
+            _map
+        }
+    };
+}
+
+#[cfg(test)]
+pub(crate) use string_hashmap;
+
 #[cfg(test)]
 mod tests {
     use super::*;
