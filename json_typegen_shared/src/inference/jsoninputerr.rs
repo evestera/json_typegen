@@ -14,4 +14,6 @@ pub enum JsonInputErr {
     UnexpectedEndOfInput,
     #[error("Unwrap pointer matched no values")]
     NoMatchForUnwrap,
+    #[error("Hint is not valid for the matched value")]
+    InvalidTargetForHint,
 }

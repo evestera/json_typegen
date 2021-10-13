@@ -1,4 +1,4 @@
-use crate::hints::Hints;
+use crate::hints::{HintType, Hints};
 use crate::inference::jsoninputerr::JsonInputErr;
 use crate::inference::jsonlex::{JsonLexer, JsonToken};
 use crate::shape::{common_shape, Shape};
@@ -6,18 +6,6 @@ use crate::Options;
 use linked_hash_map::LinkedHashMap;
 use std::io::Read;
 use std::iter::Peekable;
-
-pub trait FromJson {
-    fn from_json(json: impl Read) -> Result<Self, JsonInputErr>
-    where
-        Self: Sized;
-}
-
-impl FromJson for Shape {
-    fn from_json(json: impl Read) -> Result<Self, JsonInputErr> {
-        Inference::new(json).infer_shape()
-    }
-}
 
 pub fn shape_from_json<R: Read>(
     read: R,
@@ -67,7 +55,26 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
         }
     }
 
-    fn infer_shape(&mut self) -> Result<Shape, JsonInputErr> {
+    fn infer_shape(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
+        for hint in hints.applicable.iter() {
+            match hint.hint_type {
+                HintType::MapType(_) => {
+                    return if let JsonToken::ObjectStart = self.next_token()? {
+                        hint.used.set(true);
+                        self.infer_map(options, hints)
+                    } else {
+                        Err(JsonInputErr::InvalidTargetForHint)
+                    };
+                }
+                HintType::OpaqueType(ref t) => {
+                    hint.used.set(true);
+                    let _ = self.infer_shape(options, &Hints::new()); // parse and discard the actual value
+                    return Ok(Shape::Opaque(t.clone()));
+                }
+                _ => {}
+            }
+        }
+
         match self.next_token()? {
             JsonToken::True | JsonToken::False => Ok(Shape::Bool),
             JsonToken::Null => Ok(Shape::Null),
@@ -79,15 +86,30 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
                 }
             }
             JsonToken::String(_) => Ok(Shape::StringT),
-            JsonToken::ObjectStart => self.infer_object(),
-            JsonToken::ArrayStart => self.infer_array(),
+            JsonToken::ObjectStart => self.infer_object(options, hints),
+            JsonToken::ArrayStart => self.infer_array(options, hints),
             JsonToken::ObjectEnd | JsonToken::ArrayEnd | JsonToken::Comma | JsonToken::Colon => {
                 Err(JsonInputErr::InvalidJson)
             }
         }
     }
 
-    fn infer_object(&mut self) -> Result<Shape, JsonInputErr> {
+    fn infer_map(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
+        let shape = self.infer_object(options, hints)?;
+        if let Shape::Struct { fields } = shape {
+            let inner = fields
+                .into_iter()
+                .map(|(_, value)| value)
+                .fold(Shape::Bottom, common_shape);
+            Ok(Shape::MapT {
+                val_type: Box::new(inner),
+            })
+        } else {
+            panic!("Got non-object from infer_object")
+        }
+    }
+
+    fn infer_object(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
         if let Some(&Ok(JsonToken::ObjectEnd)) = self.tokens.peek() {
             self.tokens.next();
             return Ok(Shape::Struct {
@@ -106,7 +128,7 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
 
             self.expect_token(JsonToken::Colon)?;
 
-            let value = self.infer_shape()?;
+            let value = self.infer_shape(options, &hints.step_field(&key))?;
             fields.insert(key, value);
 
             if let Some(&Ok(JsonToken::ObjectEnd)) = self.tokens.peek() {
@@ -118,7 +140,7 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
         }
     }
 
-    fn infer_array(&mut self) -> Result<Shape, JsonInputErr> {
+    fn infer_array(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
         if let Some(&Ok(JsonToken::ArrayEnd)) = self.tokens.peek() {
             self.tokens.next();
             return Ok(Shape::VecT {
@@ -131,13 +153,14 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
         let mut folded = Shape::Bottom;
 
         loop {
-            let shape = self.infer_shape()?;
-            len += 1;
-            if len <= 12 {
+            if len < 12 {
+                let shape = self.infer_shape(options, &hints.step_index(len))?;
                 shapes.push(shape);
             } else {
+                let shape = self.infer_shape(options, &hints.step_array())?;
                 folded = common_shape(shape, folded);
             }
+            len += 1;
 
             if let Some(&Ok(JsonToken::ArrayEnd)) = self.tokens.peek() {
                 self.tokens.next();
@@ -169,7 +192,7 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
     ) -> Result<Option<Shape>, JsonInputErr> {
         let (first_token, rest_of_pointer) = match pointer_tokens.split_first() {
             None => {
-                return Ok(Some(self.infer_shape()?));
+                return Ok(Some(self.infer_shape(options, hints)?));
             }
             Some(val) => val,
         };
@@ -202,7 +225,7 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
                         folded = optional_common_shape(folded, result);
                     } else {
                         // parse and discard non-matched element (could use non-inference code)
-                        let _ = self.infer_shape()?;
+                        let _ = self.infer_shape(options, hints)?;
                     }
 
                     if let Some(&Ok(JsonToken::ObjectEnd)) = self.tokens.peek() {
@@ -231,7 +254,7 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
                         folded = optional_common_shape(folded, result);
                     } else {
                         // parse and discard non-matched element (could use non-inference code)
-                        let _ = self.infer_shape()?;
+                        let _ = self.infer_shape(options, hints)?;
                     }
 
                     if let Some(&Ok(JsonToken::ArrayEnd)) = self.tokens.peek() {
@@ -265,16 +288,20 @@ mod tests {
     use super::*;
     use crate::util::string_hashmap;
 
+    fn shape_from_just_json<R: Read>(json: R) -> Result<Shape, JsonInputErr> {
+        Inference::new(json).infer_shape(&Options::default(), &Hints::new())
+    }
+
     #[test]
     fn infer_object() {
         assert_eq!(
-            Shape::from_json(r#"{}"#.as_bytes()),
+            shape_from_just_json(r#"{}"#.as_bytes()),
             Ok(Shape::Struct {
                 fields: string_hashmap!()
             })
         );
         assert_eq!(
-            Shape::from_json(
+            shape_from_just_json(
                 r#"{
                     "foo": true
                 }"#
@@ -287,7 +314,7 @@ mod tests {
             })
         );
         assert_eq!(
-            Shape::from_json(
+            shape_from_just_json(
                 r#"{
                     "foo": true,
                     "bar": false
@@ -303,7 +330,7 @@ mod tests {
         );
 
         assert_eq!(
-            Shape::from_json(
+            shape_from_just_json(
                 r#"{
                     "foo": true
                     "bar": false
@@ -313,7 +340,7 @@ mod tests {
             Err(JsonInputErr::InvalidJson)
         );
         assert_eq!(
-            Shape::from_json(
+            shape_from_just_json(
                 r#"{
                     "foo": true,
                 }"#
@@ -322,7 +349,7 @@ mod tests {
             Err(JsonInputErr::InvalidJson)
         );
         assert_eq!(
-            Shape::from_json(
+            shape_from_just_json(
                 r#"{
                     "foo": true,
                 "#
@@ -335,36 +362,36 @@ mod tests {
     #[test]
     fn infer_array() {
         assert_eq!(
-            Shape::from_json(r#"[]"#.as_bytes()),
+            shape_from_just_json(r#"[]"#.as_bytes()),
             Ok(Shape::VecT {
                 elem_type: Box::new(Shape::Bottom)
             })
         );
         assert_eq!(
-            Shape::from_json(r#"[true]"#.as_bytes()),
+            shape_from_just_json(r#"[true]"#.as_bytes()),
             Ok(Shape::VecT {
                 elem_type: Box::new(Shape::Bool)
             })
         );
         assert_eq!(
-            Shape::from_json(r#"[true, false]"#.as_bytes()),
+            shape_from_just_json(r#"[true, false]"#.as_bytes()),
             Ok(Shape::Tuple(vec![Shape::Bool, Shape::Bool], 1)) // flattened in a later step
         );
         assert_eq!(
-            Shape::from_json(r#"[true, "hello"]"#.as_bytes()),
+            shape_from_just_json(r#"[true, "hello"]"#.as_bytes()),
             Ok(Shape::Tuple(vec![Shape::Bool, Shape::StringT], 1))
         );
 
         assert_eq!(
-            Shape::from_json(r#"[true false]"#.as_bytes()),
+            shape_from_just_json(r#"[true false]"#.as_bytes()),
             Err(JsonInputErr::InvalidJson)
         );
         assert_eq!(
-            Shape::from_json(r#"[true,]"#.as_bytes()),
+            shape_from_just_json(r#"[true,]"#.as_bytes()),
             Err(JsonInputErr::InvalidJson)
         );
         assert_eq!(
-            Shape::from_json(r#"[true"#.as_bytes()),
+            shape_from_just_json(r#"[true"#.as_bytes()),
             Err(JsonInputErr::UnexpectedEndOfInput)
         );
     }
