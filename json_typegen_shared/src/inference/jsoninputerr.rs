@@ -12,4 +12,6 @@ pub enum JsonInputErr {
     InvalidEscape(u8),
     #[error("Reached end of input while parsing")]
     UnexpectedEndOfInput,
+    #[error("Unwrap pointer matched no values")]
+    NoMatchForUnwrap,
 }

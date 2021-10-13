@@ -24,13 +24,11 @@ mod options;
 #[cfg(feature = "option-parsing")]
 pub mod parse;
 mod shape;
-// mod unwrap;
 mod util;
 
 use crate::hints::Hints;
-use crate::inference::FromJson;
+use crate::inference::shape_from_json;
 pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
-// use crate::shape::fold_shapes;
 pub use crate::shape::Shape;
 
 /// The errors that json_typegen_shared may produce
@@ -97,7 +95,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         hints.add(pointer, hint);
     }
 
-    let shape = infer_from_sample(&source)?;
+    let shape = infer_from_sample(&source, &options, &hints)?;
 
     codegen_from_shape(name, &shape, options)
 }
@@ -172,15 +170,21 @@ fn infer_source_type(s: &str) -> SampleSource {
     return SampleSource::Text(s);
 }
 
-fn infer_from_sample(source: &SampleSource) -> Result<Shape, JTError> {
+fn infer_from_sample(
+    source: &SampleSource,
+    options: &Options,
+    hints: &Hints,
+) -> Result<Shape, JTError> {
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
-        SampleSource::Url(url) => Shape::from_json(reqwest::get(url)?.error_for_status()?),
+        SampleSource::Url(url) => {
+            shape_from_json(reqwest::get(url)?.error_for_status()?, options, hints)
+        }
 
         #[cfg(feature = "local-samples")]
-        SampleSource::File(path) => Shape::from_json(File::open(path)?),
+        SampleSource::File(path) => shape_from_json(File::open(path)?, options, hints),
 
-        SampleSource::Text(text) => Shape::from_json(text.as_bytes()),
+        SampleSource::Text(text) => shape_from_json(text.as_bytes(), options, hints),
     };
     Ok(parse_result?)
 }
