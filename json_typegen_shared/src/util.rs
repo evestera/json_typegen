@@ -89,7 +89,6 @@ fn lowercase_first_letter(s: &str) -> String {
 }
 
 // based on hashmap! macro from maplit crate
-#[cfg(test)]
 macro_rules! string_hashmap {
     ($($key:expr => $value:expr,)+) => { string_hashmap!($($key => $value),+) };
     ($($key:expr => $value:expr),*) => {
@@ -103,7 +102,6 @@ macro_rules! string_hashmap {
     };
 }
 
-#[cfg(test)]
 pub(crate) use string_hashmap;
 
 #[cfg(test)]

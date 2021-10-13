@@ -1,9 +1,10 @@
 use inflector::Inflector;
 use linked_hash_map::LinkedHashMap;
-use serde_json::{json, Value};
 
+use crate::generation::value::{pretty_print_value, Value};
 use crate::options::Options;
 use crate::shape::{self, Shape};
+use crate::util::string_hashmap;
 
 #[allow(dead_code)]
 pub struct Ctxt {
@@ -17,28 +18,28 @@ pub fn json_schema(name: &str, shape: &Shape, options: Options) -> Code {
 
     let value = type_from_shape(&mut ctxt, name, shape);
 
-    let mut schema = json!({
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": format!("Generated schema for {}", name)
-    });
+    let mut schema = string_hashmap! {
+        "$schema" => Value::Str("http://json-schema.org/draft-07/schema#"),
+        "title" => Value::String(format!("Generated schema for {}", name)),
+    };
 
     if let Value::Object(map) = value {
         for (key, val) in map.into_iter() {
-            schema[key] = val;
+            schema.insert(key, val);
         }
     }
 
-    ::serde_json::to_string_pretty(&schema).unwrap()
+    pretty_print_value(0, &Value::Object(schema))
 }
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     use crate::shape::Shape::*;
     match shape {
-        Null | Any | Bottom => json!({}),
-        Bool => json!({ "type": "boolean" }),
-        StringT => json!({ "type": "string" }),
-        Integer => json!({ "type": "number" }),
-        Floating => json!({ "type": "number" }),
+        Null | Any | Bottom => Value::Object(LinkedHashMap::new()),
+        Bool => Value::Object(string_hashmap! { "type" => Value::Str("boolean") }),
+        StringT => Value::Object(string_hashmap! { "type" => Value::Str("string") }),
+        Integer => Value::Object(string_hashmap! { "type" => Value::Str("number") }),
+        Floating => Value::Object(string_hashmap! { "type" => Value::Str("number") }),
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
@@ -50,7 +51,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
         Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, map),
         MapT { val_type: v } => generate_map_type(ctxt, path, v),
-        Opaque(t) => json!({ "type": t }),
+        Opaque(t) => Value::Object(string_hashmap! { "type" => Value::String(t.clone()) }),
         Optional(e) => type_from_shape(ctxt, path, e),
     }
 }
@@ -58,18 +59,18 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
 fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     let singular = path.to_singular();
     let inner = type_from_shape(ctxt, &singular, shape);
-    json!({
-        "type": "array",
-        "items": inner
+    Value::Object(string_hashmap! {
+        "type" => Value::Str("array"),
+        "items" => inner
     })
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
     let singular = path.to_singular();
     let inner = type_from_shape(ctxt, &singular, shape);
-    json!({
-        "type": "object",
-        "additionalProperties": inner
+    Value::Object(string_hashmap! {
+        "type" => Value::Str("object"),
+        "additionalProperties" => inner
     })
 }
 
@@ -81,10 +82,10 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> Value {
         types.push(typ);
     }
 
-    json!({
-        "type": "array",
-        "items": types,
-        "additionalItems": false
+    Value::Object(string_hashmap! {
+        "type" => Value::Str("array"),
+        "items" => Value::Array(types),
+        "additionalItems" => Value::Bool(false)
     })
 }
 
@@ -100,24 +101,24 @@ fn generate_struct_from_field_shapes(
     _path: &str,
     map: &LinkedHashMap<String, Shape>,
 ) -> Value {
-    let mut required: Vec<String> = Vec::new();
-    let mut properties = json!({});
+    let mut required: Vec<Value> = Vec::new();
+    let mut properties = LinkedHashMap::new();
 
     for (name, typ) in map.iter() {
         let (was_optional, collapsed) = collapse_option(typ);
 
         if !was_optional {
-            required.push(name.clone());
+            required.push(Value::String(name.clone()));
         }
 
         let field_code = type_from_shape(ctxt, name, collapsed);
 
-        properties[name] = field_code;
+        properties.insert(name.to_string(), field_code);
     }
 
-    json!({
-        "type": "object",
-        "properties": properties,
-        "required": required
+    Value::Object(string_hashmap! {
+        "type" => Value::Str("object"),
+        "properties" => Value::Object(properties),
+        "required" => Value::Array(required)
     })
 }
