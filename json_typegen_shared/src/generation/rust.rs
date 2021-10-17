@@ -1,5 +1,3 @@
-use inflector::Inflector;
-use lazy_static::lazy_static;
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 use unindent::unindent;
@@ -7,6 +5,7 @@ use unindent::unindent;
 use crate::generation::serde_case::RenameRule;
 use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
+use crate::to_singular::ToSingular;
 use crate::util::{snake_case, type_case};
 
 pub struct Ctxt {
@@ -162,7 +161,7 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     type_or_field_name(name, used_names, "GeneratedType", type_case)
 }
 
-const RUST_KEYWORDS_ARR: &[&str] = &[
+const RUST_KEYWORDS: &[&str] = &[
     "abstract", "alignof", "as", "become", "box", "break", "const", "continue", "crate", "do",
     "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in", "let", "loop",
     "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub", "pure",
@@ -170,10 +169,6 @@ const RUST_KEYWORDS_ARR: &[&str] = &[
     "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield", "async",
     "await", "try",
 ];
-
-lazy_static! {
-    static ref RUST_KEYWORDS: HashSet<&'static str> = RUST_KEYWORDS_ARR.iter().cloned().collect();
-}
 
 fn type_or_field_name(
     name: &str,
@@ -183,7 +178,7 @@ fn type_or_field_name(
 ) -> Ident {
     let name = name.trim();
     let mut output_name = case_fn(name);
-    if RUST_KEYWORDS.contains::<str>(&output_name) {
+    if RUST_KEYWORDS.contains(&&*output_name) {
         output_name.push_str("_field");
     }
     if output_name.is_empty() {

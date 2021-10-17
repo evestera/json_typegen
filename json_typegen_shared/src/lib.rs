@@ -13,8 +13,6 @@
 #[cfg(feature = "local-samples")]
 use std::fs::File;
 
-use lazy_static::lazy_static;
-use regex::Regex;
 use thiserror::Error;
 
 mod generation;
@@ -24,6 +22,7 @@ mod options;
 #[cfg(feature = "option-parsing")]
 pub mod parse;
 mod shape;
+mod to_singular;
 mod util;
 
 use crate::hints::Hints;
@@ -130,29 +129,17 @@ pub fn codegen_from_shape(name: &str, shape: &Shape, options: Options) -> Result
 
 /// Parse "names" like `pub(crate) Foo` into a name and a visibility option
 fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
-    lazy_static! {
-        static ref PUB_RE: Regex = Regex::new(
-            r"(?x)
-                pub ( \( (?P<restriction> [^)]+ ) \) )?
-                \s+
-                (?P<name> .+ )
-            "
-        )
-        .unwrap();
+    if let Some(suffix) = name.strip_prefix("pub ") {
+        options.type_visibility = "pub".to_string();
+        return suffix;
     }
-    match PUB_RE.captures(name) {
-        Some(captures) => {
-            options.type_visibility = match captures.name("restriction") {
-                Some(restriction) => format!("pub({})", restriction.as_str()),
-                None => "pub".into(),
-            };
-            captures.name("name").unwrap().as_str()
-        }
-        None => {
-            // If there is no visibility specified here, we want to use whatever is set elsewhere
-            name
+    if name.starts_with("pub(") {
+        if let Some((visibility, rest)) = name.split_once(") ") {
+            options.type_visibility = format!("{})", visibility);
+            return rest;
         }
     }
+    name
 }
 
 fn infer_source_type(s: &str) -> SampleSource {

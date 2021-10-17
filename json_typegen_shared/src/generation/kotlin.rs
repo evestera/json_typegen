@@ -1,10 +1,9 @@
-use inflector::Inflector;
-use lazy_static::lazy_static;
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 
 use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
+use crate::to_singular::ToSingular;
 use crate::util::{kebab_case, lower_camel_case, snake_case, type_case};
 use crate::OutputMode;
 
@@ -132,16 +131,11 @@ fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
 // https://kotlinlang.org/docs/reference/keyword-reference.html
 // Only hard keywords are restricted. Others don't cause any problems I know of.
 #[rustfmt::skip]
-const KOTLIN_KEYWORDS_ARR: &[&str] = &[
+const KOTLIN_KEYWORDS: &[&str] = &[
     "as", "break", "class", "continue", "do", "else", "false", "for", "fun", "if", "in",
     "interface", "is", "null", "object", "package", "return", "super", "this", "throw", "true",
     "try", "typealias", "val", "var", "when", "while",
 ];
-
-lazy_static! {
-    static ref KOTLIN_KEYWORDS: HashSet<&'static str> =
-        KOTLIN_KEYWORDS_ARR.iter().cloned().collect();
-}
 
 fn type_or_field_name(
     name: &str,
@@ -151,7 +145,7 @@ fn type_or_field_name(
 ) -> Ident {
     let name = name.trim();
     let mut output_name = case_fn(name);
-    if KOTLIN_KEYWORDS.contains::<str>(&output_name) {
+    if KOTLIN_KEYWORDS.contains(&&*output_name) {
         output_name.push_str("_field");
     }
     if output_name.is_empty() {

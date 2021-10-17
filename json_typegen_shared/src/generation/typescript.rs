@@ -1,11 +1,9 @@
-use inflector::Inflector;
-use lazy_static::lazy_static;
 use linked_hash_map::LinkedHashMap;
-use regex::Regex;
 use std::collections::HashSet;
 
 use crate::options::Options;
 use crate::shape::{self, Shape};
+use crate::to_singular::ToSingular;
 use crate::util::type_case;
 
 pub struct Ctxt {
@@ -130,22 +128,33 @@ pub fn collapse_option(typ: &Shape) -> (bool, &Shape) {
 }
 
 #[rustfmt::skip]
-const RESERVED_WORDS_ARR: &[&str] = &["break", "case", "catch", "class", "const",
+const RESERVED_WORDS: &[&str] = &["break", "case", "catch", "class", "const",
     "continue", "debugger", "default", "delete", "do", "else", "enum", "export", "extends", "false",
     "finally", "for", "function", "if", "import", "in", "instanceof", "new", "null", "return",
     "super", "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while", "with",
     "implements", "interface", "let", "package", "private", "protected", "public", "static",
     "yield"];
 
-lazy_static! {
-    static ref RESERVED_WORDS: HashSet<&'static str> = RESERVED_WORDS_ARR.iter().cloned().collect();
-}
-
 pub fn is_ts_identifier(s: &str) -> bool {
-    lazy_static! {
-        static ref JS_IDENTIFIER_RE: Regex = Regex::new(r"^[a-zA-Z_$][a-zA-Z_$0-9]*$").unwrap();
+    if RESERVED_WORDS.contains(&s) {
+        return false;
     }
-    JS_IDENTIFIER_RE.is_match(s) && !RESERVED_WORDS.contains(s)
+
+    if let Some((first, rest)) = s.as_bytes().split_first() {
+        let first_valid = (b'a'..b'z').contains(first)
+            || (b'A'..b'Z').contains(first)
+            || *first == b'_'
+            || *first == b'$';
+        return first_valid
+            && rest.iter().all(|b| {
+                (b'a'..b'z').contains(b)
+                    || (b'A'..b'Z').contains(b)
+                    || *b == b'_'
+                    || *b == b'$'
+                    || (b'0'..b'9').contains(b)
+            });
+    }
+    false
 }
 
 fn generate_struct_from_field_shapes(
