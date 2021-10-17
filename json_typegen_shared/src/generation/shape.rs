@@ -3,7 +3,7 @@ use linked_hash_map::LinkedHashMap;
 use crate::generation::value::{pretty_print_value, Value};
 use crate::options::Options;
 use crate::shape::{self, Shape};
-use crate::to_singular::ToSingular;
+use crate::to_singular::to_singular;
 use crate::util::string_hashmap;
 
 #[allow(dead_code)]
@@ -51,13 +51,13 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
 }
 
 fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let inner = type_from_shape(ctxt, &singular, shape);
     Value::Array(vec![inner])
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let inner = type_from_shape(ctxt, &singular, shape);
     Value::Object(string_hashmap! {
         "__type__" => Value::Str("map"),

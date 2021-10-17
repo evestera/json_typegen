@@ -5,7 +5,7 @@ use unindent::unindent;
 use crate::generation::serde_case::RenameRule;
 use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::to_singular::ToSingular;
+use crate::to_singular::to_singular;
 use crate::util::{snake_case, type_case};
 
 pub struct Ctxt {
@@ -120,13 +120,13 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
 }
 
 fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (format!("Vec<{}>", inner), defs)
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (
         format!(

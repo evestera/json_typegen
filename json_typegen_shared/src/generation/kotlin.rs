@@ -3,7 +3,7 @@ use std::collections::HashSet;
 
 use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
-use crate::to_singular::ToSingular;
+use crate::to_singular::to_singular;
 use crate::util::{kebab_case, lower_camel_case, snake_case, type_case};
 use crate::OutputMode;
 
@@ -83,13 +83,13 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
 }
 
 fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (format!("List<{}>", inner), defs)
 }
 
 fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
-    let singular = path.to_singular();
+    let singular = to_singular(path);
     let (inner, defs) = type_from_shape(ctxt, &singular, shape);
     (format!("Map<String, {}>", inner), defs)
 }
