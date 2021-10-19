@@ -96,7 +96,7 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> (Ident,
 fn type_name(name: &str, used_names: &HashSet<String>) -> Ident {
     let name = name.trim();
     let mut output_name = if let Some(c) = name.chars().next() {
-        if c.is_ascii() && c.is_numeric() {
+        if c.is_ascii_digit() {
             let temp = String::from("n") + name;
             type_case(&temp)
         } else {

@@ -1,23 +1,16 @@
 pub fn camel_case(name: &str) -> String {
     let mut s = String::new();
     let mut last = ' ';
-    for c in name
-        .chars()
-        .skip_while(|c| !(c.is_alphanumeric() && c.is_ascii()))
-    {
-        if !c.is_alphanumeric() {
+    for c in name.chars().skip_while(|c| !c.is_ascii_alphanumeric()) {
+        if !c.is_ascii_alphanumeric() {
             last = c;
             continue;
         }
-        if !c.is_ascii() {
-            last = c;
-            continue;
-        }
-        if (!last.is_alphanumeric() && c.is_alphanumeric())
-            || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
+            || (last.is_ascii_lowercase() && c.is_ascii_uppercase())
         {
             s.push(c.to_ascii_uppercase());
-        } else if last.is_alphabetic() {
+        } else if last.is_ascii_alphabetic() {
             s.push(c.to_ascii_lowercase());
         } else {
             s.push(c);
@@ -38,20 +31,13 @@ pub fn kebab_case(name: &str) -> String {
 fn sep_case(name: &str, separator: char) -> String {
     let mut s = String::new();
     let mut last = 'A';
-    for c in name
-        .chars()
-        .skip_while(|c| !(c.is_alphanumeric() && c.is_ascii()))
-    {
-        if !c.is_alphanumeric() {
+    for c in name.chars().skip_while(|c| !c.is_ascii_alphanumeric()) {
+        if !c.is_ascii_alphanumeric() {
             last = c;
             continue;
         }
-        if !c.is_ascii() {
-            last = c;
-            continue;
-        }
-        if (!last.is_alphanumeric() && c.is_alphanumeric())
-            || (last.is_lowercase() && c.is_uppercase())
+        if (!last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
+            || (last.is_ascii_lowercase() && c.is_ascii_uppercase())
         {
             s.push(separator);
         }
@@ -76,7 +62,7 @@ fn uppercase_first_letter(s: &str) -> String {
     let mut c = s.chars();
     match c.next() {
         None => String::new(),
-        Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+        Some(f) => f.to_ascii_uppercase().to_string() + c.as_str(),
     }
 }
 
@@ -84,7 +70,7 @@ fn lowercase_first_letter(s: &str) -> String {
     let mut c = s.chars();
     match c.next() {
         None => String::new(),
-        Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
+        Some(f) => f.to_ascii_lowercase().to_string() + c.as_str(),
     }
 }
 

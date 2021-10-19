@@ -152,7 +152,7 @@ fn type_or_field_name(
         output_name.push_str(default_name);
     }
     if let Some(c) = output_name.chars().next() {
-        if c.is_ascii() && c.is_numeric() {
+        if c.is_ascii_digit() {
             output_name = String::from("n") + &output_name;
         }
     }
