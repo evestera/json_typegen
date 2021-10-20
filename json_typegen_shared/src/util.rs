@@ -6,7 +6,7 @@ pub fn camel_case(name: &str) -> String {
             last = c;
             continue;
         }
-        if (!last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
+        if (last.is_ascii() && !last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
             || (last.is_ascii_lowercase() && c.is_ascii_uppercase())
         {
             s.push(c.to_ascii_uppercase());
@@ -36,7 +36,7 @@ fn sep_case(name: &str, separator: char) -> String {
             last = c;
             continue;
         }
-        if (!last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
+        if (last.is_ascii() && !last.is_ascii_alphanumeric() && c.is_ascii_alphanumeric())
             || (last.is_ascii_lowercase() && c.is_ascii_uppercase())
         {
             s.push(separator);

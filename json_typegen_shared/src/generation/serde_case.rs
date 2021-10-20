@@ -51,7 +51,7 @@ impl RenameRule {
             SnakeCase => {
                 let mut snake = String::new();
                 for (i, ch) in variant.char_indices() {
-                    if i > 0 && ch.is_uppercase() {
+                    if i > 0 && ch.is_ascii_uppercase() {
                         snake.push('_');
                     }
                     snake.push(ch.to_ascii_lowercase());
