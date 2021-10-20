@@ -45,8 +45,21 @@ pub enum JTError {
     SampleReadingError(#[from] std::io::Error),
     #[error("An error occurred while parsing JSON")]
     JsonParsingError(#[from] inference::JsonInputErr),
-    #[error("An error occurred while parsing a macro or macro input {0}")]
+    #[error("An error occurred while parsing a macro or macro input: {0}")]
     MacroParsingError(String),
+}
+
+/// Utilities exposed only to be available inside the `json_typegen` workspace. Internal API.
+pub mod internal_util {
+    pub fn display_error_with_causes(error: &dyn std::error::Error) -> String {
+        let mut message = format!("{}", error);
+        let mut err = error;
+        while let Some(source) = err.source() {
+            message += &format!("\n  Caused by: {}", source);
+            err = source;
+        }
+        message
+    }
 }
 
 enum SampleSource<'a> {

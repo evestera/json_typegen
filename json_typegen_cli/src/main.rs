@@ -1,4 +1,5 @@
 use clap::{App, Arg};
+use json_typegen_shared::internal_util::display_error_with_causes;
 use json_typegen_shared::{codegen, codegen_from_macro, parse, Options, OutputMode};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
@@ -104,12 +105,7 @@ fn main() {
     let result = main_with_result();
 
     if let Err(e) = result {
-        eprintln!("Error: {}", e);
-        let mut err = &*e;
-        while let Some(source) = err.source() {
-            println!("  Caused by: {}", source);
-            err = source;
-        }
+        eprintln!("Error: {}", display_error_with_causes(&*e));
         std::process::exit(1);
     }
 }

@@ -1,5 +1,4 @@
 use cfg_if::cfg_if;
-use std::error::Error;
 use wasm_bindgen::prelude::*;
 
 cfg_if! {
@@ -34,13 +33,8 @@ pub fn run(name: &str, input: &str, options: &str) -> String {
     match json_typegen_shared::codegen(name, input, opts) {
         Ok(res) => res,
         Err(err) => {
-            let mut output = format!("Error: {}", err);
-            let mut err: &dyn Error = &err;
-            while let Some(source) = err.source() {
-                output = format!("{}\n  Caused by: {}", output, source);
-                err = source;
-            }
-            output
+            let message = json_typegen_shared::internal_util::display_error_with_causes(&err);
+            format!("Error: {}", message)
         }
     }
 }
