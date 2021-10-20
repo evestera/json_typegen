@@ -15,8 +15,13 @@ edition = "2018"
 [badges]
 travis-ci = { repository = "evestera/json_typegen" }
 
+[features]
+default = ["remote-samples", "local-samples"]
+remote-samples = [ "json_typegen_shared/remote-samples" ]
+local-samples = [ "json_typegen_shared/local-samples" ]
+
 [dependencies]
-json_typegen_shared = { path = "../json_typegen_shared", version = "0.7" }
+json_typegen_shared = { path = "../json_typegen_shared", version = "0.7", default-features = false, features = ["option-parsing"] }
 
 [dev-dependencies]
 serde = "1.0"
