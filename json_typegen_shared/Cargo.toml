@@ -2,13 +2,16 @@
 name = "json_typegen_shared"
 version = "0.7.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-license = "MIT/Apache-2.0"
-description = "Codegen from JSON samples. Not intended to be used directly. See repository for the intended crates."
-homepage = "https://github.com/evestera/json_typegen"
+license = "MIT OR Apache-2.0"
+description = "Generate types from JSON samples. See repository for CLI, website and procedural macro variants."
+keywords = ["json", "code-generation"]
+categories = ["encoding"]
+homepage = "https://typegen.vestera.as"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_shared"
 readme = "README.md"
 edition = "2018"
+exclude = ["/benches/"]
 
 [features]
 unstable = []

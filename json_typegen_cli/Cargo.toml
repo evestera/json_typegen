@@ -2,11 +2,11 @@
 name = "json_typegen_cli"
 version = "0.7.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-license = "MIT/Apache-2.0"
-description = "Command line utility for generating Rust types from JSON samples"
+license = "MIT OR Apache-2.0"
+description = "Command line utility for generating Rust, Kotlin and TypeScript types from JSON samples"
 keywords = ["json", "code-generation", "cli", "serde"]
 categories = ["command-line-utilities", "encoding"]
-homepage = "https://github.com/evestera/json_typegen"
+homepage = "https://typegen.vestera.as"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_cli"
 readme = "README.md"

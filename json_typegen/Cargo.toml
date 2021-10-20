@@ -2,26 +2,26 @@
 name = "json_typegen"
 version = "0.7.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 description = "Procedural macro that generates Rust types from JSON samples"
 keywords = ["json", "code-generation", "macro", "proc-macro", "serde"]
 categories = ["encoding"]
-homepage = "https://github.com/evestera/json_typegen"
+homepage = "https://typegen.vestera.as"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen"
 readme = "README.md"
 edition = "2018"
 
-[badges]
-travis-ci = { repository = "evestera/json_typegen" }
-
 [features]
 default = ["remote-samples", "local-samples"]
-remote-samples = [ "json_typegen_shared/remote-samples" ]
-local-samples = [ "json_typegen_shared/local-samples" ]
+remote-samples = ["json_typegen_shared/remote-samples"]
+local-samples = ["json_typegen_shared/local-samples"]
 
-[dependencies]
-json_typegen_shared = { path = "../json_typegen_shared", version = "0.7", default-features = false, features = ["option-parsing"] }
+[dependencies.json_typegen_shared]
+path = "../json_typegen_shared"
+version = "0.7"
+default-features = false
+features = ["option-parsing"]
 
 [dev-dependencies]
 serde = "1.0"
