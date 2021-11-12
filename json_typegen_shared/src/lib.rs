@@ -10,9 +10,6 @@
 //! but then I'll at least try to keep your use-case in mind if possible.
 //! This has happened enough by now that there are parts I already consider public API.)
 
-#[cfg(feature = "local-samples")]
-use std::fs::File;
-
 use thiserror::Error;
 
 mod generation;
@@ -21,6 +18,8 @@ mod inference;
 mod options;
 #[cfg(feature = "option-parsing")]
 pub mod parse;
+#[cfg(feature = "progress")]
+mod progress;
 mod shape;
 mod to_singular;
 mod util;
@@ -181,8 +180,14 @@ fn infer_from_sample(
             shape_from_json(reqwest::get(url)?.error_for_status()?, options, hints)
         }
 
-        #[cfg(feature = "local-samples")]
-        SampleSource::File(path) => shape_from_json(File::open(path)?, options, hints),
+        #[cfg(all(feature = "local-samples", feature = "progress"))]
+        SampleSource::File(path) => shape_from_json(
+            crate::progress::FileWithProgress::open(path)?,
+            options,
+            hints,
+        ),
+        #[cfg(all(feature = "local-samples", not(feature = "progress")))]
+        SampleSource::File(path) => shape_from_json(std::fs::File::open(path)?, options, hints),
 
         SampleSource::Text(text) => shape_from_json(text.as_bytes(), options, hints),
     };

@@ -19,6 +19,7 @@ default = ["remote-samples", "local-samples", "option-parsing"]
 remote-samples = ["reqwest"]
 local-samples = []
 option-parsing = ["syn", "synom"]
+progress = ["indicatif"]
 
 [dependencies]
 reqwest = { version = "0.9", optional = true }
@@ -27,6 +28,7 @@ linked-hash-map = "0.5.4"
 syn = { version = "0.11", features = ["full", "parsing"], optional = true }
 synom = { version = "0.11.3", optional = true }
 unindent = "0.1.7"
+indicatif = { version = "0.16.2", optional = true }
 
 [dev-dependencies]
 testsyn = { package = "syn", version = "0.15", features = ["full", "parsing", "extra-traits"] }

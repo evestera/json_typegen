@@ -14,7 +14,11 @@ edition = "2018"
 
 [dependencies]
 clap = "2.33.3"
-json_typegen_shared = { path = "../json_typegen_shared", version = "0.7" }
+
+[dependencies.json_typegen_shared]
+path = "../json_typegen_shared"
+version = "0.7"
+features = ["progress"]
 
 [[bin]]
 name = "json_typegen"
