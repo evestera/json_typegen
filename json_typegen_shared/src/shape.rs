@@ -94,23 +94,27 @@ fn make_optional(a: Shape) -> Shape {
 }
 
 fn common_field_shapes(
-    f1: LinkedHashMap<String, Shape>,
+    mut f1: LinkedHashMap<String, Shape>,
     mut f2: LinkedHashMap<String, Shape>,
 ) -> LinkedHashMap<String, Shape> {
     if f1 == f2 {
         return f1;
     }
-    let mut unified = LinkedHashMap::new();
-    for (key, val) in f1.into_iter() {
-        match f2.remove(&key) {
-            Some(val2) => unified.insert(key, common_shape(val, val2)),
-            None => unified.insert(key, make_optional(val)),
+    for (key, val) in f1.iter_mut() {
+        let temp = std::mem::replace(val, Shape::Bottom);
+        match f2.remove(key) {
+            Some(val2) => {
+                *val = common_shape(temp, val2);
+            }
+            None => {
+                *val = make_optional(temp);
+            }
         };
     }
     for (key, val) in f2.into_iter() {
-        unified.insert(key, make_optional(val));
+        f1.insert(key, make_optional(val));
     }
-    unified
+    f1
 }
 
 #[test]
