@@ -20,6 +20,7 @@ pub enum JsonToken {
 pub struct JsonLexer<R: Read> {
     bytes: Peekable<Bytes<BufReader<R>>>, // TODO: Keep position info
     failed: bool,
+    buffer: Vec<u8>,
 }
 
 impl<R: Read> JsonLexer<R> {
@@ -27,6 +28,7 @@ impl<R: Read> JsonLexer<R> {
         JsonLexer {
             bytes: BufReader::new(source).bytes().peekable(),
             failed: false,
+            buffer: Vec::new(),
         }
     }
 
@@ -94,26 +96,27 @@ impl<R: Read> JsonLexer<R> {
 
     fn match_string(&mut self) -> Result<JsonToken, JsonInputErr> {
         self.skip_byte(b'"')?;
-        let mut buffer = Vec::new();
+        self.buffer.clear();
         loop {
             let byte = self.expect_byte()?;
 
             if byte == b'"' {
                 return Ok(JsonToken::String(
-                    String::from_utf8(buffer).map_err(|_| JsonInputErr::InvalidUtf8)?,
+                    String::from_utf8(self.buffer.clone())
+                        .map_err(|_| JsonInputErr::InvalidUtf8)?,
                 ));
             } else if byte == b'\\' {
                 let escaped = self.expect_byte()?;
 
                 match escaped {
-                    b'"' => buffer.push(b'"'),
-                    b'\\' => buffer.push(b'\\'),
-                    b'/' => buffer.push(b'/'),
-                    b'b' => buffer.push(8),  // backspace
-                    b'f' => buffer.push(12), // form feed
-                    b'n' => buffer.push(b'\n'),
-                    b'r' => buffer.push(b'\r'),
-                    b't' => buffer.push(b'\t'),
+                    b'"' => self.buffer.push(b'"'),
+                    b'\\' => self.buffer.push(b'\\'),
+                    b'/' => self.buffer.push(b'/'),
+                    b'b' => self.buffer.push(8),  // backspace
+                    b'f' => self.buffer.push(12), // form feed
+                    b'n' => self.buffer.push(b'\n'),
+                    b'r' => self.buffer.push(b'\r'),
+                    b't' => self.buffer.push(b'\t'),
                     b'u' => {
                         let surrogate_offset: u32 = (0xD800 << 10) + 0xDC00 - 0x10000;
 
@@ -131,13 +134,13 @@ impl<R: Read> JsonLexer<R> {
                             .encode_utf8(&mut buf)
                             .bytes();
                         for encoded_byte in encoded_bytes {
-                            buffer.push(encoded_byte);
+                            self.buffer.push(encoded_byte);
                         }
                     }
                     _ => return Err(JsonInputErr::InvalidEscape(escaped)),
                 };
             } else {
-                buffer.push(byte)
+                self.buffer.push(byte)
             }
         }
     }
