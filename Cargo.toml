@@ -6,3 +6,12 @@ members = [
     "json_typegen",
     "json_typegen_demo"
 ]
+
+# Compiler config for slightly smaller WASM bundle
+#[profile.release]
+#lto = true
+#opt-level = 3
+
+# Include debuginfo (e.g. for flamegraphs)
+#[profile.release]
+#debug = true

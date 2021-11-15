@@ -31,3 +31,7 @@ wee_alloc = { version = "0.4.2", optional = true }
 [features]
 #default = ["console_error_panic_hook"]
 default = []
+
+# Stop wasm-opt from stripping symbol names, for running e.g. twiggy on wasm-pack output:
+#[package.metadata.wasm-pack.profile.release]
+#wasm-opt = ['-g', '-O']
