@@ -26,7 +26,9 @@ pub struct JsonLexer<R: Read> {
 impl<R: Read> JsonLexer<R> {
     pub fn new(source: R) -> Self {
         JsonLexer {
-            bytes: BufReader::new(source).bytes().peekable(),
+            bytes: BufReader::with_capacity(128 * 1024, source)
+                .bytes()
+                .peekable(),
             failed: false,
             buffer: Vec::new(),
         }
