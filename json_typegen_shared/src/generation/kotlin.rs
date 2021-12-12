@@ -11,6 +11,7 @@ struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
     imports: HashSet<String>,
+    created_classes: Vec<(Shape, Ident)>,
 }
 
 pub type Ident = String;
@@ -21,6 +22,7 @@ pub fn kotlin_types(name: &str, shape: &Shape, options: Options) -> Code {
         options,
         type_names: HashSet::new(),
         imports: HashSet::new(),
+        created_classes: Vec::new(),
     };
 
     if !matches!(shape, Shape::Struct { .. }) {
@@ -68,7 +70,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             }
         }
         VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
-        Struct { fields } => generate_data_class(ctxt, path, fields),
+        Struct { fields } => generate_data_class(ctxt, path, fields, shape),
         MapT { val_type: v } => generate_map_type(ctxt, path, v),
         Opaque(t) => (t.clone(), None),
         Optional(e) => {
@@ -182,21 +184,29 @@ fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
 fn generate_data_class(
     ctxt: &mut Ctxt,
     path: &str,
-    map: &LinkedHashMap<String, Shape>,
+    field_shapes: &LinkedHashMap<String, Shape>,
+    containing_shape: &Shape,
 ) -> (Ident, Option<Code>) {
-    if map.is_empty() {
+    if field_shapes.is_empty() {
         // Kotlin does not allow empty data classes, so use type for general unknown object
         // Once #30 is implemented: && !options.collect_unknown_properties
         return ("Map<String, Any>".into(), None);
     }
 
+    for (created_for_shape, ident) in ctxt.created_classes.iter() {
+        if containing_shape == created_for_shape { // Note: eq is overly strict
+            return (ident.into(), None);
+        }
+    }
+
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
+    ctxt.created_classes.push((containing_shape.clone(), type_name.clone()));
 
     let mut field_names = HashSet::new();
     let mut defs = Vec::new();
 
-    let fields: Vec<Code> = map
+    let fields: Vec<Code> = field_shapes
         .iter()
         .map(|(name, typ)| {
             let field_name = field_name(name, &field_names);

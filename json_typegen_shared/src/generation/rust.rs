@@ -12,6 +12,7 @@ pub struct Ctxt {
     options: Options,
     type_names: HashSet<String>,
     imports: HashSet<String>,
+    created_structs: Vec<(Shape, Ident)>,
 }
 
 pub type Ident = String;
@@ -44,6 +45,7 @@ pub fn rust_types(name: &str, shape: &Shape, options: Options) -> Code {
         options,
         type_names: HashSet::new(),
         imports: HashSet::new(),
+        created_structs: Vec::new(),
     };
 
     if ctxt.options.import_style != ImportStyle::QualifiedPaths {
@@ -105,7 +107,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             }
         }
         VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
-        Struct { fields: map } => generate_struct_from_field_shapes(ctxt, path, map),
+        Struct { fields } => generate_struct_type(ctxt, path, fields, shape),
         MapT { val_type: v } => generate_map_type(ctxt, path, v),
         Opaque(t) => (t.clone(), None),
         Optional(e) => {
@@ -226,13 +228,22 @@ fn import(ctxt: &mut Ctxt, qualified: &str) -> String {
     }
 }
 
-fn generate_struct_from_field_shapes(
+fn generate_struct_type(
     ctxt: &mut Ctxt,
     path: &str,
-    map: &LinkedHashMap<String, Shape>,
+    field_shapes: &LinkedHashMap<String, Shape>,
+    containing_shape: &Shape,
 ) -> (Ident, Option<Code>) {
+    for (created_for_shape, ident) in ctxt.created_structs.iter() {
+        if containing_shape == created_for_shape { // Note: eq is overly strict
+            return (ident.into(), None);
+        }
+    }
+
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
+    ctxt.created_structs.push((containing_shape.clone(), type_name.clone()));
+
     let visibility = ctxt.options.type_visibility.clone();
     let field_visibility = match ctxt.options.field_visibility {
         None => visibility.clone(),
@@ -242,7 +253,7 @@ fn generate_struct_from_field_shapes(
     let mut field_names = HashSet::new();
     let mut defs = Vec::new();
 
-    let fields: Vec<Code> = map
+    let fields: Vec<Code> = field_shapes
         .iter()
         .map(|(name, typ)| {
             let field_name = field_name(name, &field_names);
