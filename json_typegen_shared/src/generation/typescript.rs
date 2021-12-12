@@ -37,13 +37,13 @@ pub fn typescript_types(name: &str, shape: &Shape, options: Options) -> Code {
 
 fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option<Code>) {
     use crate::shape::Shape::*;
-    match *shape {
+    match shape {
         Null | Any | Bottom => ("any".into(), None),
         Bool => ("boolean".into(), None),
         StringT => ("string".into(), None),
         Integer => ("number".into(), None),
         Floating => ("number".into(), None),
-        Tuple(ref shapes, _n) => {
+        Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, path, shapes)
@@ -51,11 +51,11 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
                 generate_vec_type(ctxt, path, &folded)
             }
         }
-        VecT { elem_type: ref e } => generate_vec_type(ctxt, path, e),
-        Struct { fields: ref map } => generate_struct_from_field_shapes(ctxt, path, map),
-        MapT { val_type: ref v } => generate_map_type(ctxt, path, v),
-        Opaque(ref t) => (t.clone(), None),
-        Optional(ref e) => {
+        VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
+        Struct { fields } => generate_struct_from_field_shapes(ctxt, path, fields),
+        MapT { val_type: v } => generate_map_type(ctxt, path, v),
+        Opaque(t) => (t.clone(), None),
+        Optional(e) => {
             let (inner, defs) = type_from_shape(ctxt, path, e);
             if ctxt.options.use_default_for_missing_fields {
                 (inner, defs)

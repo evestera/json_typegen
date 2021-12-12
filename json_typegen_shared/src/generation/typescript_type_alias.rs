@@ -24,13 +24,13 @@ pub fn typescript_type_alias(name: &str, shape: &Shape, options: Options) -> Cod
 
 fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
     use crate::shape::Shape::*;
-    match *shape {
+    match shape {
         Null | Any | Bottom => "any".into(),
         Bool => "boolean".into(),
         StringT => "string".into(),
         Integer => "number".into(),
         Floating => "number".into(),
-        Tuple(ref shapes, _n) => {
+        Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, shapes)
@@ -38,11 +38,11 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
                 generate_vec_type(ctxt, &folded)
             }
         }
-        VecT { elem_type: ref e } => generate_vec_type(ctxt, e),
-        Struct { fields: ref map } => generate_struct_from_field_shapes(ctxt, map),
-        MapT { val_type: ref v } => generate_map_type(ctxt, v),
-        Opaque(ref t) => t.clone(),
-        Optional(ref e) => {
+        VecT { elem_type: e } => generate_vec_type(ctxt, e),
+        Struct { fields } => generate_struct_from_field_shapes(ctxt, fields),
+        MapT { val_type: v } => generate_map_type(ctxt, v),
+        Opaque(t) => t.clone(),
+        Optional(e) => {
             let inner = type_from_shape(ctxt, e);
             if ctxt.options.use_default_for_missing_fields {
                 inner
