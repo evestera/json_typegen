@@ -22,7 +22,7 @@ macro_rules! fail {
             "{}, but remaining input was '{}'",
             $base,
             $input.trim()
-        ));
+        ))
     };
 }
 
