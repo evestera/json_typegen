@@ -23,9 +23,11 @@ fn code_output_test(name: &str, input: &str, expected: &str) {
 fn empty_object() {
     code_output_test(
         "Root",
+        // language=JSON
         r##"
             {}
         "##,
+        // language=Rust
         r##"
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Root {}
@@ -37,9 +39,11 @@ fn empty_object() {
 fn list_of_numbers() {
     code_output_test(
         "Numbers",
+        // language=JSON
         r##"
             [1, 2, 3]
         "##,
+        // language=Rust
         r##"
             pub type Numbers = Vec<i64>;
         "##,
@@ -50,12 +54,14 @@ fn list_of_numbers() {
 fn point() {
     code_output_test(
         "Point",
+        // language=JSON
         r##"
             {
                 "x": 2,
                 "y": 3
             }
         "##,
+        // language=Rust
         r##"
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Point {
@@ -70,12 +76,14 @@ fn point() {
 fn pub_crate_point() {
     code_output_test(
         "pub(crate) Point",
+        // language=JSON
         r##"
             {
                 "x": 2,
                 "y": 3
             }
         "##,
+        // language=Rust
         r##"
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub(crate) struct Point {
@@ -90,6 +98,7 @@ fn pub_crate_point() {
 fn optionals() {
     code_output_test(
         "Optionals",
+        // language=JSON
         r##"
             [
                 {
@@ -104,6 +113,7 @@ fn optionals() {
                 }
             ]
         "##,
+        // language=Rust
         r##"
             pub type Optionals = Vec<Optional>;
 
@@ -122,6 +132,7 @@ fn optionals() {
 fn fallback() {
     code_output_test(
         "FallbackExamples",
+        // language=JSON
         r##"
             [
                 {
@@ -136,6 +147,7 @@ fn fallback() {
                 }
             ]
         "##,
+        // language=Rust
         r##"
             pub type FallbackExamples = Vec<FallbackExample>;
 
@@ -153,6 +165,7 @@ fn fallback() {
 fn nesting() {
     code_output_test(
         "NestedTypes",
+        // language=JSON
         r##"
             [
                 {
@@ -164,6 +177,7 @@ fn nesting() {
                 }
             ]
         "##,
+        // language=Rust
         r##"
             pub type NestedTypes = Vec<NestedType>;
 
@@ -196,6 +210,7 @@ fn nesting() {
 fn tuple() {
     code_output_test(
         "Pagination",
+        // language=JSON
         r##"
             [
                 {
@@ -215,6 +230,7 @@ fn tuple() {
                 ]
             ]
         "##,
+        // language=Rust
         r##"
             pub type Pagination = (Pagination2, Vec<Pagination3>);
 
@@ -236,11 +252,13 @@ fn tuple() {
 fn rename() {
     code_output_test(
         "Renamed",
+        // language=JSON
         r##"
             {
                 "type": 5
             }
         "##,
+        // language=Rust
         r##"
             #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
             pub struct Renamed {
