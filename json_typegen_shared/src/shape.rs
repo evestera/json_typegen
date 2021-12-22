@@ -50,8 +50,8 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
     match (a, b) {
         (a, Bottom) | (Bottom, a) => a,
         (Integer, Floating) | (Floating, Integer) => Floating,
-        (a, Null) | (Null, a) => make_optional(a),
-        (a, Optional(b)) | (Optional(b), a) => make_optional(common_shape(a, *b)),
+        (a, Null) | (Null, a) => a.into_optional(),
+        (a, Optional(b)) | (Optional(b), a) => common_shape(a, *b).into_optional(),
         (Tuple(shapes1, n1), Tuple(shapes2, n2)) => {
             if shapes1.len() == shapes2.len() {
                 let shapes: Vec<_> = shapes1
@@ -85,14 +85,6 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
     }
 }
 
-fn make_optional(a: Shape) -> Shape {
-    use self::Shape::*;
-    match a {
-        Null | Any | Bottom | Optional(_) => a,
-        non_nullable => Optional(Box::new(non_nullable)),
-    }
-}
-
 fn common_field_shapes(
     mut f1: LinkedHashMap<String, Shape>,
     mut f2: LinkedHashMap<String, Shape>,
@@ -107,14 +99,60 @@ fn common_field_shapes(
                 *val = common_shape(temp, val2);
             }
             None => {
-                *val = make_optional(temp);
+                *val = temp.into_optional();
             }
         };
     }
     for (key, val) in f2.into_iter() {
-        f1.insert(key, make_optional(val));
+        f1.insert(key, val.into_optional());
     }
     f1
+}
+
+impl Shape {
+    fn into_optional(self) -> Self {
+        use self::Shape::*;
+        match self {
+            Null | Any | Bottom | Optional(_) => self,
+            non_nullable => Optional(Box::new(non_nullable)),
+        }
+    }
+
+    /// Note: This is asymmetrical because we don't unify based on this,
+    /// but check if `self` can be used *as is* as a replacement for `other`
+    pub(crate) fn is_acceptable_substitution_for(&self, other: &Shape) -> bool {
+        use self::Shape::*;
+        if self == other {
+            return true;
+        }
+        match (self, other) {
+            (_, Bottom) => true,
+            (Optional(_), Null) => true,
+            (Optional(a), Optional(b)) => a.is_acceptable_substitution_for(b),
+            (VecT { elem_type: e1 }, VecT { elem_type: e2 }) => {
+                e1.is_acceptable_substitution_for(e2)
+            }
+            (MapT { val_type: v1 }, MapT { val_type: v2 }) => v1.is_acceptable_substitution_for(v2),
+            (Tuple(a, _), Tuple(b, _)) => {
+                a.len() == b.len()
+                    && a.iter()
+                        .zip(b.iter())
+                        .all(|(e1, e2)| e1.is_acceptable_substitution_for(e2))
+            }
+            (Struct { fields: f1 }, Struct { fields: f2}) => {
+                // Require all fields to be the same (but ignore order)
+                // Could maybe be more lenient, e.g. for missing optional fields
+                f1.len() == f2.len() && f1.iter().all(|(key, shape1)| {
+                    if let Some(shape2) = f2.get(key) {
+                        shape1.is_acceptable_substitution_for(shape2)
+                    } else {
+                        false
+                    }
+                })
+            }
+            _ => false,
+        }
+    }
 }
 
 #[test]

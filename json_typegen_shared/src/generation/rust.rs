@@ -235,14 +235,15 @@ fn generate_struct_type(
     containing_shape: &Shape,
 ) -> (Ident, Option<Code>) {
     for (created_for_shape, ident) in ctxt.created_structs.iter() {
-        if containing_shape == created_for_shape { // Note: eq is overly strict
+        if created_for_shape.is_acceptable_substitution_for(containing_shape) {
             return (ident.into(), None);
         }
     }
 
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
-    ctxt.created_structs.push((containing_shape.clone(), type_name.clone()));
+    ctxt.created_structs
+        .push((containing_shape.clone(), type_name.clone()));
 
     let visibility = ctxt.options.type_visibility.clone();
     let field_visibility = match ctxt.options.field_visibility {

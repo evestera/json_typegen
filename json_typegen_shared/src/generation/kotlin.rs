@@ -194,14 +194,15 @@ fn generate_data_class(
     }
 
     for (created_for_shape, ident) in ctxt.created_classes.iter() {
-        if containing_shape == created_for_shape { // Note: eq is overly strict
+        if created_for_shape.is_acceptable_substitution_for(containing_shape) {
             return (ident.into(), None);
         }
     }
 
     let type_name = type_name(path, &ctxt.type_names);
     ctxt.type_names.insert(type_name.clone());
-    ctxt.created_classes.push((containing_shape.clone(), type_name.clone()));
+    ctxt.created_classes
+        .push((containing_shape.clone(), type_name.clone()));
 
     let mut field_names = HashSet::new();
     let mut defs = Vec::new();
