@@ -7,7 +7,6 @@ use crate::hints::Hint;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Options {
     pub output_mode: OutputMode,
-    pub runnable: bool,
     pub use_default_for_missing_fields: bool,
     pub deny_unknown_fields: bool,
     pub(crate) allow_option_vec: bool,
@@ -25,7 +24,6 @@ impl Default for Options {
     fn default() -> Options {
         Options {
             output_mode: OutputMode::Rust,
-            runnable: false,
             use_default_for_missing_fields: false,
             deny_unknown_fields: false,
             allow_option_vec: false,

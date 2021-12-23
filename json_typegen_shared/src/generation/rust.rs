@@ -1,6 +1,5 @@
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
-use unindent::unindent;
 
 use crate::generation::serde_case::RenameRule;
 use crate::options::{ImportStyle, Options, StringTransform};
@@ -17,28 +16,6 @@ pub struct Ctxt {
 
 pub type Ident = String;
 pub type Code = String;
-
-pub fn rust_program(name: &str, shape: &Shape, options: Options) -> Code {
-    let defs = rust_types(name, shape, options);
-
-    let var_name = snake_case(name);
-
-    let main = unindent(&format!(
-        r#"
-        fn main() {{
-            let {var_name} = {type_name}::default();
-            let serialized = serde_json::to_string(&{var_name}).unwrap();
-            println!("serialized = {{}}", serialized);
-            let deserialized: {type_name} = serde_json::from_str(&serialized).unwrap();
-            println!("deserialized = {{:?}}", deserialized);
-        }}
-        "#,
-        var_name = var_name,
-        type_name = name
-    ));
-
-    defs + "\n\n" + &main
-}
 
 pub fn rust_types(name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt {
