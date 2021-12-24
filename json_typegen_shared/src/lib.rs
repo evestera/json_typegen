@@ -140,9 +140,11 @@ fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
         return suffix;
     }
     if name.starts_with("pub(") {
-        if let Some((visibility, rest)) = name.split_once(") ") {
-            options.type_visibility = format!("{})", visibility);
-            return rest;
+        // MSRV: after 1.52 use split_once
+        let split = name.splitn(2, ") ").collect::<Vec<_>>();
+        if split.len() == 2 {
+            options.type_visibility = format!("{})", split[0]);
+            return split[1];
         }
     }
     name
