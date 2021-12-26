@@ -38,7 +38,7 @@ pub use crate::shape::Shape;
 pub enum JTError {
     #[cfg(feature = "remote-samples")]
     #[error("An error occurred while fetching JSON")]
-    SampleFetchingError(#[from] reqwest::Error),
+    SampleFetchingError(#[from] ureq::Error),
     #[cfg(feature = "local-samples")]
     #[error("An error occurred while reading JSON from file")]
     SampleReadingError(#[from] std::io::Error),
@@ -173,7 +173,7 @@ fn infer_from_sample(
     let parse_result = match *source {
         #[cfg(feature = "remote-samples")]
         SampleSource::Url(url) => {
-            shape_from_json(reqwest::get(url)?.error_for_status()?, options, hints)
+            shape_from_json(ureq::get(url).call()?.into_reader(), options, hints)
         }
 
         #[cfg(all(feature = "local-samples", feature = "progress"))]
