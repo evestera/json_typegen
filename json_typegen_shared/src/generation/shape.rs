@@ -3,7 +3,6 @@ use linked_hash_map::LinkedHashMap;
 use crate::generation::value::{pretty_print_value, Value};
 use crate::options::Options;
 use crate::shape::{self, Shape};
-use crate::to_singular::to_singular;
 use crate::util::string_hashmap;
 
 #[allow(dead_code)]
@@ -13,15 +12,15 @@ pub struct Ctxt {
 
 pub type Code = String;
 
-pub fn shape_string(name: &str, shape: &Shape, options: Options) -> Code {
+pub fn shape_string(_name: &str, shape: &Shape, options: Options) -> Code {
     let mut ctxt = Ctxt { options };
 
-    let value = type_from_shape(&mut ctxt, name, shape);
+    let value = type_from_shape(&mut ctxt, shape);
 
     pretty_print_value(0, &value)
 }
 
-fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
+fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Value {
     use crate::shape::Shape::*;
     match shape {
         Null => Value::Null,
@@ -34,42 +33,40 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
             if folded == Any && shapes.iter().any(|s| s != &Any) {
-                generate_tuple_type(ctxt, path, shapes)
+                generate_tuple_type(ctxt, shapes)
             } else {
-                generate_vec_type(ctxt, path, &folded)
+                generate_vec_type(ctxt, &folded)
             }
         }
-        VecT { elem_type: e } => generate_vec_type(ctxt, path, e),
-        Struct { fields } => generate_struct_from_field_shapes(ctxt, path, fields),
-        MapT { val_type: v } => generate_map_type(ctxt, path, v),
+        VecT { elem_type: e } => generate_vec_type(ctxt, e),
+        Struct { fields } => generate_struct_from_field_shapes(ctxt, fields),
+        MapT { val_type: v } => generate_map_type(ctxt, v),
         Opaque(t) => Value::String(t.to_string()),
         Optional(e) => Value::Object(string_hashmap! {
             "__type__" => Value::Str("optional"),
-            "item" => type_from_shape(ctxt, path, e),
+            "item" => type_from_shape(ctxt, e),
         }),
     }
 }
 
-fn generate_vec_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    let singular = to_singular(path);
-    let inner = type_from_shape(ctxt, &singular, shape);
+fn generate_vec_type(ctxt: &mut Ctxt, shape: &Shape) -> Value {
+    let inner = type_from_shape(ctxt, shape);
     Value::Array(vec![inner])
 }
 
-fn generate_map_type(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
-    let singular = to_singular(path);
-    let inner = type_from_shape(ctxt, &singular, shape);
+fn generate_map_type(ctxt: &mut Ctxt, shape: &Shape) -> Value {
+    let inner = type_from_shape(ctxt, shape);
     Value::Object(string_hashmap! {
         "__type__" => Value::Str("map"),
         "values" => inner
     })
 }
 
-fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> Value {
+fn generate_tuple_type(ctxt: &mut Ctxt, shapes: &[Shape]) -> Value {
     let mut types = Vec::new();
 
     for shape in shapes {
-        let typ = type_from_shape(ctxt, path, shape);
+        let typ = type_from_shape(ctxt, shape);
         types.push(typ);
     }
 
@@ -86,11 +83,7 @@ fn collapse_option(typ: &Shape) -> (bool, &Shape) {
     (false, typ)
 }
 
-fn generate_struct_from_field_shapes(
-    ctxt: &mut Ctxt,
-    _path: &str,
-    map: &LinkedHashMap<String, Shape>,
-) -> Value {
+fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String, Shape>) -> Value {
     let mut properties = LinkedHashMap::new();
 
     for (name, typ) in map.iter() {
@@ -102,7 +95,7 @@ fn generate_struct_from_field_shapes(
             name.to_owned()
         };
 
-        let field_code = type_from_shape(ctxt, name, collapsed);
+        let field_code = type_from_shape(ctxt, collapsed);
 
         properties.insert(annotated_name, field_code);
     }
