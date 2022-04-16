@@ -51,6 +51,7 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
                     "kotlin",
                     "kotlin/jackson",
                     "kotlin/kotlinx",
+                    "python",
                     "json_schema",
                     "shape",
                 ])

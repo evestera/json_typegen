@@ -80,6 +80,7 @@ pub enum OutputMode {
     TypescriptTypeAlias,
     KotlinJackson,
     KotlinKotlinx,
+    PythonPydantic,
     JsonSchema,
     Shape,
 }
@@ -93,6 +94,7 @@ impl OutputMode {
             "kotlin" => Some(OutputMode::KotlinJackson),
             "kotlin/jackson" => Some(OutputMode::KotlinJackson),
             "kotlin/kotlinx" => Some(OutputMode::KotlinKotlinx),
+            "python" => Some(OutputMode::PythonPydantic),
             "json_schema" => Some(OutputMode::JsonSchema),
             "shape" => Some(OutputMode::Shape),
             _ => None,
