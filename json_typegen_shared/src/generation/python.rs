@@ -239,7 +239,7 @@ fn generate_data_class(
             let mut field_code = String::new();
             let transformed = &apply_transform(ctxt, &field_name);
             if transformed != name {
-                field_code += &format!(" = {}(alias = \"{}\")", import(ctxt, Import::Field), name)
+                field_code += &format!(" = {}(alias = \"{}\")", import(ctxt, Import::Field), transformed)
             }
 
             format!("    {}: {}{}", field_name, field_type, field_code)
