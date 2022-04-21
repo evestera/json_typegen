@@ -237,8 +237,8 @@ fn generate_data_class(
             }
 
             let mut field_code = String::new();
-            let transformed = &apply_transform(ctxt, &field_name);
-            if transformed != name {
+            let transformed = apply_transform(ctxt, &field_name, &name);
+            if transformed != field_name {
                 field_code += &format!(" = {}(alias = \"{}\")", import(ctxt, Import::Field), transformed)
             }
 
@@ -271,7 +271,7 @@ fn generate_data_class(
     (type_name, Some(code))
 }
 
-fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
+fn apply_transform(ctxt: &Ctxt, field_name: &str, name: &str) -> String {
     match ctxt.options.property_name_format {
         Some(StringTransform::LowerCase) => field_name.to_ascii_lowercase(),
         Some(StringTransform::PascalCase) => type_case(field_name),
@@ -281,7 +281,7 @@ fn apply_transform(ctxt: &Ctxt, field_name: &str) -> String {
         Some(StringTransform::CamelCase) => lower_camel_case(field_name),
         Some(StringTransform::ScreamingSnakeCase) => snake_case(field_name).to_ascii_uppercase(),
         Some(StringTransform::ScreamingKebabCase) => kebab_case(field_name).to_ascii_uppercase(),
-        None => field_name.to_string(),
+        None => name.to_string(),
     }
 }
 
