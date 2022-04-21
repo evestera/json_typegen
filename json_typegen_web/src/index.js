@@ -86,8 +86,8 @@ worker.onmessage = messageEvent => {
 
 function toggleOptions() {
   const conditionalOptions = ({
-    propertynameformat: ['rust', 'kotlin/jackson'],
-    importstyle: ['rust', 'kotlin/jackson', 'kotlin/kotlinx'],
+    propertynameformat: ['rust', 'kotlin/jackson', 'python'],
+    importstyle: ['rust', 'kotlin/jackson', 'kotlin/kotlinx', 'python'],
     collectadditional: ['rust', 'kotlin/jackson'],
   });
   const currentOutputmode = $('outputmode').value;
