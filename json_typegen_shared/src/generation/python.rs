@@ -95,7 +95,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
         Floating => ("float".into(), None),
         Tuple(shapes, _n) => {
             let folded = shape::fold_shapes(shapes.clone());
-            if shapes.len() <= 3 && folded == Any && shapes.iter().any(|s| s != &Any) {
+            if folded == Any && shapes.iter().any(|s| s != &Any) {
                 generate_tuple_type(ctxt, path, shapes)
             } else {
                 generate_vec_type(ctxt, path, &folded)
