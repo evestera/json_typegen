@@ -83,8 +83,10 @@ pub fn python_types(name: &str, shape: &Shape, options: Options) -> Code {
                 }
             }
         }
-        import_code += "\n\n";
-        code = import_code + &code;
+        if !import_code.is_empty(){
+            import_code += "\n\n";
+            code = import_code + &code;
+        }
     }
 
     if ident != name {
@@ -145,7 +147,9 @@ fn generate_tuple_type(ctxt: &mut Ctxt, path: &str, shapes: &[Shape]) -> (Ident,
         let (typ, def) = type_from_shape(ctxt, path, shape);
         types.push(typ);
         if let Some(code) = def {
-            defs.push(code)
+            if !code.is_empty() {
+                defs.push(code)
+            }
         }
     }
 
@@ -241,7 +245,9 @@ fn generate_data_class(
             let (field_type, child_defs) = type_from_shape(ctxt, name, typ);
 
             if let Some(code) = child_defs {
-                defs.push(code);
+                if !code.is_empty() {
+                    defs.push(code);
+                }
             }
 
             let mut field_code = String::new();
