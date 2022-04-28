@@ -65,15 +65,21 @@ pub fn python_types(name: &str, shape: &Shape, options: Options) -> Code {
         let mut imports: Vec<_> = ctxt.imports.drain().collect();
         imports.sort();
         let mut import_code = String::new();
-        for import in imports {
-            match ctxt.options.import_style {
-                ImportStyle::AssumeExisting => {}
-                ImportStyle::AddImports => {
+        match ctxt.options.import_style {
+            ImportStyle::AssumeExisting => {}
+            ImportStyle::AddImports => {
+                for import in imports {
                     let (module, identifier) = import.pair();
                     import_code += &format!("from {} import {}\n", module, identifier);
                 }
-                ImportStyle::QualifiedPaths => {
-                    import_code += &format!("import {}\n", import.module());
+            }
+            ImportStyle::QualifiedPaths => {
+                let mut seen = HashSet::new();
+                for import in imports {
+                    let module = import.module();
+                    if seen.insert(module) {
+                        import_code += &format!("import {}\n", module);
+                    }
                 }
             }
         }
@@ -239,7 +245,7 @@ fn generate_data_class(
             }
 
             let mut field_code = String::new();
-            let transformed = apply_transform(ctxt, &field_name, &name);
+            let transformed = apply_transform(ctxt, &field_name, name);
             if transformed != field_name {
                 field_code += &format!(" = {}(alias = \"{}\")", import(ctxt, Import::Field), transformed)
             }
