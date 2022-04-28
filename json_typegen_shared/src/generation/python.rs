@@ -23,6 +23,9 @@ impl Import {
             Import::Field => ("pydantic", "Field"),
         }
     }
+    fn module(&self) -> &'static str {
+        self.pair().0
+    }
     fn identifier(&self) -> &'static str {
         self.pair().1
     }
@@ -70,8 +73,7 @@ pub fn python_types(name: &str, shape: &Shape, options: Options) -> Code {
                     import_code += &format!("from {} import {}\n", module, identifier);
                 }
                 ImportStyle::QualifiedPaths => {
-                    let (module, identifier) = import.pair();
-                    import_code += &format!("import {}.{}\n", module, identifier);
+                    import_code += &format!("import {}\n", import.module());
                 }
             }
         }
