@@ -90,7 +90,10 @@ pub fn python_types(name: &str, shape: &Shape, options: Options) -> Code {
     }
 
     if ident != name {
-        code += &format!("\n\n{} = {}", name, ident);
+        if !code.is_empty() {
+            code += "\n\n";
+        }
+        code += &format!("{} = {}", name, ident);
     }
     code
 }

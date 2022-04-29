@@ -7,8 +7,7 @@ fn code_output_test(name: &str, input: &str, expected: &str) {
     options.output_mode = OutputMode::PythonPydantic;
     let res = codegen(name, input, options);
     let output = res.unwrap();
-    let expected = expected.trim();
-    let output = output.trim();
+    let expected = &expected[1..];
     assert_eq!(
         output,
         expected,
@@ -40,7 +39,9 @@ fn list_of_numbers() {
         r##"
             [1, 2, 3]
         "##,
-        "Numbers = list[int]"
+        "
+Numbers = list[int]
+"
     );
 }
 
