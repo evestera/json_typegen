@@ -143,17 +143,17 @@ pub fn is_ts_identifier(s: &str) -> bool {
     }
 
     if let Some((first, rest)) = s.as_bytes().split_first() {
-        let first_valid = (b'a'..b'z').contains(first)
-            || (b'A'..b'Z').contains(first)
+        let first_valid = (b'a'..=b'z').contains(first)
+            || (b'A'..=b'Z').contains(first)
             || *first == b'_'
             || *first == b'$';
         return first_valid
             && rest.iter().all(|b| {
-                (b'a'..b'z').contains(b)
-                    || (b'A'..b'Z').contains(b)
+                (b'a'..=b'z').contains(b)
+                    || (b'A'..=b'Z').contains(b)
                     || *b == b'_'
                     || *b == b'$'
-                    || (b'0'..b'9').contains(b)
+                    || (b'0'..=b'9').contains(b)
             });
     }
     false
@@ -230,6 +230,7 @@ mod tests {
         assert!(is_ts_identifier("foo_bar"));
         assert!(is_ts_identifier("$"));
         assert!(is_ts_identifier("foobar1"));
+        assert!(is_ts_identifier("zoneId"));
 
         // Invalid:
         assert!(!is_ts_identifier("1foobar"));
