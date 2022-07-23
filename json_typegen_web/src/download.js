@@ -7,6 +7,7 @@ function createFilename(typename, output_mode) {
         "typescript/typealias": "ts",
         "kotlin/jackson": "kt",
         "kotlin/kotlinx": "kt",
+        "python": "py",
         "json_schema": "json",
         "shape": "json",
     }
