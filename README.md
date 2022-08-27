@@ -1,4 +1,4 @@
-# json_typegen - Rust types from JSON samples
+# json_typegen - Types from JSON samples
 
 [![CI](https://github.com/evestera/json_typegen/actions/workflows/ci.yml/badge.svg)](https://github.com/evestera/json_typegen/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/json_typegen.svg)](https://crates.io/crates/json_typegen)
