@@ -1,0 +1,91 @@
+analyses analysis
+analysis analysis
+diagnoses diagnosis
+prognoses prognosis
+synopses synopsis
+crises crisis
+theses thesis
+
+matrices matrix
+vertices vertex
+indices index
+radices radix
+vortices vortex
+codices codex
+lattices lattice
+slices slice
+prices price
+
+cards card
+types type
+colors color
+rulings ruling
+foreignNames foreignName
+tags tag
+categoryKeys categoryKey
+attributes attribute
+values value
+images image
+feet foot
+
+guesses guess
+guess guess
+miss miss
+buses bus
+gasses gas
+
+moves move
+lives life
+leaves leaf
+staves staff
+thieves thief
+
+legalities legality
+abilities ability
+queries query
+cookies cookie
+movies movie
+
+children child
+
+series series
+news news
+axis axis
+
+people person
+
+zeroes zero
+heroes hero
+
+quizzes quiz
+
+elves elf
+wolves wolf
+dwarves dwarf
+scarves scarf
+
+clothes clothes
+
+objectIds objectId
+errors error
+instructions instruction
+services service
+interfaces interface
+repositories repository
+messages message
+items item
+relations relation
+packages package
+statuses status
+status status
+aliases alias
+alias alias
+submenus submenu
+subqueries subquery
+schemas schema
+releases release
+
+bases base
+taxis taxi
+taxies taxi
+taxes tax
