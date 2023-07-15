@@ -94,7 +94,15 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             } else {
                 (format!("Option<{}>", inner), defs)
             }
-        }
+        },
+        Nullable(e) => {
+            let (inner, defs) = type_from_shape(ctxt, path, e);
+            if ctxt.options.use_default_for_missing_fields {
+                (inner, defs)
+            } else {
+                (format!("Option<{}>", inner), defs)
+            }
+        },
     }
 }
 

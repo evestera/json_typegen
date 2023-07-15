@@ -53,6 +53,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> Value {
         MapT { val_type: v } => generate_map_type(ctxt, path, v),
         Opaque(t) => Value::Object(string_hashmap! { "type" => Value::String(t.clone()) }),
         Optional(e) => type_from_shape(ctxt, path, e),
+        Nullable(e) => type_from_shape(ctxt, path, e),
     }
 }
 

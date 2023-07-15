@@ -49,7 +49,15 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
             } else {
                 format!("{} | undefined", inner)
             }
-        }
+        },
+        Nullable(e) => {
+            let inner = type_from_shape(ctxt, e);
+            if ctxt.options.use_default_for_missing_fields {
+                inner
+            } else {
+                format!("{} | null", inner)
+            }
+        },
     }
 }
 
