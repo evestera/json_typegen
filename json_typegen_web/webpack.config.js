@@ -11,7 +11,7 @@ module.exports = {
     filename: "bundle.js"
   },
   devServer: {
-    contentBase: dist,
+    static: dist,
   },
   plugins: [
     new HtmlWebpackPlugin({
