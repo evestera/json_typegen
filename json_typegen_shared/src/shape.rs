@@ -15,9 +15,10 @@ pub enum Shape {
     /// represented by any single shape
     Any,
 
-    /// `Optional(T)` represents that a value is nullable, or not always present
+    /// `Optional(T)` represents that a value is not always present
     Optional(Box<Shape>),
-
+    /// `Nullable(T)` represents that a value is nullable
+    Nullable(Box<Shape>),
     /// Equivalent to `Optional(Bottom)`, `Null` represents optionality with no further information
     Null,
 
@@ -50,7 +51,7 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
     match (a, b) {
         (a, Bottom) | (Bottom, a) => a,
         (Integer, Floating) | (Floating, Integer) => Floating,
-        (a, Null) | (Null, a) => a.into_optional(),
+        (a, Null) | (Null, a) => a.into_nullable(),
         (a, Optional(b)) | (Optional(b), a) => common_shape(a, *b).into_optional(),
         (Tuple(shapes1, n1), Tuple(shapes2, n2)) => {
             if shapes1.len() == shapes2.len() {
@@ -81,6 +82,7 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
             fields: common_field_shapes(f1, f2),
         },
         (Opaque(t), _) | (_, Opaque(t)) => Opaque(t),
+        (a, Nullable(b)) | (Nullable(b), a) => common_shape(a, *b).into_nullable(),
         _ => Any,
     }
 }
@@ -113,8 +115,17 @@ impl Shape {
     fn into_optional(self) -> Self {
         use self::Shape::*;
         match self {
-            Null | Any | Bottom | Optional(_) => self,
+            Null => Nullable(Box::new(self)),
+            Any | Bottom | Optional(_) => self,
             non_nullable => Optional(Box::new(non_nullable)),
+        }
+    }
+    fn into_nullable(self) -> Self {
+        use self::Shape::*;
+        match self {
+            Null => Nullable(Box::new(self)),
+            Any | Bottom | Nullable(_) => self,
+            non_nullable => Nullable(Box::new(non_nullable)),
         }
     }
 

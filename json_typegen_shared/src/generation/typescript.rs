@@ -64,6 +64,10 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
             } else {
                 (format!("{} | undefined", inner), defs)
             }
+        },
+        Nullable(e) => {
+            let (inner, defs) = type_from_shape(ctxt, path, e);
+            (format!("{} | null", inner), defs)
         }
     }
 }
