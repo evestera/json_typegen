@@ -46,6 +46,10 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Value {
             "__type__" => Value::Str("optional"),
             "item" => type_from_shape(ctxt, e),
         }),
+        Nullable(e) => Value::Object(string_hashmap! {
+            "__type__" => Value::Str("nullable"),
+            "item" => type_from_shape(ctxt, e),
+        }),
     }
 }
 
