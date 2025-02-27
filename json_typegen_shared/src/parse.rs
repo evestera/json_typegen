@@ -4,7 +4,7 @@
 
 use syn;
 use syn::parse::{boolean, ident, string};
-use synom::{alt, call, named, punct, IResult};
+use synom::{IResult, alt, call, named, punct};
 
 use crate::hints::Hint;
 use crate::options::{ImportStyle, InputMode, Options, OutputMode, StringTransform};

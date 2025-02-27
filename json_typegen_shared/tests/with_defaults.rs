@@ -1,6 +1,6 @@
-use testsyn::{parse_str, Item};
+use testsyn::{Item, parse_str};
 
-use json_typegen_shared::{codegen, ImportStyle, Options};
+use json_typegen_shared::{ImportStyle, Options, codegen};
 
 /// Function to test AST equality, not string equality
 fn code_output_test(name: &str, input: &str, expected: &str) {

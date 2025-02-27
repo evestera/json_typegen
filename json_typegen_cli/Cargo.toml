@@ -10,7 +10,7 @@ homepage = "https://typegen.vestera.as"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_cli"
 readme = "README.md"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 clap = "2.33.3"

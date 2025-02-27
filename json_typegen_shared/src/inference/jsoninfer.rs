@@ -1,8 +1,8 @@
+use crate::Options;
 use crate::hints::{HintType, Hints};
 use crate::inference::jsoninputerr::JsonInputErr;
 use crate::inference::jsonlex::{JsonLexer, JsonToken};
-use crate::shape::{common_shape, Shape};
-use crate::Options;
+use crate::shape::{Shape, common_shape};
 use linked_hash_map::LinkedHashMap;
 use std::io::Read;
 use std::iter::Peekable;
@@ -96,16 +96,19 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
 
     fn infer_map(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
         let shape = self.infer_object(options, hints)?;
-        if let Shape::Struct { fields } = shape {
-            let inner = fields
-                .into_iter()
-                .map(|(_, value)| value)
-                .fold(Shape::Bottom, common_shape);
-            Ok(Shape::MapT {
-                val_type: Box::new(inner),
-            })
-        } else {
-            panic!("Got non-object from infer_object")
+        match shape {
+            Shape::Struct { fields } => {
+                let inner = fields
+                    .into_iter()
+                    .map(|(_, value)| value)
+                    .fold(Shape::Bottom, common_shape);
+                Ok(Shape::MapT {
+                    val_type: Box::new(inner),
+                })
+            }
+            _ => {
+                panic!("Got non-object from infer_object")
+            }
         }
     }
 

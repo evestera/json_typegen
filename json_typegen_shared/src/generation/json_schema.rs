@@ -1,6 +1,6 @@
 use linked_hash_map::LinkedHashMap;
 
-use crate::generation::value::{pretty_print_value, Value};
+use crate::generation::value::{Value, pretty_print_value};
 use crate::options::Options;
 use crate::shape::{self, Shape};
 use crate::to_singular::to_singular;

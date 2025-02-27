@@ -1,11 +1,11 @@
 use linked_hash_map::LinkedHashMap;
 use std::collections::HashSet;
 
+use crate::OutputMode;
 use crate::options::{ImportStyle, Options, StringTransform};
 use crate::shape::{self, Shape};
 use crate::to_singular::to_singular;
 use crate::util::{kebab_case, lower_camel_case, snake_case, type_case};
-use crate::OutputMode;
 
 struct Ctxt {
     options: Options,

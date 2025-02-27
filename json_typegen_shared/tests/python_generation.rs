@@ -1,4 +1,4 @@
-use json_typegen_shared::{codegen, ImportStyle, Options, OutputMode};
+use json_typegen_shared::{ImportStyle, Options, OutputMode, codegen};
 
 /// Function to test AST equality, not string equality
 fn code_output_test(name: &str, input: &str, expected: &str) {

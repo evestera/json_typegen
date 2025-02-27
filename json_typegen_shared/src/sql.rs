@@ -94,7 +94,7 @@ fn shape_for_column(column: &ColumnDef) -> Shape {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{codegen_from_shape, Options, OutputMode};
+    use crate::{Options, OutputMode, codegen_from_shape};
 
     #[test]
     fn test_sql_to_shape() {

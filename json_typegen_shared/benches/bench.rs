@@ -9,7 +9,7 @@
 extern crate json_typegen_shared;
 extern crate test;
 
-use json_typegen_shared::{codegen, Options};
+use json_typegen_shared::{Options, codegen};
 use test::Bencher;
 
 macro_rules! file_bench {

@@ -2,7 +2,7 @@ use linked_hash_map::LinkedHashMap;
 
 use crate::generation::typescript::{collapse_option, is_ts_identifier};
 use crate::options::Options;
-use crate::shape::{self, common_shape, Shape};
+use crate::shape::{self, Shape, common_shape};
 use crate::util::lower_camel_case;
 
 pub struct Ctxt {
