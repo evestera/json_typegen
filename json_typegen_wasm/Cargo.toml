@@ -2,7 +2,7 @@
 name = "json_typegen_wasm"
 version = "0.7.0"
 authors = ["Erik Vesteraas <erik@vestera.as>"]
-edition = "2018"
+edition = "2021"
 publish = false
 description = "WASM wrapper for json_typegen. Codegen from JSON samples."
 homepage = "https://typegen.vestera.as"

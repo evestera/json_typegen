@@ -7,6 +7,7 @@ members = [
     "json_typegen_demo"
 ]
 default-members = ["json_typegen_cli"]
+resolver = "3"
 
 # Compiler config for slightly smaller WASM bundle
 #[profile.release]

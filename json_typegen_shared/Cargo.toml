@@ -10,7 +10,7 @@ homepage = "https://typegen.vestera.as"
 repository = "https://github.com/evestera/json_typegen"
 documentation = "https://docs.rs/json_typegen_shared"
 readme = "README.md"
-edition = "2018"
+edition = "2021"
 exclude = ["/benches/"]
 
 [features]
