@@ -83,7 +83,7 @@ pub fn python_types(name: &str, shape: &Shape, options: Options) -> Code {
                 }
             }
         }
-        if !import_code.is_empty(){
+        if !import_code.is_empty() {
             import_code += "\n\n";
             code = import_code + &code;
         }
@@ -126,7 +126,7 @@ fn type_from_shape(ctxt: &mut Ctxt, path: &str, shape: &Shape) -> (Ident, Option
                 let optional = import(ctxt, Import::Optional);
                 (format!("{}[{}]", optional, inner), defs)
             }
-        },
+        }
         Nullable(e) => {
             let (inner, defs) = type_from_shape(ctxt, path, e);
             if ctxt.options.use_default_for_missing_fields {
@@ -265,7 +265,11 @@ fn generate_data_class(
             let mut field_code = String::new();
             let transformed = apply_transform(ctxt, &field_name, name);
             if transformed != field_name {
-                field_code += &format!(" = {}(alias=\"{}\")", import(ctxt, Import::Field), transformed)
+                field_code += &format!(
+                    " = {}(alias=\"{}\")",
+                    import(ctxt, Import::Field),
+                    transformed
+                )
             }
 
             format!("    {}: {}{}", field_name, field_type, field_code)

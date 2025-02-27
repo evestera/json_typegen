@@ -151,16 +151,17 @@ impl Shape {
                         .zip(b.iter())
                         .all(|(e1, e2)| e1.is_acceptable_substitution_for(e2))
             }
-            (Struct { fields: f1 }, Struct { fields: f2}) => {
+            (Struct { fields: f1 }, Struct { fields: f2 }) => {
                 // Require all fields to be the same (but ignore order)
                 // Could maybe be more lenient, e.g. for missing optional fields
-                f1.len() == f2.len() && f1.iter().all(|(key, shape1)| {
-                    if let Some(shape2) = f2.get(key) {
-                        shape1.is_acceptable_substitution_for(shape2)
-                    } else {
-                        false
-                    }
-                })
+                f1.len() == f2.len()
+                    && f1.iter().all(|(key, shape1)| {
+                        if let Some(shape2) = f2.get(key) {
+                            shape1.is_acceptable_substitution_for(shape2)
+                        } else {
+                            false
+                        }
+                    })
             }
             _ => false,
         }

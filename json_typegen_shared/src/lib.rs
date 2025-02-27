@@ -21,9 +21,9 @@ pub mod parse;
 #[cfg(feature = "progress")]
 mod progress;
 mod shape;
+mod sql;
 mod to_singular;
 mod util;
-mod sql;
 
 use crate::hints::Hints;
 use crate::inference::shape_from_json;
@@ -115,9 +115,7 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
             let (_name, shap) = shapes.get(0).unwrap();
             shap.clone()
         }
-        options::InputMode::Json => {
-            infer_from_sample(&source, &options, &hints)?
-        }
+        options::InputMode::Json => infer_from_sample(&source, &options, &hints)?,
     };
 
     codegen_from_shape(name, &shape, options)

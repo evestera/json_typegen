@@ -43,7 +43,11 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
         }
         VecT { elem_type: e } => generate_vec_type(ctxt, e),
         Struct { fields } => {
-            if ctxt.options.infer_map_threshold.is_some_and(|lim| { fields.len() > lim }) {
+            if ctxt
+                .options
+                .infer_map_threshold
+                .is_some_and(|lim| fields.len() > lim)
+            {
                 let inner = fields
                     .into_iter()
                     .map(|(_, value)| value.clone())
@@ -62,7 +66,7 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
             } else {
                 format!("{}.optional()", inner)
             }
-        },
+        }
         Nullable(e) => {
             let inner = type_from_shape(ctxt, e);
             if ctxt.options.use_default_for_missing_fields {
@@ -70,7 +74,7 @@ fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
             } else {
                 format!("{}.nullable()", inner)
             }
-        },
+        }
     }
 }
 

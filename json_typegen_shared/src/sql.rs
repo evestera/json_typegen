@@ -6,7 +6,8 @@ use sqlparser::parser::Parser;
 pub fn sql_to_shape(input: &str) -> Result<Vec<(String, Shape)>, String> {
     let dialect = GenericDialect {};
     let ast: Vec<Statement> = Parser::parse_sql(&dialect, input).map_err(|e| e.to_string())?;
-    Ok(ast.iter()
+    Ok(ast
+        .iter()
         .filter_map(|stmt| match stmt {
             Statement::CreateTable { name, columns, .. } => Some((
                 name.to_string(),

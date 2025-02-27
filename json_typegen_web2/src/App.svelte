@@ -224,7 +224,9 @@
 
 <Container>
     <h1>typegen</h1>
-    <p>Generate types (Rust, TS, Kotlin, Python, ...) from JSON samples or SQL</p>
+    <p>
+        Generate types (Rust, TS, Kotlin, Python, ...) from JSON samples or SQL
+    </p>
     <p>
         Examples:
         {#each examples as example}

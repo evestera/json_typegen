@@ -9,12 +9,9 @@ fn code_output_test(name: &str, input: &str, expected: &str) {
     let output = res.unwrap();
     let expected = &expected[1..];
     assert_eq!(
-        output,
-        expected,
+        output, expected,
         "\n\nUnexpected output code:\n  input: {}\n  output:\n{}\n  expected: {}",
-        input,
-        output,
-        expected
+        input, output, expected
     );
 }
 
@@ -41,7 +38,7 @@ fn list_of_numbers() {
         "##,
         "
 Numbers = list[int]
-"
+",
     );
 }
 

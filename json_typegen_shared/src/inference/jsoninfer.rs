@@ -139,7 +139,10 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
             self.expect_token(JsonToken::Comma)?;
         }
 
-        if options.infer_map_threshold.is_some_and(|lim| { fields.len() > lim }) {
+        if options
+            .infer_map_threshold
+            .is_some_and(|lim| fields.len() > lim)
+        {
             let inner = fields
                 .into_iter()
                 .map(|(_, value)| value)
@@ -254,7 +257,8 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
                     return Ok(None);
                 }
 
-                let first_token_is_numeric = first_token.bytes().all(|b| (b'0'..=b'9').contains(&b));
+                let first_token_is_numeric =
+                    first_token.bytes().all(|b| (b'0'..=b'9').contains(&b));
 
                 let mut folded = None;
 
