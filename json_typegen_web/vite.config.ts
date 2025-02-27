@@ -8,22 +8,22 @@ export default defineConfig({
   plugins: [
     ViteRsw(),
     svelte(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: "node_modules/shiki/dist/onig.wasm",
-          dest: "shiki/dist",
-        },
-        {
-          src: "node_modules/shiki/languages/*",
-          dest: "shiki/languages",
-        },
-        {
-          src: "node_modules/shiki/themes/*",
-          dest: "shiki/themes",
-        },
-      ],
-    }),
+    // viteStaticCopy({
+    //   targets: [
+    //     {
+    //       src: "node_modules/shiki/dist/onig.wasm",
+    //       dest: "shiki/dist",
+    //     },
+    //     {
+    //       src: "node_modules/shiki/languages/*",
+    //       dest: "shiki/languages",
+    //     },
+    //     {
+    //       src: "node_modules/shiki/themes/*",
+    //       dest: "shiki/themes",
+    //     },
+    //   ],
+    // }),
   ],
   server: {
     fs: {

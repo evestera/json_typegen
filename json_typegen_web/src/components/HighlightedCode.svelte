@@ -1,12 +1,11 @@
 <script lang="ts">
-    import { getHighlighter, setCDN, renderToHtml } from "shiki";
+    import { createHighlighter } from "shiki";
 
     export let code: string;
     export let language: string;
 
-    setCDN("/shiki/");
-    const highlighter = getHighlighter({
-        theme: "github-light",
+    const highlighter = createHighlighter({
+        themes: ["github-light"],
         langs: ["rust", "typescript", "kotlin", "python", "json"],
     });
 
@@ -14,9 +13,12 @@
 
     $: {
         highlighter.then((highlighter) => {
-            const tokens = highlighter.codeToThemedTokens(code, language);
-            highlighted = renderToHtml(tokens, {
-                bg: "rgba(255, 255, 255, 0.8)",
+            highlighted = highlighter.codeToHtml(code, {
+                lang: language,
+                theme: 'github-light',
+                colorReplacements: {
+                    '#fff': "rgba(255, 255, 255, 0.8)"
+                }
             });
         });
     }
