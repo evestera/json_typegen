@@ -7,6 +7,7 @@ use crate::hints::Hint;
 #[derive(Debug, PartialEq, Clone)]
 pub struct Options {
     pub output_mode: OutputMode,
+    pub input_mode: InputMode,
     pub use_default_for_missing_fields: bool,
     pub deny_unknown_fields: bool,
     pub(crate) allow_option_vec: bool,
@@ -18,12 +19,14 @@ pub struct Options {
     pub unwrap: String,
     pub import_style: ImportStyle,
     pub collect_additional: bool,
+    pub infer_map_threshold: Option<usize>,
 }
 
 impl Default for Options {
     fn default() -> Options {
         Options {
             output_mode: OutputMode::Rust,
+            input_mode: InputMode::Json,
             use_default_for_missing_fields: false,
             deny_unknown_fields: false,
             allow_option_vec: false,
@@ -35,6 +38,7 @@ impl Default for Options {
             unwrap: "".into(),
             import_style: ImportStyle::AddImports,
             collect_additional: false,
+            infer_map_threshold: None,
         }
     }
 }
@@ -82,6 +86,7 @@ pub enum OutputMode {
     KotlinKotlinx,
     PythonPydantic,
     JsonSchema,
+    ZodSchema,
     Shape,
 }
 
@@ -96,7 +101,25 @@ impl OutputMode {
             "kotlin/kotlinx" => Some(OutputMode::KotlinKotlinx),
             "python" => Some(OutputMode::PythonPydantic),
             "json_schema" => Some(OutputMode::JsonSchema),
+            "zod" => Some(OutputMode::ZodSchema),
             "shape" => Some(OutputMode::Shape),
+            _ => None,
+        }
+    }
+}
+
+#[non_exhaustive]
+#[derive(Debug, PartialEq, Clone)]
+pub enum InputMode {
+    Json,
+    Sql,
+}
+
+impl InputMode {
+    pub fn parse(s: &str) -> Option<Self> {
+        match s {
+            "json" => Some(InputMode::Json),
+            "sql" => Some(InputMode::Sql),
             _ => None,
         }
     }

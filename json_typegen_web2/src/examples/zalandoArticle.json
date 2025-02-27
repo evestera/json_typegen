@@ -1,0 +1,285 @@
+{
+  "id": "AN621C0S5-K11",
+  "modelId": "AN621C0S5",
+  "name": "Summer dress - blue/white",
+  "shopUrl": "https://www.zalando.co.uk/anna-field-summer-dress-blue-white-an621c0s5-k11.html",
+  "color": "Blue",
+  "available": true,
+  "season": "WINTER",
+  "seasonYear": "2016",
+  "activationDate": "2015-04-30T16:52:52+02:00",
+  "additionalInfos": [],
+  "tags": [],
+  "genders": ["FEMALE"],
+  "ageGroups": ["ADULT"],
+  "brand": {
+    "key": "AN6",
+    "name": "Anna Field",
+    "logoUrl": "https://i6.ztat.net/brand/anna-field.jpg",
+    "logoLargeUrl": "https://i6.ztat.net/brandxl/anna-field.jpg",
+    "brandFamily": {
+      "key": "AN00",
+      "name": "Anna Field",
+      "shopUrl": "https://www.zalando.co.uk/anna-field-online-shop"
+    },
+    "shopUrl": "https://www.zalando.co.uk/anna-field"
+  },
+  "categoryKeys": [
+    "catalog",
+    "women",
+    "womens-sale",
+    "womens-clothing-sale",
+    "womens-dresses-sale",
+    "all",
+    "sale",
+    "summer-dresses-sale"
+  ],
+  "attributes": [
+    {
+      "name": "Outer fabric material",
+      "values": ["100% cotton"]
+    },
+    {
+      "name": "Total length",
+      "values": ["34.0 \" (Size 8)"]
+    },
+    {
+      "name": "Insert material",
+      "values": ["97% viscose, 3% spandex"]
+    },
+    {
+      "name": "Fabric",
+      "values": ["Jersey"]
+    },
+    {
+      "name": "Details",
+      "values": ["belt included"]
+    },
+    {
+      "name": "Length",
+      "values": ["short"]
+    },
+    {
+      "name": "Top part material",
+      "values": ["97% viscose, 3% spandex"]
+    },
+    {
+      "name": "Fit",
+      "values": ["tailored"]
+    },
+    {
+      "name": "Pattern",
+      "values": ["striped"]
+    },
+    {
+      "name": "Neckline",
+      "values": ["round neck"]
+    },
+    {
+      "name": "Washing instructions",
+      "values": [
+        "do not tumble dry",
+        "machine wash at 30°C",
+        "Machine wash on gentle cycle"
+      ]
+    },
+    {
+      "name": "Sleeve length",
+      "values": ["Extra short"]
+    },
+    {
+      "name": "Our model's height",
+      "values": ["Our model is 70.0 \" tall and is wearing size 8"]
+    }
+  ],
+  "units": [
+    {
+      "id": "AN621C0S5-K110340000",
+      "size": "6",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": false,
+      "stock": 0
+    },
+    {
+      "id": "AN621C0S5-K110360000",
+      "size": "8",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": false,
+      "stock": 0
+    },
+    {
+      "id": "AN621C0S5-K110440000",
+      "size": "16",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": true,
+      "stock": 3
+    },
+    {
+      "id": "AN621C0S5-K110420000",
+      "size": "14",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": false,
+      "stock": 0
+    },
+    {
+      "id": "AN621C0S5-K110380000",
+      "size": "10",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": false,
+      "stock": 0
+    },
+    {
+      "id": "AN621C0S5-K110400000",
+      "size": "12",
+      "price": {
+        "currency": "GBP",
+        "value": 14.69,
+        "formatted": "£14.69"
+      },
+      "originalPrice": {
+        "currency": "GBP",
+        "value": 20.99,
+        "formatted": "£20.99"
+      },
+      "available": false,
+      "stock": 0
+    }
+  ],
+  "media": {
+    "images": [
+      {
+        "orderNumber": 1,
+        "type": "NON_MODEL",
+        "thumbnailHdUrl": "https://i2.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "smallUrl": "https://i2.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "smallHdUrl": "https://i2.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "mediumUrl": "https://i2.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "mediumHdUrl": "https://i2.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "largeUrl": "https://i2.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg",
+        "largeHdUrl": "https://i2.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@16.jpg"
+      },
+      {
+        "orderNumber": 2,
+        "type": "STYLE",
+        "thumbnailHdUrl": "https://i3.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "smallUrl": "https://i3.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "smallHdUrl": "https://i3.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "mediumUrl": "https://i3.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "mediumHdUrl": "https://i3.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "largeUrl": "https://i3.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg",
+        "largeHdUrl": "https://i3.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@15.jpg"
+      },
+      {
+        "orderNumber": 3,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i6.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "smallUrl": "https://i6.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "smallHdUrl": "https://i6.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "mediumUrl": "https://i6.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "mediumHdUrl": "https://i6.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "largeUrl": "https://i6.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg",
+        "largeHdUrl": "https://i6.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@14.jpg"
+      },
+      {
+        "orderNumber": 4,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i5.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "smallUrl": "https://i5.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "smallHdUrl": "https://i5.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "mediumUrl": "https://i5.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "mediumHdUrl": "https://i5.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "largeUrl": "https://i5.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg",
+        "largeHdUrl": "https://i5.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@13.jpg"
+      },
+      {
+        "orderNumber": 5,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i4.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "smallUrl": "https://i4.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "smallHdUrl": "https://i4.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "mediumUrl": "https://i4.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "mediumHdUrl": "https://i4.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "largeUrl": "https://i4.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg",
+        "largeHdUrl": "https://i4.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@12.jpg"
+      },
+      {
+        "orderNumber": 6,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i1.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "smallUrl": "https://i1.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "smallHdUrl": "https://i1.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "mediumUrl": "https://i1.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "mediumHdUrl": "https://i1.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "largeUrl": "https://i1.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg",
+        "largeHdUrl": "https://i1.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@11.jpg"
+      },
+      {
+        "orderNumber": 7,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i6.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "smallUrl": "https://i6.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "smallHdUrl": "https://i6.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "mediumUrl": "https://i6.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "mediumHdUrl": "https://i6.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "largeUrl": "https://i6.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg",
+        "largeHdUrl": "https://i6.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@10.jpg"
+      },
+      {
+        "orderNumber": 8,
+        "type": "PREMIUM",
+        "thumbnailHdUrl": "https://i5.ztat.net/thumb_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "smallUrl": "https://i5.ztat.net/catalog/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "smallHdUrl": "https://i5.ztat.net/catalog_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "mediumUrl": "https://i5.ztat.net/detail/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "mediumHdUrl": "https://i5.ztat.net/detail_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "largeUrl": "https://i5.ztat.net/large/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg",
+        "largeHdUrl": "https://i5.ztat.net/large_hd/AN/62/1C/0S/5K/11/AN621C0S5-K11@9.jpg"
+      }
+    ]
+  }
+}

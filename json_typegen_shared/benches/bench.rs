@@ -21,5 +21,5 @@ macro_rules! file_bench {
     };
 }
 
-file_bench!(magic_card_list, "fixtures/magic_card_list.json");
-file_bench!(zalando_article, "fixtures/zalando_article.json");
+file_bench!(magic_card_list, "fixtures/magicCardList.json");
+file_bench!(zalando_article, "fixtures/zalandoArticle.json");

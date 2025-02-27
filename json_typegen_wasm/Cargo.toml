@@ -14,7 +14,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 cfg-if = "0.1.5"
-wasm-bindgen = "0.2.71"
+wasm-bindgen = "0.2.100"
 json_typegen_shared = { path = "../json_typegen_shared", default-features = false, features = ["option-parsing"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

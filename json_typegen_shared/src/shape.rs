@@ -112,7 +112,7 @@ fn common_field_shapes(
 }
 
 impl Shape {
-    fn into_optional(self) -> Self {
+    pub(crate) fn into_optional(self) -> Self {
         use self::Shape::*;
         match self {
             Null => Nullable(Box::new(self)),
@@ -120,11 +120,12 @@ impl Shape {
             non_nullable => Optional(Box::new(non_nullable)),
         }
     }
-    fn into_nullable(self) -> Self {
+    pub(crate) fn into_nullable(self) -> Self {
         use self::Shape::*;
         match self {
             Null => Nullable(Box::new(self)),
             Any | Bottom | Nullable(_) => self,
+            Optional(non_nullable) => Optional(Box::new(Nullable(non_nullable))),
             non_nullable => Nullable(Box::new(non_nullable)),
         }
     }
@@ -173,10 +174,10 @@ fn test_unify() {
     assert_eq!(common_shape(Bool, Integer), Any);
     assert_eq!(common_shape(Integer, Floating), Floating);
     assert_eq!(common_shape(Null, Any), Any);
-    assert_eq!(common_shape(Null, Bool), Optional(Box::new(Bool)));
+    assert_eq!(common_shape(Null, Bool), Nullable(Box::new(Bool)));
     assert_eq!(
         common_shape(Null, Optional(Box::new(Integer))),
-        Optional(Box::new(Integer))
+        Optional(Box::new(Nullable(Box::new(Integer))))
     );
     assert_eq!(common_shape(Any, Optional(Box::new(Integer))), Any);
     assert_eq!(common_shape(Any, Optional(Box::new(Integer))), Any);
@@ -213,7 +214,7 @@ fn test_common_field_shapes() {
                 "a" => Integer,
                 "b" => Optional(Box::new(Bool)),
                 "c" => Floating,
-                "d" => Optional(Box::new(StringT)),
+                "d" => Nullable(Box::new(StringT)),
                 "e" => Any,
             }
         );

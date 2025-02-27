@@ -7,7 +7,7 @@ use syn::parse::{boolean, ident, string};
 use synom::{alt, call, named, punct, IResult};
 
 use crate::hints::Hint;
-use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
+use crate::options::{ImportStyle, InputMode, Options, OutputMode, StringTransform};
 
 #[derive(PartialEq, Debug)]
 pub struct MacroInput {
@@ -114,6 +114,9 @@ fn options_with_defaults(input: &str, default_options: Options) -> Result<Option
         "output_mode" => string_option(remaining, "output_mode", |val| {
             options.output_mode = OutputMode::parse(&val).unwrap_or(OutputMode::Rust);
         }),
+        "input_mode" => string_option(remaining, "input_mode", |val| {
+            options.input_mode = InputMode::parse(&val).unwrap_or(InputMode::Json);
+        }),
         "derives" => string_option(remaining, "derives", |val| {
             options.derives = val;
         }),
@@ -142,6 +145,9 @@ fn options_with_defaults(input: &str, default_options: Options) -> Result<Option
         }),
         "unwrap" => string_option(remaining, "unwrap", |val| {
             options.unwrap = val;
+        }),
+        "infer_map_threshold" => string_option(remaining, "infer_map_threshold", |val| {
+            options.infer_map_threshold = val.parse().ok();
         }),
         key if key.is_empty() || key.starts_with('/') => {
             let (rem, hints) = pointer_block(remaining)?;

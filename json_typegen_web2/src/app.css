@@ -1,0 +1,91 @@
+:root {
+    --text: hsl(0, 0%, 15%);
+    --background: hsl(139, 76%, 85%);
+    --primary: hsl(309, 79%, 89%);
+    --secondary: hsl(133, 100%, 66%);
+    --accent-light: hsl(250, 43%, 51%);
+    --accent: hsl(250, 43%, 36%);
+    --accent-dark: hsl(250, 43%, 21%);
+    --body-font: "Ubuntu", sans-serif;
+    --heading-font: "Petrona", serif;
+    --mono-font: "Ubuntu Mono", monospace;
+    --px1: 13px;
+    --px2: calc(var(--px1) * 2);
+}
+
+body {
+    color: var(--text);
+    font-family: var(--body-font);
+    font-size: 14px;
+    padding-top: 0;
+    margin: 0;
+    background: url("shape.svg") top right;
+    background-size: cover;
+}
+
+html {
+    /* pattern from https://random.css-pattern.com/ */
+    --s: 222px; /* control the size*/
+    --c1: #bcf6ce;
+    --c2: #a5f3be;
+    --c3: #8ff0ad;
+
+    --_g: var(--c1) 10%, var(--c2) 10.5% 19%, #0000 19.5% 80.5%,
+        var(--c2) 81% 89.5%, var(--c3) 90%;
+    --_c: from -90deg at 37.5% 50%, #0000 75%;
+    --_l1: linear-gradient(145deg, var(--_g));
+    --_l2: linear-gradient(35deg, var(--_g));
+    background:
+        var(--_l1),
+        var(--_l1) calc(var(--s) / 2) var(--s),
+        var(--_l2),
+        var(--_l2) calc(var(--s) / 2) var(--s),
+        conic-gradient(var(--_c), var(--c1) 0) calc(var(--s) / 8) 0,
+        conic-gradient(var(--_c), var(--c3) 0) calc(var(--s) / 2) 0,
+        linear-gradient(
+            90deg,
+            var(--c3) 38%,
+            var(--c1) 0 50%,
+            var(--c3) 0 62%,
+            var(--c1) 0
+        );
+    background-size: var(--s) calc(2 * var(--s) / 3);
+}
+
+a {
+    color: var(--text);
+}
+a:visited {
+    color: var(--text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--heading-font);
+    font-weight: bold;
+    margin: 10px 0;
+}
+h1 {
+    font-size: 2.5rem;
+}
+
+.overlay-container {
+    position: relative;
+    text-align: center;
+    min-height: 150px;
+}
+
+#large-file-overlay {
+    background-color: #fffc;
+    width: calc(100% - 4px);
+    height: calc(100% - 36px);
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    padding-top: 30px;
+    border-radius: 8px;
+}

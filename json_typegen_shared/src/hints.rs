@@ -72,7 +72,7 @@ impl<'a> Hints<'a> {
 
     /// ([/a/b, /a/c, /d/e], "a") -> [/b, /c]
     pub fn step_field(&self, name: &str) -> Hints {
-        self.step(|first| first == name)
+        self.step(|first| first == "-" || first == name)
     }
 
     /// [/1/b, /a/c, /-/e] -> [/b, /c, /e]

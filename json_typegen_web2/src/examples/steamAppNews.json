@@ -1,0 +1,47 @@
+{
+  "appnews": {
+    "appid": 252950,
+    "newsitems": [
+      {
+        "gid": "75839596806397207",
+        "title": "Rocket League gets Dropshot mode and Easter treats",
+        "url": "http://store.steampowered.com/news/externalpost/rps/75839596806397207",
+        "is_external_url": true,
+        "author": "contact@rockpapershotgun.com (Alice O'Connor)",
+        "contents": "",
+        "feedlabel": "Rock, Paper, Shotgun",
+        "date": 1490211386,
+        "feedname": "rps",
+        "feed_type": 0,
+        "appid": 252950
+      },
+      {
+        "gid": "75839596806384441",
+        "title": "Patch Notes v1.31",
+        "url": "http://store.steampowered.com/news/externalpost/steam_community_announcements/75839596806384441",
+        "is_external_url": true,
+        "author": "Dirkened",
+        "contents": "https://672061c0b827554def11-ea8c7607510173b2cbad15f9892e8687.ssl.cf2.rackcdn.com/444.BJRwuSghg.c6e1dc555a6eff57c623d9877706c9a5.HyxRuHg3l.jpg THE HEADLINES Dropshot game mode is now available in the unranked playlists Neo Tokyo has been removed from Casual and Competitive playlists Turbo Crate has ...",
+        "feedlabel": "Community Announcements",
+        "date": 1490211385,
+        "feedname": "steam_community_announcements",
+        "feed_type": 1,
+        "appid": 252950
+      },
+      {
+        "gid": "75839063733227192",
+        "title": "Free Easter Items Start Dropping on March 22",
+        "url": "http://store.steampowered.com/news/externalpost/steam_community_announcements/75839063733227192",
+        "is_external_url": true,
+        "author": "Dirkened",
+        "contents": "https://672061c0b827554def11-ea8c7607510173b2cbad15f9892e8687.ssl.cf2.rackcdn.com/bunny_ears.c6e1dc555a6eff57c623d9877706c9a5.jpg Hopping alongside Dropshot and the start of Competitive Season 4 in the March 22 update, Rocket League will be scattering hidden Easter surprises as post-match drops for ...",
+        "feedlabel": "Community Announcements",
+        "date": 1490049258,
+        "feedname": "steam_community_announcements",
+        "feed_type": 1,
+        "appid": 252950
+      }
+    ],
+    "count": 273
+  }
+}

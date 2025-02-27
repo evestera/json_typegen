@@ -1,0 +1,32 @@
+{
+  "name": "json_typegen_web2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "rsw": "rsw",
+    "rsw-watch": "rsw watch",
+    "build": "rsw build && vite build",
+    "preview": "vite build && vite preview",
+    "format": "prettier --write src --plugin prettier-plugin-svelte",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.5",
+    "@tsconfig/svelte": "^5.0.2",
+    "prettier": "^3.0.1",
+    "prettier-plugin-svelte": "^3.3.3",
+    "svelte": "^4.2.0",
+    "svelte-check": "^3.5.0",
+    "svelte-preprocess": "^5.0.4",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9",
+    "vite-plugin-rsw": "^2.0.11",
+    "vite-plugin-static-copy": "^0.17.0"
+  },
+  "dependencies": {
+    "shiki": "^0.14.4"
+  }
+}

@@ -133,10 +133,22 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
 
             if let Some(&Ok(JsonToken::ObjectEnd)) = self.tokens.peek() {
                 self.tokens.next();
-                return Ok(Shape::Struct { fields });
+                break;
             }
 
             self.expect_token(JsonToken::Comma)?;
+        }
+
+        if options.infer_map_threshold.is_some_and(|lim| { fields.len() > lim }) {
+            let inner = fields
+                .into_iter()
+                .map(|(_, value)| value)
+                .fold(Shape::Bottom, common_shape);
+            Ok(Shape::MapT {
+                val_type: Box::new(inner),
+            })
+        } else {
+            Ok(Shape::Struct { fields })
         }
     }
 

@@ -23,6 +23,7 @@ mod progress;
 mod shape;
 mod to_singular;
 mod util;
+mod sql;
 
 use crate::hints::Hints;
 use crate::inference::shape_from_json;
@@ -44,6 +45,8 @@ pub enum JTError {
     SampleReadingError(#[from] std::io::Error),
     #[error("An error occurred while parsing JSON")]
     JsonParsingError(#[from] inference::JsonInputErr),
+    #[error("An error occurred while parsing SQL: {0}")]
+    SqlParsingError(String),
     #[error("An error occurred while parsing a macro or macro input: {0}")]
     MacroParsingError(String),
 }
@@ -106,7 +109,16 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
         hints.add(pointer, hint);
     }
 
-    let shape = infer_from_sample(&source, &options, &hints)?;
+    let shape = match options.input_mode {
+        options::InputMode::Sql => {
+            let shapes = sql::sql_to_shape(input).map_err(JTError::SqlParsingError)?;
+            let (_name, shap) = shapes.get(0).unwrap();
+            shap.clone()
+        }
+        options::InputMode::Json => {
+            infer_from_sample(&source, &options, &hints)?
+        }
+    };
 
     codegen_from_shape(name, &shape, options)
 }
@@ -116,6 +128,7 @@ pub fn codegen_from_shape(name: &str, shape: &Shape, options: Options) -> Result
     let mut generated_code = match options.output_mode {
         OutputMode::Rust => generation::rust::rust_types(name, shape, options),
         OutputMode::JsonSchema => generation::json_schema::json_schema(name, shape, options),
+        OutputMode::ZodSchema => generation::zod_schema::zod_schema(name, shape, options),
         OutputMode::KotlinJackson | OutputMode::KotlinKotlinx => {
             generation::kotlin::kotlin_types(name, shape, options)
         }
