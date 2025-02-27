@@ -13,13 +13,13 @@ export type WorkerMessageType =
       type: WorkerMessage.CODEGEN;
       input: string;
       typename: string;
-      options: object;
+      options: Record<string, unknown>;
     }
   | {
       type: WorkerMessage.CODEGEN_COMPLETE;
       result: string;
       typename: string;
-      options: object;
+      options: Record<string, unknown>;
     }
   | { type: WorkerMessage.LOAD_FILE; file: File }
   | { type: WorkerMessage.LOAD_FILE_COMPLETE }

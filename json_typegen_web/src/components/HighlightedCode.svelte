@@ -15,10 +15,10 @@
         highlighter.then((highlighter) => {
             highlighted = highlighter.codeToHtml(code, {
                 lang: language,
-                theme: 'github-light',
+                theme: "github-light",
                 colorReplacements: {
-                    '#fff': "rgba(255, 255, 255, 0.8)"
-                }
+                    "#fff": "rgba(255, 255, 255, 0.8)",
+                },
             });
         });
     }

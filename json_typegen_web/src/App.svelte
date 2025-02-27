@@ -23,6 +23,7 @@
     import FileInputButton from "./components/FileInputButton.svelte";
     import ClipboardDocumentIcon from "./icons/ClipboardDocumentIcon.svelte";
     import HighlightedCode from "./components/HighlightedCode.svelte";
+    import GithubCorner from "./components/GithubCorner.svelte";
 
     const worker = new Worker(new URL("./lib/worker.ts", import.meta.url), {
         type: "module",
@@ -77,7 +78,7 @@
             downloadLink = getDownloadLinkProps(
                 output,
                 message.typename,
-                message.options["output_mode"],
+                message.options["output_mode"] as string,
             );
             isLoading = false;
         } else if (message.type === WorkerMessage.LOAD_FILE_COMPLETE) {
@@ -223,7 +224,7 @@
 </script>
 
 <Container>
-    <h1>typegen</h1>
+    <h1>json_typegen</h1>
     <p>
         Generate types (Rust, TS, Kotlin, Python, ...) from JSON samples or SQL
     </p>
@@ -407,3 +408,5 @@
         </Column>
     </Row>
 </Container>
+
+<GithubCorner />

@@ -27,7 +27,7 @@
     on:keyup
     bind:this={ref}
     {rows}
-/>
+></textarea>
 
 <style>
     textarea {
