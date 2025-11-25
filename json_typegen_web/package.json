@@ -1,5 +1,5 @@
 {
-  "name": "json_typegen_web2",
+  "name": "json_typegen_web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "rsw": "rsw",
     "rsw-watch": "rsw watch",
-    "build": "rsw build && vite build",
+    "build": "rm -rf dist && rsw build && vite build",
     "preview": "vite build && vite preview",
     "deploy": "npm run build && firebase deploy",
     "format": "prettier --write src",

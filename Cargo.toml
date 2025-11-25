@@ -15,5 +15,5 @@ resolver = "3"
 #opt-level = 3
 
 # Include debuginfo (e.g. for flamegraphs)
-#[profile.release]
-#debug = true
+[profile.release]
+debug = true

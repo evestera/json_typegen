@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use json_typegen_shared::internal_util::display_error_with_causes;
-use json_typegen_shared::{Options, OutputMode, codegen, codegen_from_macro, parse};
+use json_typegen_shared::{InputMode, Options, OutputMode, codegen, codegen_from_macro, parse};
 use std::fs::OpenOptions;
 use std::io::{self, Read, Write};
 
@@ -38,6 +38,14 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
                     "Options for code generation, in the form of an options block. If input is a ",
                     "macro, this option is ignored."
                 ))
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("input-mode")
+                .long("input-mode")
+                .short("-I")
+                .possible_values(&["json", "sql", "xml"])
+                .help("What input mode to use.")
                 .takes_value(true),
         )
         .arg(
@@ -82,6 +90,9 @@ fn main_with_result() -> Result<(), Box<dyn std::error::Error>> {
         };
         if let Some(output_mode) = matches.value_of("output-mode") {
             options.output_mode = OutputMode::parse(output_mode).ok_or("Invalid output mode")?;
+        }
+        if let Some(input_mode) = matches.value_of("input-mode") {
+            options.input_mode = InputMode::parse(input_mode).ok_or("Invalid input mode")?;
         }
         codegen(name, &input, options)
     };

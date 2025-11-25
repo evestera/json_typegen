@@ -30,11 +30,8 @@ pub fn run(name: &str, input: &str, options: &str) -> String {
         Err(msg) => return format!("Error: {}", msg),
     };
 
-    match json_typegen_shared::codegen(name, input, opts) {
-        Ok(res) => res,
-        Err(err) => {
-            let message = json_typegen_shared::internal_util::display_error_with_causes(&err);
-            format!("Error: {}", message)
-        }
-    }
+    json_typegen_shared::codegen(name, input, opts).unwrap_or_else(|err| {
+        let message = json_typegen_shared::internal_util::display_error_with_causes(&err);
+        format!("Error: {}", message)
+    })
 }

@@ -1,4 +1,6 @@
 use linked_hash_map::LinkedHashMap;
+use crate::generation::typescript_type_alias::typescript_type_alias;
+use crate::Options;
 
 /// The type representing the inferred structure
 ///
@@ -83,7 +85,21 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
         },
         (Opaque(t), _) | (_, Opaque(t)) => Opaque(t),
         (a, Nullable(b)) | (Nullable(b), a) => common_shape(a, *b).into_nullable(),
-        _ => Any,
+        // (VecT { elem_type: e1 }, b) | (b, VecT { elem_type: e1 }) => {
+        //     let inner = common_shape(*e1, b);
+        //     if inner == Any {
+        //         Any
+        //     } else {
+        //         VecT {
+        //             elem_type: Box::new(inner),
+        //         }
+        //     }
+        // },
+        (Any, _) | (_, Any) => Any,
+        (a, b) => {
+            eprintln!("merging shapes to Any:\n{}\n{}", typescript_type_alias("a", &a, Options::default()), typescript_type_alias("b", &b, Options::default()));
+            Any
+        },
     }
 }
 

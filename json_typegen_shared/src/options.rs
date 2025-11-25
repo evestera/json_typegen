@@ -94,8 +94,8 @@ impl OutputMode {
     pub fn parse(s: &str) -> Option<Self> {
         match s {
             "rust" => Some(OutputMode::Rust),
-            "typescript" => Some(OutputMode::Typescript),
-            "typescript/typealias" => Some(OutputMode::TypescriptTypeAlias),
+            "typescript" | "ts" => Some(OutputMode::Typescript),
+            "typescript/typealias" | "ts/alias" => Some(OutputMode::TypescriptTypeAlias),
             "kotlin" => Some(OutputMode::KotlinJackson),
             "kotlin/jackson" => Some(OutputMode::KotlinJackson),
             "kotlin/kotlinx" => Some(OutputMode::KotlinKotlinx),
@@ -113,6 +113,7 @@ impl OutputMode {
 pub enum InputMode {
     Json,
     Sql,
+    Xml,
 }
 
 impl InputMode {
@@ -120,6 +121,7 @@ impl InputMode {
         match s {
             "json" => Some(InputMode::Json),
             "sql" => Some(InputMode::Sql),
+            "xml" => Some(InputMode::Xml),
             _ => None,
         }
     }

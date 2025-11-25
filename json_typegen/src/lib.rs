@@ -67,13 +67,10 @@ use json_typegen_shared::internal_util::display_error_with_causes;
 /// `json_typegen!(<type name>, <sample source>, <options?>)`
 #[proc_macro]
 pub fn json_typegen(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    match codegen_from_macro_input(&input.to_string()) {
-        Ok(code) => code,
-        Err(e) => {
-            let message = display_error_with_causes(&e);
-            format!(r##"compile_error!(r#"{}"#);"##, message)
-        }
-    }
+    codegen_from_macro_input(&input.to_string()).unwrap_or_else(|e| {
+        let message = display_error_with_causes(&e);
+        format!(r##"compile_error!(r#"{}"#);"##, message)
+    })
     .parse()
     .unwrap()
 }

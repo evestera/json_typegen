@@ -24,10 +24,11 @@ mod shape;
 mod sql;
 mod to_singular;
 mod util;
+mod xml;
 
 use crate::hints::Hints;
 use crate::inference::shape_from_json;
-pub use crate::options::{ImportStyle, Options, OutputMode, StringTransform};
+pub use crate::options::{ImportStyle, InputMode, Options, OutputMode, StringTransform};
 pub use crate::shape::Shape;
 
 /// The errors that json_typegen_shared may produce
@@ -47,6 +48,8 @@ pub enum JTError {
     JsonParsingError(#[from] inference::JsonInputErr),
     #[error("An error occurred while parsing SQL: {0}")]
     SqlParsingError(String),
+    #[error("An error occurred while parsing XML: {0}")]
+    XmlParsingError(String),
     #[error("An error occurred while parsing a macro or macro input: {0}")]
     MacroParsingError(String),
 }
@@ -115,7 +118,8 @@ pub fn codegen(name: &str, input: &str, mut options: Options) -> Result<String, 
             let (_name, shap) = shapes.get(0).unwrap();
             shap.clone()
         }
-        options::InputMode::Json => infer_from_sample(&source, &options, &hints)?,
+        options::InputMode::Xml => infer_xml_from_sample(&source, &options, &hints)?,
+        options::InputMode::Json => infer_json_from_sample(&source, &options, &hints)?,
     };
 
     codegen_from_shape(name, &shape, options)
@@ -177,7 +181,7 @@ fn infer_source_type(s: &str) -> SampleSource {
     return SampleSource::Text(s);
 }
 
-fn infer_from_sample(
+fn infer_json_from_sample(
     source: &SampleSource,
     options: &Options,
     hints: &Hints,
@@ -198,6 +202,31 @@ fn infer_from_sample(
         SampleSource::File(path) => shape_from_json(std::fs::File::open(path)?, options, hints),
 
         SampleSource::Text(text) => shape_from_json(text.as_bytes(), options, hints),
+    };
+    Ok(parse_result?)
+}
+
+fn infer_xml_from_sample(
+    source: &SampleSource,
+    options: &Options,
+    hints: &Hints,
+) -> Result<Shape, JTError> {
+    let parse_result = match *source {
+        #[cfg(feature = "remote-samples")]
+        SampleSource::Url(url) => {
+            xml::xml_to_shape(ureq::get(url).call()?.into_reader(), options, hints)
+        }
+
+        #[cfg(all(feature = "local-samples", feature = "progress"))]
+        SampleSource::File(path) => xml::xml_to_shape(
+            crate::progress::FileWithProgress::open(path)?,
+            options,
+            hints,
+        ),
+        #[cfg(all(feature = "local-samples", not(feature = "progress")))]
+        SampleSource::File(path) => xml::xml_to_shape(std::fs::File::open(path)?, options, hints),
+
+        SampleSource::Text(text) => xml::xml_to_shape(text.as_bytes(), options, hints),
     };
     Ok(parse_result?)
 }

@@ -25,7 +25,9 @@ pub fn typescript_type_alias(name: &str, shape: &Shape, options: Options) -> Cod
 fn type_from_shape(ctxt: &mut Ctxt, shape: &Shape) -> Code {
     use crate::shape::Shape::*;
     match shape {
-        Null | Any | Bottom => "any".into(),
+        Null => "null".into(),
+        Any => "any".into(),
+        Bottom => "any /* bottom */".into(),
         Bool => "boolean".into(),
         StringT => "string".into(),
         Integer => "number".into(),
