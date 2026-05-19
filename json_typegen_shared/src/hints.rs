@@ -71,27 +71,27 @@ impl<'a> Hints<'a> {
     }
 
     /// ([/a/b, /a/c, /d/e], "a") -> [/b, /c]
-    pub fn step_field(&self, name: &str) -> Hints {
+    pub fn step_field(&self, name: &str) -> Hints<'_> {
         self.step(|first| first == "-" || first == name)
     }
 
     /// [/1/b, /a/c, /-/e] -> [/b, /c, /e]
-    pub fn step_any(&self) -> Hints {
+    pub fn step_any(&self) -> Hints<'_> {
         self.step(|_first| true)
     }
 
     /// [/1/b, /a/c, /-/e] -> [/b, /e]
-    pub fn step_array(&self) -> Hints {
+    pub fn step_array(&self) -> Hints<'_> {
         self.step(is_index)
     }
 
     /// ([/2/b, /a/c, /-/e, /3/d], 3) -> [/e, /d]
-    pub fn step_index(&self, index: usize) -> Hints {
+    pub fn step_index(&self, index: usize) -> Hints<'_> {
         let i_str = &index.to_string();
         self.step(|first| first == "-" || first == i_str)
     }
 
-    fn step<F: Fn(&str) -> bool>(&self, pred: F) -> Hints {
+    fn step<F: Fn(&str) -> bool>(&self, pred: F) -> Hints<'_> {
         let mut filtered = Vec::new();
         let mut applicable = Vec::new();
 

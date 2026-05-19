@@ -162,7 +162,7 @@ fn handle_pub_in_name<'a>(name: &'a str, options: &mut Options) -> &'a str {
     name
 }
 
-fn infer_source_type(s: &str) -> SampleSource {
+fn infer_source_type(s: &str) -> SampleSource<'_> {
     let s = s.trim();
     if s.starts_with('{') || s.starts_with('[') {
         return SampleSource::Text(s);
