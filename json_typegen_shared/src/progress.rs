@@ -14,9 +14,13 @@ impl FileWithProgress {
         let len = file.metadata()?.len();
         Ok(FileWithProgress {
             file,
-            progress: ProgressBar::new(len).with_style(ProgressStyle::default_bar().template(
-                "[{elapsed_precise}] {bar:40.cyan/blue} {bytes}/{total_bytes} Processing file...",
-            )),
+            progress: ProgressBar::new(len).with_style(
+                ProgressStyle::default_bar()
+                    .template(
+                        "[{elapsed_precise}] {bar:40.cyan/blue} {bytes}/{total_bytes} Processing file...",
+                    )
+                    .unwrap(),
+            ),
         })
     }
 }
