@@ -21,9 +21,23 @@ pub fn shape_from_json<R: Read>(
         pointer.split('/').collect()
     };
 
-    Inference::new(read)
-        .unwrap(&pointer_tokens, options, hints)?
-        .ok_or(JsonInputErr::NoMatchForUnwrap)
+    let mut inference = Inference::new(read);
+    let mut merged_shape = Shape::Bottom;
+    loop {
+        if !inference.has_more() {
+            break;
+        }
+        let shape = inference.unwrap(&pointer_tokens, options, hints)?
+            .ok_or(JsonInputErr::NoMatchForUnwrap)?;
+
+        merged_shape = common_shape(merged_shape, shape);
+    }
+
+    if merged_shape == Shape::Bottom {
+        Err(JsonInputErr::UnexpectedEndOfInput)
+    } else {
+        Ok(merged_shape)
+    }
 }
 
 struct Inference<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> {
@@ -53,6 +67,10 @@ impl<T: Iterator<Item = Result<JsonToken, JsonInputErr>>> Inference<T> {
         } else {
             Err(JsonInputErr::InvalidJson)
         }
+    }
+
+    fn has_more(&mut self) -> bool {
+        self.tokens.peek().is_some()
     }
 
     fn infer_shape(&mut self, options: &Options, hints: &Hints) -> Result<Shape, JsonInputErr> {
