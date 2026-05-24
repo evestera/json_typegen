@@ -111,7 +111,7 @@ fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String
             let escape_name = !is_ts_identifier(name);
 
             format!(
-                "{}{}{}{}: {};",
+                "{}{}{}{}: {}",
                 "    ".repeat(ctxt.indent_level),
                 if escape_name { "\"" } else { "" },
                 name,
@@ -124,11 +124,35 @@ fn generate_struct_from_field_shapes(ctxt: &mut Ctxt, map: &LinkedHashMap<String
     let mut code = "z.object({\n".to_string();
 
     if !fields.is_empty() {
-        code += &fields.join("\n");
+        code += &fields.join(",\n");
         code += "\n";
     }
     code += &"    ".repeat(ctxt.indent_level - 1);
     code += "})";
 
     code
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::util::string_hashmap;
+    #[test]
+    fn test_basic_zod_schema() {
+        let shape = Shape::Struct {
+            fields: string_hashmap! {
+                "foo".to_string() => Shape::StringT,
+                "bar".to_string() => Shape::Integer,
+            },
+        };
+        assert_eq!(
+            zod_schema("baz", &shape, Options::default()).trim(),
+            r#"
+export const bazSchema = z.object({
+    foo: z.string(),
+    bar: z.number()
+});
+"#.trim()
+        )
+    }
 }
