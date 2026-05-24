@@ -32,3 +32,8 @@ sqlparser = "0.36.1"
 
 [dev-dependencies]
 testsyn = { package = "syn", version = "0.15", features = ["full", "parsing", "extra-traits"] }
+criterion = "0.8"
+
+[[bench]]
+name = "bench"
+harness = false
