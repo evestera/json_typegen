@@ -1,6 +1,0 @@
-cli = "npm"
-
-[[crates]]
-name = "json_typegen_wasm"
-root = ".."
-link = true

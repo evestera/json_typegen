@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "rsw": "rsw",
-    "rsw-watch": "rsw watch",
-    "build": "rsw build && vite build",
+    "build": "vite build",
     "preview": "vite build && vite preview",
     "deploy": "npm run build && firebase deploy",
     "format": "prettier --write src",
@@ -23,11 +21,10 @@
     "svelte-preprocess": "^6.0.3",
     "tslib": "^2.8.1",
     "typescript": "^5.7.3",
-    "vite": "^6.2.0",
-    "vite-plugin-rsw": "^2.0.11",
-    "vite-plugin-static-copy": "^2.2.0"
+    "vite": "^6.2.0"
   },
   "dependencies": {
+    "json_typegen_wasm": "file:../json_typegen_wasm/pkg",
     "shiki": "^3.1.0"
   }
 }
