@@ -6,7 +6,7 @@
 
     const highlighter = createHighlighter({
         themes: ["github-light"],
-        langs: ["rust", "typescript", "kotlin", "python", "json"],
+        langs: ["rust", "typescript", "kotlin", "scala", "python", "json"],
     });
 
     let highlighted = "";
