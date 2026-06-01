@@ -66,7 +66,13 @@
 
     const conditionalOptions = {
         propertynameformat: ["rust", "kotlin/jackson", "python"],
-        importstyle: ["rust", "kotlin/jackson", "kotlin/kotlinx", "python"],
+        importstyle: [
+            "rust",
+            "kotlin/jackson",
+            "kotlin/kotlinx",
+            "scala",
+            "python",
+        ],
         collectadditional: ["rust", "kotlin/jackson"],
     };
 
@@ -212,6 +218,8 @@
             case "kotlin/jackson":
             case "kotlin/kotlinx":
                 return "kotlin";
+            case "scala":
+                return "scala";
             case "python":
                 return "python";
             case "json_schema":
@@ -298,6 +306,7 @@
                         ],
                         ["kotlin/jackson", "Kotlin (Jackson)"],
                         ["kotlin/kotlinx", "Kotlin (kotlinx.serialization)"],
+                        ["scala", "Scala (circe)"],
                         ["python", "Python (pydantic)"],
                         ["json_schema", "JSON Schema"],
                         ["zod", "Zod Schema"],

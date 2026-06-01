@@ -135,6 +135,7 @@ pub fn codegen_from_shape(name: &str, shape: &Shape, options: Options) -> Result
         OutputMode::TypescriptTypeAlias => {
             generation::typescript_type_alias::typescript_type_alias(name, shape, options)
         }
+        OutputMode::ScalaCirce => generation::scala::scala_types(name, shape, options),
         OutputMode::PythonPydantic => generation::python::python_types(name, shape, options),
     };
 
