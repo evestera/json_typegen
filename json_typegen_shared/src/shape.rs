@@ -88,12 +88,20 @@ pub fn common_shape(a: Shape, b: Shape) -> Shape {
 }
 
 fn common_field_shapes(
-    mut f1: LinkedHashMap<String, Shape>,
-    mut f2: LinkedHashMap<String, Shape>,
+    f1: LinkedHashMap<String, Shape>,
+    f2: LinkedHashMap<String, Shape>,
 ) -> LinkedHashMap<String, Shape> {
     if f1 == f2 {
         return f1;
     }
+
+    // use the biggest object as the base
+    let (mut f1, mut f2) = if f1.len() >= f2.len() {
+        (f1, f2)
+    } else {
+        (f2, f1)
+    };
+
     for (key, val) in f1.iter_mut() {
         let temp = std::mem::replace(val, Shape::Bottom);
         match f2.remove(key) {
