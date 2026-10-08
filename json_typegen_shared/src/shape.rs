@@ -102,20 +102,26 @@ fn common_field_shapes(
         (f2, f1)
     };
 
+    // For performance, we use Shape::Bottom as a sentinel value here to mark a field as processed.
+    // Shape::Bottom can currently not be inferred as a field value (from neither JSON nor SQL),
+    // but this could potentially change.
+    // If we add a way for Bottom to end up as the shape of a field,
+    // we will have to add a separate sentinel value, or remove this performance optimization.
+
     for (key, val) in f1.iter_mut() {
         let temp = std::mem::replace(val, Shape::Bottom);
-        match f2.remove(key) {
-            Some(val2) => {
-                *val = common_shape(temp, val2);
-            }
-            None => {
-                *val = temp.into_optional();
-            }
-        };
+        *val = match f2.get_mut(key) {
+            Some(val2) => common_shape(temp, std::mem::replace(val2, Shape::Bottom)),
+            None => temp.into_optional(),
+        }
     }
+
     for (key, val) in f2.into_iter() {
-        f1.insert(key, val.into_optional());
+        if val != Shape::Bottom {
+            f1.insert(key, val.into_optional());
+        }
     }
+
     f1
 }
 
